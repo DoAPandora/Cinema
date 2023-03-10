@@ -5,7 +5,7 @@
   "author": "FutureMapper",
   "version": "${version}",
   "packageId": "com.beatgames.beatsaber",
-  "packageVersion": "1.25.1",
+  "packageVersion": "1.27.0_3631150051",
   "description": "#{description}",
   "coverImage": "cover.png",
   "dependencies": [],
