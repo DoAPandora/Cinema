@@ -29,10 +29,17 @@
 #include "VideoPlayer.hpp"
 #include "custom-types/shared/coroutine.hpp"
 
+#include "hooks.hpp"
+#include "VideoManager.hpp"
+
 using namespace UnityEngine;
 using namespace GlobalNamespace;
 
 static ModInfo modInfo; // Stores the ID and version of our mod, and is sent to the modloader upon startup
+
+ModInfo& getModInfo() {
+    return modInfo;
+}
 
 // Loads the config from disk using our modInfo, then returns it for use
 Configuration& getConfig() {
@@ -67,9 +74,10 @@ Cinema::VideoPlayer* videoPlayer = nullptr;
 
 MAKE_HOOK_MATCH(GamePause_Resume, &GlobalNamespace::GamePause::Resume, void, GamePause* self) {
     GamePause_Resume(self);
-    if(videoPlayer)
+    if(videoPlayer) {
         videoPlayer->Play();
-    getLogger().info("resume");
+        getLogger().info("resume");
+    }
 }
 
 MAKE_HOOK_MATCH(GamePause_Pause, &GamePause::Pause, void, GamePause* self) {
@@ -83,6 +91,8 @@ MAKE_HOOK_MATCH(GamePause_Pause, &GamePause::Pause, void, GamePause* self) {
 
 MAKE_HOOK_MATCH(SetupSongUI, &GlobalNamespace::AudioTimeSyncController::StartSong, void, GlobalNamespace::AudioTimeSyncController* self, float startTimeOffset) {
     SetupSongUI(self, startTimeOffset);
+    if(!Cinema::VideoManager::GetShouldCreateScreen())
+        return;
 
     GameObject* Mesh = GameObject::CreatePrimitive(PrimitiveType::Plane);
     auto material = QuestUI::ArrayUtil::Last(Resources::FindObjectsOfTypeAll<Material*>(), [](Material* x) {
@@ -106,55 +116,11 @@ MAKE_HOOK_MATCH(SetupSongUI, &GlobalNamespace::AudioTimeSyncController::StartSon
     videoPlayer->set_aspectRatio(Video::VideoAspectRatio::FitInside);
     if(cinemaScreen)
         videoPlayer->set_renderer(cinemaScreen);
-    videoPlayer->set_url("/sdcard/EaswWiwMVs8.mp4");
+    videoPlayer->set_url(Cinema::VideoManager::GetCurrentVideoPath());
 
     videoPlayer->Prepare();
 
     GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(coroutine(videoPlayer, self->audioSource)));
-}
-
-#include "pythonlib/shared/Python.hpp"
-#include "pythonlib/shared/Utils/FileUtils.hpp"
-#include "pythonlib/shared/Utils/StringUtils.hpp"
-#include "assets.hpp"
-
-bool DownloadVideo(std::string_view url, std::function<void(float)> status = nullptr) {
-    bool error = false;
-    std::function<void(int, char*)> eventHandler = [status, &error](int type, char* data) {
-        switch (type) {
-        case 0:
-            {
-                std::string dataString(data);
-                if(dataString.find("[download]", 0) != -1) {
-                    auto pos = dataString.find("%", 0);
-                    if(pos != -1 && pos > 5) {
-                        auto percentange = dataString.substr(pos-5, 5);
-                        if(percentange.find("]", 0) == 0) 
-                            percentange = percentange.substr(1);
-                        status(std::stof(percentange));
-                    }
-                }
-            }
-            break;
-        case 1:
-            error = true;
-            getLogger().info("Error: %s", data);
-            break;
-        }
-    };
-    Python::PythonWriteEvent += eventHandler;
-    std::string ytdlp = FileUtils::getScriptsPath() + "/yt_dlp";
-    if(!direxists(ytdlp))
-        FileUtils::ExtractZip(IncludedAssets::ytdlp_zip, ytdlp);
-    Python::PyRun_SimpleString("from yt_dlp.__init__ import _real_main");
-    std::string command = "_real_main([";
-    for(auto splitted : StringUtils::Split("--no-cache-dir -o %(id)s.%(ext)s -P /sdcard " + url, " ")) {
-        command += "\"" + splitted + "\",";
-    }
-    command = command.substr(0, command.length()-1) + "])";
-    int result = Python::PyRun_SimpleString(command.c_str());
-    Python::PythonWriteEvent -= eventHandler;
-    return !error;
 }
 
 // Called later on in the game loading - a good time to install function hooks
@@ -165,13 +131,9 @@ extern "C" void load() {
     INSTALL_HOOK(getLogger(), GamePause_Resume);
     INSTALL_HOOK(getLogger(), GamePause_Pause);
 
+    Cinema::InstallVideoDownloadHooks();
+
     QuestUI::Register::RegisterGameplaySetupMenu<Cinema::VideoMenuViewController*>(modInfo, "Cinema", QuestUI::Register::MenuType::Solo);
 
 	custom_types::Register::AutoRegister();
-    getLogger().info("DownloadVideo Result: %d", DownloadVideo("https://youtu.be/SnP0Nqp455I", [](float percentage) {
-        getLogger().info("Download: %f", percentage);
-    }));
-    getLogger().info("DownloadVideo Result: %d", DownloadVideo("https://youtu.be/EaswWiwMVs8", [](float percentage) {
-        getLogger().info("Download: %f", percentage);
-    }));
 }

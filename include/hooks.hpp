@@ -1,0 +1,5 @@
+namespace Cinema {
+    void InstallVideoDownloadHooks();
+
+    
+}

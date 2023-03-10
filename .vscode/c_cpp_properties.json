@@ -10,15 +10,16 @@
       "includePath": [
         "${workspaceFolder}/**",
         "${workspaceFolder}/shared",
-        "${workspaceFolder}/include",
-        "${workspaceFolder}/extern/**",
+        "${workspaceFolder}/include/**",
+        "${workspaceFolder}/extern/includes/**",
         "${workspaceFolder}/extern/libil2cpp/il2cpp/libil2cpp",
-        "D:/android-ndk-r22b/android-ndk-r22b/**"
+        "C:/android-ndk-r25c/**"
       ],
       "name": "Quest",
       "cStandard": "c11",
       "cppStandard": "c++20",
-      "intelliSenseMode": "clang-x64"
+      "intelliSenseMode": "clang-x64",
+      "configurationProvider": "ms-vscode.cpptools"
     }
   ],
   "version": 4

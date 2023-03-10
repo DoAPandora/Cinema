@@ -27,17 +27,17 @@
     },
     {
       "id": "codegen",
-      "versionRange": "^0.28.0",
+      "versionRange": "^0.32.0",
       "additionalData": {}
     },
     {
       "id": "questui",
-      "versionRange": "^0.17.3",
+      "versionRange": "^0.17.10",
       "additionalData": {}
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.15.21",
+      "versionRange": "^0.15.22",
       "additionalData": {}
     },
     {
@@ -46,10 +46,20 @@
       "additionalData": {}
     },
     {
+      "id": "pinkcore",
+      "versionRange": "^1.8.8",
+      "additionalData": {}
+    },
+    {
+      "id": "rapidjson-macros",
+      "versionRange": "^0.4.6",
+      "additionalData": {}
+    },
+    {
       "id": "pythonlib",
-      "versionRange": "^0.2.0",
+      "versionRange": "^0.3.1",
       "additionalData": {}
     }
   ],
-  "additionalData": {}
+  "workspace": null
 }
