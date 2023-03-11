@@ -21,11 +21,6 @@
       }
     },
     {
-      "id": "config-utils",
-      "versionRange": "^0.8.0",
-      "additionalData": {}
-    },
-    {
       "id": "codegen",
       "versionRange": "^0.32.0",
       "additionalData": {}
@@ -58,6 +53,11 @@
     {
       "id": "pythonlib",
       "versionRange": "^0.3.1",
+      "additionalData": {}
+    },
+    {
+      "id": "config-utils",
+      "versionRange": "^1.0.2",
       "additionalData": {}
     }
   ],

@@ -2,6 +2,7 @@
 #include "VideoManager.hpp"
 #include "json.hpp"
 #include "VideoDownloader.hpp"
+#include "ModConfig.hpp"
 
 #include "pinkcore/shared/RequirementAPI.hpp"
 
@@ -10,6 +11,8 @@
 #include <filesystem>
 
 namespace Cinema::VideoManager {
+
+    QuestUI::ProgressBar* progressBar;
     const std::string modDataDir = "/sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema/";
     JSON::CinemaInfo currentLevelInfo;
     std::string currentLevelPath;
@@ -48,11 +51,20 @@ namespace Cinema::VideoManager {
         }
 
         PinkCore::RequirementAPI::DisablePlayButton(getModInfo());
+        if(!progressBar)
+            progressBar = QuestUI::BeatSaberUI::CreateProgressBar({0, 3.2f, 4}, {0, 0, 0}, "Downloading video...", "", "Cinema");
+        progressBar->canvas->get_gameObject()->SetActive(true);
+        progressBar->SetProgress(0);
         std::thread([]()
         {
             Cinema::DownloadVideo("https://youtu.be/" + currentLevelInfo.videoId, "/sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema", [](float percentage)
             {
                 getLogger().info("Percentage: %f", percentage);
+                QuestUI::MainThreadScheduler::Schedule([percentage]()
+                {
+                    progressBar->subText2->SetText(std::to_string(int(percentage)) + "%");
+                    progressBar->SetProgress(percentage / 100);
+                });
             },
             [](bool success)
             {
@@ -61,6 +73,7 @@ namespace Cinema::VideoManager {
                 {
                     std::filesystem::rename(modDataDir + currentLevelInfo.videoId + ".mp4", GetCurrentVideoPath());
                     PinkCore::RequirementAPI::EnablePlayButton(getModInfo());
+                    progressBar->canvas->get_gameObject()->SetActive(false);
                 });
             });
         }).detach();
@@ -73,6 +86,6 @@ namespace Cinema::VideoManager {
 
     bool GetShouldCreateScreen()
     {
-        return shouldCreateScreen;
+        return getModConfig().enabled.GetValue() ? shouldCreateScreen : false;
     }
 }

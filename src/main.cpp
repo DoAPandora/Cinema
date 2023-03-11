@@ -31,6 +31,7 @@
 
 #include "hooks.hpp"
 #include "VideoManager.hpp"
+#include "ModConfig.hpp"
 
 using namespace UnityEngine;
 using namespace GlobalNamespace;
@@ -126,13 +127,16 @@ MAKE_HOOK_MATCH(SetupSongUI, &GlobalNamespace::AudioTimeSyncController::StartSon
 // Called later on in the game loading - a good time to install function hooks
 extern "C" void load() {
     il2cpp_functions::Init();
-    //INSTALL_HOOK(getLogger(), MainMenu);
+
     INSTALL_HOOK(getLogger(), SetupSongUI);
     INSTALL_HOOK(getLogger(), GamePause_Resume);
     INSTALL_HOOK(getLogger(), GamePause_Pause);
 
     Cinema::InstallVideoDownloadHooks();
 
+    getModConfig().Init(modInfo);
+
+    QuestUI::Init();
     QuestUI::Register::RegisterGameplaySetupMenu<Cinema::VideoMenuViewController*>(modInfo, "Cinema", QuestUI::Register::MenuType::Solo);
 
 	custom_types::Register::AutoRegister();
