@@ -8,14 +8,25 @@
 #include "GlobalNamespace/FilteredBeatmapLevel.hpp"
 #include "GlobalNamespace/BeatmapDifficulty.hpp"
 #include "GlobalNamespace/StandardLevelDetailView.hpp"
+
+#include "WIPUI/VideoMenuManager.hpp"
+
+#include "pinkcore/shared/RequirementAPI.hpp"
+#include "pinkcore/shared/LevelDetailAPI.hpp"
             
 MAKE_HOOK_MATCH(StandardLevelDetailView_SetContent, &GlobalNamespace::StandardLevelDetailView::SetContent, void, GlobalNamespace::StandardLevelDetailView* self, ::GlobalNamespace::IBeatmapLevel* level, GlobalNamespace::BeatmapDifficulty defaultDifficulty, GlobalNamespace::BeatmapCharacteristicSO* defaultBeatmapCharacteristic, GlobalNamespace::PlayerData* playerData)
 {
 	StandardLevelDetailView_SetContent(self, level, defaultDifficulty, defaultBeatmapCharacteristic, playerData);
-    bool isCustom = self->level->i_IPreviewBeatmapLevel()->get_levelID()->StartsWith("custom_level_");
+
+    auto mapData = PinkCore::API::GetCurrentMapData();
+    auto menu = Cinema::VideoMenuManager::get_instance();
+
+    bool useCinema = std::find(mapData.currentSuggestions.begin(), mapData.currentSuggestions.end(), "Cinema") != mapData.currentSuggestions.end();
+
+    menu->set_doesCurrentSongUseCinema(useCinema);
 
     std::string songpath = "";
-    if(isCustom)
+    if(mapData.isCustom)
     {
         auto preview = level->i_IPreviewBeatmapLevel();
         GlobalNamespace::CustomPreviewBeatmapLevel* customLevel;

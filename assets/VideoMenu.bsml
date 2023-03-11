@@ -1,0 +1,8 @@
+<bg id='root' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='https://raw.githubusercontent.com/RedBrumbler/Quest-BSML-Docs/gh-pages/schema.xsd'>
+    <vertical>
+        <horizontal horizontal-fit='PreferredSize' pref-width='100.0'>
+            <text id='videoTitleText' text='Video Title'/>
+            <button id='deleteButton' text='D'/>
+        </horizontal>
+    </vertical>
+</bg>

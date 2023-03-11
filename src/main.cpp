@@ -33,6 +33,8 @@
 #include "VideoManager.hpp"
 #include "ModConfig.hpp"
 
+#include "BSML/shared/BSML.hpp"
+
 using namespace UnityEngine;
 using namespace GlobalNamespace;
 
@@ -56,7 +58,7 @@ Logger& getLogger() {
 
 // Called at the early stages of game loading
 extern "C" void setup(ModInfo& info) {
-    info.id = ID;
+    info.id = MOD_ID;
     info.version = VERSION;
     modInfo = info;
 	
@@ -124,6 +126,10 @@ MAKE_HOOK_MATCH(SetupSongUI, &GlobalNamespace::AudioTimeSyncController::StartSon
     GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(coroutine(videoPlayer, self->audioSource)));
 }
 
+#include "WIPUI/VideoMenuManager.hpp"
+#include "assets.hpp"
+#include "pinkcore/shared/RequirementAPI.hpp"
+
 // Called later on in the game loading - a good time to install function hooks
 extern "C" void load() {
     il2cpp_functions::Init();
@@ -136,8 +142,17 @@ extern "C" void load() {
 
     getModConfig().Init(modInfo);
 
-    QuestUI::Init();
-    QuestUI::Register::RegisterGameplaySetupMenu<Cinema::VideoMenuViewController*>(modInfo, "Cinema", QuestUI::Register::MenuType::Solo);
+    BSML::Init();
+    BSML::Register::RegisterGameplaySetupTab("Cinema", MOD_ID "_settings", Cinema::VideoMenuManager::get_instance(), BSML::MenuType::Solo);
+
+    PinkCore::RequirementAPI::RegisterInstalled("Cinema");
 
 	custom_types::Register::AutoRegister();
+}
+
+#include "bsml/shared/BSMLDataCache.hpp"
+
+BSML_DATACACHE(settings)
+{
+    return IncludedAssets::VideoMenu_bsml;
 }

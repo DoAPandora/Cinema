@@ -10,6 +10,8 @@
 
 #include <filesystem>
 
+// Probably going to move all this to VideoMenuManager at some point
+
 namespace Cinema::VideoManager {
 
     QuestUI::ProgressBar* progressBar;
