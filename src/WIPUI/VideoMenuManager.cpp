@@ -2,8 +2,6 @@
 #include "ModConfig.hpp"
 
 
-// will remove QUI at some point
-#include "questui/shared/BeatSaberUI.hpp"
 #include "HMUI/ViewController_AnimationDirection.hpp"
 #include "HMUI/ViewController_AnimationType.hpp"
 

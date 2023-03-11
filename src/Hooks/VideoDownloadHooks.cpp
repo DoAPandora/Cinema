@@ -37,7 +37,7 @@ MAKE_HOOK_MATCH(StandardLevelDetailView_SetContent, &GlobalNamespace::StandardLe
         }
         songpath = static_cast<std::string>(customLevel->customLevelPath);
     }
-    Cinema::VideoManager::DidSelectLevel(isCustom, songpath);
+    Cinema::VideoManager::DidSelectLevel(mapData.isCustom, songpath);
     if(Cinema::VideoManager::GetShouldCreateScreen())
         Cinema::VideoManager::DownloadCurrentVideo();
 }
