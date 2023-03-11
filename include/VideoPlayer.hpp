@@ -1,10 +1,10 @@
 #pragma once
-#include "main.hpp"
 #include "UnityEngine/Video/VideoPlayer.hpp"
 #include "UnityEngine/Video/VideoRenderMode.hpp"
 #include "UnityEngine/Video/VideoAudioOutputMode.hpp"
 #include "UnityEngine/Video/VideoAspectRatio.hpp"
 #include "UnityEngine/Renderer.hpp"
+#include "UnityEngine/AudioSource.hpp"
 
 using namespace UnityEngine;
 
@@ -68,6 +68,12 @@ namespace Cinema {
             static auto setUrl = reinterpret_cast<function_ptr_t<void, Video::VideoPlayer*, StringW>>(il2cpp_functions::resolve_icall("UnityEngine.Video.VideoPlayer::set_url"));
             setUrl(this, url);
         }
+
+        static VideoPlayer* CreateVideoPlayer(UnityEngine::AudioSource* _audioSource);
+
+        void Start(float offset);
+
+        UnityEngine::AudioSource* audioSource;
     };
 }
 DEFINE_IL2CPP_ARG_TYPE(Cinema::VideoPlayer*, "UnityEngine.Video", "VideoPlayer");

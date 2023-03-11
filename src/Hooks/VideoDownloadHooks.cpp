@@ -1,6 +1,5 @@
 #include "main.hpp"
 #include "hooks.hpp"
-#include "VideoManager.hpp"
 
 #include "GlobalNamespace/CustomPreviewBeatmapLevel.hpp"
 #include "GlobalNamespace/IPreviewBeatmapLevel.hpp"
@@ -11,7 +10,6 @@
 
 #include "WIPUI/VideoMenuManager.hpp"
 
-#include "pinkcore/shared/RequirementAPI.hpp"
 #include "pinkcore/shared/LevelDetailAPI.hpp"
             
 MAKE_HOOK_MATCH(StandardLevelDetailView_SetContent, &GlobalNamespace::StandardLevelDetailView::SetContent, void, GlobalNamespace::StandardLevelDetailView* self, ::GlobalNamespace::IBeatmapLevel* level, GlobalNamespace::BeatmapDifficulty defaultDifficulty, GlobalNamespace::BeatmapCharacteristicSO* defaultBeatmapCharacteristic, GlobalNamespace::PlayerData* playerData)
@@ -25,8 +23,7 @@ MAKE_HOOK_MATCH(StandardLevelDetailView_SetContent, &GlobalNamespace::StandardLe
 
     menu->set_doesCurrentSongUseCinema(useCinema);
 
-    std::string songpath = "";
-    if(mapData.isCustom)
+    if(useCinema)
     {
         auto preview = level->i_IPreviewBeatmapLevel();
         GlobalNamespace::CustomPreviewBeatmapLevel* customLevel;
@@ -35,13 +32,19 @@ MAKE_HOOK_MATCH(StandardLevelDetailView_SetContent, &GlobalNamespace::StandardLe
         } else {
             customLevel = il2cpp_utils::cast<GlobalNamespace::CustomPreviewBeatmapLevel>(level);
         }
-        songpath = static_cast<std::string>(customLevel->customLevelPath);
+
+        std::string songpath = static_cast<std::string>(customLevel->customLevelPath);
+        Cinema::JSON::CinemaInfo info;
+        ReadFromFile(songpath + "/cinema-video.json", info);
+
+        if(info.videoFile.empty())
+            info.videoFile = info.title + ".mp4";
+
+        menu->set_currentLevelData(info);
     }
-    Cinema::VideoManager::DidSelectLevel(mapData.isCustom, songpath);
-    if(Cinema::VideoManager::GetShouldCreateScreen())
-        Cinema::VideoManager::DownloadCurrentVideo();
+    menu->UpdateMenu();
 }
 
-void Cinema::InstallVideoDownloadHooks() {
+void Cinema::Hooks::InstallVideoDownloadHooks() {
    INSTALL_HOOK(getLogger(), StandardLevelDetailView_SetContent);
 }

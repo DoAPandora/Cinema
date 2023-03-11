@@ -2,7 +2,7 @@
     <vertical>
         <horizontal horizontal-fit='PreferredSize' pref-width='100.0'>
             <text id='videoTitleText' text='Video Title'/>
-            <button id='deleteButton' text='D'/>
+            <button id='downloadButton' text='Download' on-click='DownloadButtonClicked'/>
         </horizontal>
     </vertical>
 </bg>
