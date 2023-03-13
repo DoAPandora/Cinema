@@ -1,10 +1,11 @@
 #include "main.hpp"
 #include "hooks.hpp"
 #include "VideoPlayer.hpp"
-#include "WIPUI/VideoMenuManager.hpp"
+#include "UI/VideoMenuManager.hpp"
 
 #include "GlobalNamespace/GamePause.hpp"
 #include "GlobalNamespace/AudioTimeSyncController.hpp"
+#include "GlobalNamespace/AudioTimeSyncController_InitData.hpp"
 
 Cinema::VideoPlayer* videoPlayer = nullptr;
 
@@ -20,7 +21,7 @@ MAKE_HOOK_MATCH(AudioTimeSyncController_Start, &GlobalNamespace::AudioTimeSyncCo
         videoPlayer->set_url(manager->GetCurrentVideoPath());
         float offset = manager->get_currentLevelData().offset;
         offset /= 1000;
-        videoPlayer->Start(offset + 0.5f);
+        videoPlayer->Start(offset + self->initData->startSongTime);
     }
     else
         videoPlayer = nullptr;

@@ -1,8 +1,31 @@
 <bg id='root' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='https://raw.githubusercontent.com/RedBrumbler/Quest-BSML-Docs/gh-pages/schema.xsd'>
-    <vertical>
-        <horizontal horizontal-fit='PreferredSize' pref-width='100.0'>
+    <vertical id='mainVertical' active='false'>
+        <horizontal horizontal-fit='PreferredSize' pref-width='100.0' child-expand-height='false' child-align='top'>
             <text id='videoTitleText' text='Video Title'/>
-            <button id='downloadButton' text='Download' on-click='DownloadButtonClicked'/>
         </horizontal>
+        <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' width='50' height='25' child-expand-width='false' child-expand-height='false'>
+            <image id='thumbnailSprite' pref-width='40' pref-height='25' preserve-aspect='true'/>
+            <vertical align='Top' pad-left='3.0' spacing='0.0' pref-width='40.0' child-expand-width='false' vertical-fit='PreferredSize'>
+                <text id='authorText' font-size='3' align='Left' overflow-mode='Ellipsis' text='Author Name'/>
+                <text id='durationText' font-size='3' align='Left' overflow-mode='Ellipsis' text='4:20'/>
+                <text id='downloadStateText' align='Left' color='red' text='Not downloaded'/>
+				<button id='downloadButton' horizontal-fit='PreferredSize' pref-width='20.0' text='Download Video' on-click='DownloadButtonClicked'/>
+            </vertical>
+        </horizontal>
+        <vertical>
+            <text font-size='3.5' text='Video Offset' align='Center'/>
+            <horizontal horizontal-fit='PreferredSize' spacing='1.0' child-align='Center'>
+                <button id='majorDecreaseButton' horizontal-fit='PreferredSize' pref-width='10.0' font-size='3.0' text='---' on-click='DecreaseOffsetMajor'/>
+                <button id='normalDecreaseButton' horizontal-fit='PreferredSize' pref-width='10.0' font-size='3.0' text='--' on-click='DecreaseOffsetNormal'/>
+                <button id='minorDecreaseButton' horizontal-fit='PreferredSize' pref-width='10.0' font-size='3.0' text='-' on-click='DecreaseOffsetMinor'/>
+                <text id='videoOffsetText' font-size='5.0' text='0ms'/>
+                <button id='minorIncreaseButton' horizontal-fit='PreferredSize' pref-width='10.0' font-size='3.0' text='+' on-click='IncreaseOffsetMinor'/>
+                <button id='normalIncreaseButton' horizontal-fit='PreferredSize' pref-width='10.0' font-size='3.0' text='++' on-click='IncreaseOffsetNormal'/>
+                <button id='majorIncreaseButton' horizontal-fit='PreferredSize' pref-width='10.0' font-size='3.0' text='+++' on-click='IncreaseOffsetMajor'/>
+            </horizontal>
+        </vertical>
+    </vertical>
+    <vertical id='noCinemaVertical'>
+        <text text='Current selected level does not use cinema' active='true'/>
     </vertical>
 </bg>

@@ -21,14 +21,14 @@ using namespace UnityEngine;
 namespace Cinema {
 
     custom_types::Helpers::Coroutine coroutine(Cinema::VideoPlayer* videoPlayer, AudioSource* audioSource, float offset) {
-        while(!audioSource->get_isPlaying()) co_yield nullptr;
+        // while(!audioSource->get_isPlaying()) co_yield nullptr;
         getLogger().info("Starting video with offset %f", offset);
-        if(0 > offset)
+        if(offset < 0)
         {
-            co_yield reinterpret_cast<System::Collections::IEnumerator*>(UnityEngine::WaitForSeconds::New_ctor(offset * -1 + 0.5f));
+            co_yield reinterpret_cast<System::Collections::IEnumerator*>(UnityEngine::WaitForSeconds::New_ctor(offset * -1 + 0.6f));
         }
         else
-            videoPlayer->set_time(offset);
+            videoPlayer->set_time(offset + 0.6f);
         videoPlayer->Play();
         co_return;
     }

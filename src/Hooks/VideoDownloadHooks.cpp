@@ -8,7 +8,7 @@
 #include "GlobalNamespace/BeatmapDifficulty.hpp"
 #include "GlobalNamespace/StandardLevelDetailView.hpp"
 
-#include "WIPUI/VideoMenuManager.hpp"
+#include "UI/VideoMenuManager.hpp"
 
 #include "pinkcore/shared/LevelDetailAPI.hpp"
             
@@ -21,7 +21,7 @@ MAKE_HOOK_MATCH(StandardLevelDetailView_SetContent, &GlobalNamespace::StandardLe
 
     bool useCinema = std::find(mapData.currentSuggestions.begin(), mapData.currentSuggestions.end(), "Cinema") != mapData.currentSuggestions.end();
 
-    menu->set_doesCurrentSongUseCinema(useCinema);
+    menu->set_doesCurrentSongUseCinema(useCinema && mapData.isCustom);
 
     if(useCinema)
     {

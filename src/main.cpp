@@ -3,7 +3,7 @@
 #include "ModConfig.hpp"
 #include "BSML/shared/BSML.hpp"
 
-#include "WIPUI/VideoMenuManager.hpp"
+#include "UI/VideoMenuManager.hpp"
 #include "assets.hpp"
 #include "pinkcore/shared/RequirementAPI.hpp"
 
