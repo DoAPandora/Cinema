@@ -51,12 +51,6 @@ target_include_directories(${COMPILE_ID} PUBLIC ${SHARED_DIR})
 # codegen includes 
 target_include_directories(${COMPILE_ID} PRIVATE ${EXTERN_DIR}/includes/${CODEGEN_ID}/include)
 
-#VLC
-target_include_directories(${COMPILE_ID} PRIVATE SYSTEM vlc/include)
-target_link_directories(${COMPILE_ID} PRIVATE vlc/libs)
-RECURSE_FILES(vlc_list vlc/libs/*.so)
-target_link_libraries(${COMPILE_ID} PRIVATE ${vlc_list})
-
 target_link_libraries(${COMPILE_ID} PRIVATE -llog)
 # add extern stuff like libs and other includes
 include(extern.cmake)

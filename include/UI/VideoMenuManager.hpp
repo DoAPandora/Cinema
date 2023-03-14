@@ -28,7 +28,7 @@ DECLARE_CLASS_CODEGEN(Cinema, VideoMenuManager, Il2CppObject,
 
     DECLARE_INSTANCE_METHOD(bool, DownloadCurrentVideo);
     DECLARE_INSTANCE_METHOD(void, DeleteCurrentVideo);
-    DECLARE_INSTANCE_METHOD(bool, DownloadCurrentThumbnail);
+    DECLARE_INSTANCE_METHOD(void, DownloadCurrentThumbnail);
     DECLARE_INSTANCE_METHOD(void, SetCurrentThumbnail);
     DECLARE_INSTANCE_METHOD(void, UpdateMenu);
     DECLARE_INSTANCE_METHOD(bool, ShouldCreateScreen);

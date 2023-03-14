@@ -6,6 +6,8 @@
 #include "questui/shared/BeatSaberUI.hpp"
 #include "questui/shared/CustomTypes/Components/MainThreadScheduler.hpp"
 
+#include "GlobalNamespace/SharedCoroutineStarter.hpp"
+
 #include "pinkcore/shared/RequirementAPI.hpp"
 
 #include "bsml-lite/shared/Creation/Image.hpp"
@@ -66,7 +68,10 @@ namespace Cinema
     {
         int minutes = length / 60;
         int seconds = length - minutes * 60;
-        std::string dur = std::to_string(minutes) + ":" + std::to_string(seconds);
+        std::string dur = std::to_string(minutes) + ":";
+        if(seconds < 10)
+            dur += "0";
+        dur += std::to_string(seconds);
         return dur;
     }
 
@@ -141,9 +146,9 @@ namespace Cinema
     void VideoMenuManager::UpdateProgressBar(float progress)
     {
         if(!progressBar)
-            progressBar = QuestUI::BeatSaberUI::CreateProgressBar({0, 3, 4}, "Downloading Video...", "Cinema");
+            progressBar = QuestUI::BeatSaberUI::CreateProgressBar({0, 3.3, 4}, "Downloading Video...", "Cinema");
         progressBar->canvas->get_gameObject()->SetActive(true);
-        progressBar->SetProgress(progress);
+        progressBar->SetProgress(progress / 100);
         progressBar->subText2->SetText(std::to_string(int(progress)) + "%");
     }
 
@@ -164,37 +169,22 @@ namespace Cinema
 
     void VideoMenuManager::SetCurrentThumbnail()
     {
-        getLogger().info("Attempting to set thumbnail");
-        std::string path = thumbnailsDir + currentLevelData.videoId + ".webp";
+        std::string path = thumbnailsDir + currentLevelData.videoId + ".jpg";
         if(std::filesystem::exists(path))
         {
-            getLogger().info("Thumbnail alreadye exists");
             thumbnailSprite->set_sprite(BSML::Lite::FileToSprite(path));
-            return;
         }
-
-        std::thread([this, path]()
-        {
-            getLogger().info("Downloading sprite");
-            if(!DownloadCurrentThumbnail())
-            {
-                getLogger().info("Downloading thumbnail failed");
-                return;
-            }
-            QuestUI::MainThreadScheduler::Schedule([this, path]()
-            {
-                getLogger().info("Downloaded Sprite");
-                if(std::filesystem::exists(path))
-                    this->thumbnailSprite->set_sprite(BSML::Lite::FileToSprite(path));
-            });
-        }).detach();
+        else
+            DownloadCurrentThumbnail();
     }
 
-    bool VideoMenuManager::DownloadCurrentThumbnail()
+    void VideoMenuManager::DownloadCurrentThumbnail()
     {
-        return Downloader::DownloadThumbnail("https://youtu.be/" + currentLevelData.videoId, [](float progress){
-            getLogger().info("Thumnail download progress: %f", progress);
-        });
+        GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(Downloader::DownloadThumbnail(currentLevelData.videoId, [this]()
+        {
+            getLogger().info("Finished downloading thumbnail");
+            SetCurrentThumbnail();
+        })));    
     }
 
     void VideoMenuManager::DecreaseOffsetMajor()
