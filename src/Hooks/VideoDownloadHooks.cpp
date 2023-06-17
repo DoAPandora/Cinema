@@ -1,14 +1,12 @@
 #include "main.hpp"
-#include "hooks.hpp"
+#include "Hooks/Hooks.hpp"
 
-#include "GlobalNamespace/CustomPreviewBeatmapLevel.hpp"
-#include "GlobalNamespace/IPreviewBeatmapLevel.hpp"
 #include "GlobalNamespace/IBeatmapLevel.hpp"
-#include "GlobalNamespace/FilteredBeatmapLevel.hpp"
 #include "GlobalNamespace/BeatmapDifficulty.hpp"
 #include "GlobalNamespace/StandardLevelDetailView.hpp"
 
 #include "UI/VideoMenuManager.hpp"
+#include "Video/VideoLoader.hpp"
 
 #include "pinkcore/shared/LevelDetailAPI.hpp"
             
@@ -21,26 +19,12 @@ MAKE_HOOK_MATCH(StandardLevelDetailView_SetContent, &GlobalNamespace::StandardLe
 
     bool useCinema = std::find(mapData.currentSuggestions.begin(), mapData.currentSuggestions.end(), "Cinema") != mapData.currentSuggestions.end();
 
-    menu->set_doesCurrentSongUseCinema(useCinema && mapData.isCustom);
+    menu->doesCurrentSongUseCinema = useCinema && mapData.isCustom;
 
     if(useCinema)
     {
-        auto preview = level->i_IPreviewBeatmapLevel();
-        GlobalNamespace::CustomPreviewBeatmapLevel* customLevel;
-        if (auto filter = il2cpp_utils::try_cast<GlobalNamespace::FilteredBeatmapLevel>(level)) {
-            customLevel = il2cpp_utils::cast<GlobalNamespace::CustomPreviewBeatmapLevel>(filter.value()->beatmapLevel);
-        } else {
-            customLevel = il2cpp_utils::cast<GlobalNamespace::CustomPreviewBeatmapLevel>(level);
-        }
-
-        std::string songpath = static_cast<std::string>(customLevel->customLevelPath);
-        Cinema::JSON::CinemaInfo info;
-        ReadFromFile(songpath + "/cinema-video.json", info);
-
-        if(info.videoFile.empty())
-            info.videoFile = info.title + ".mp4";
-
-        menu->set_currentLevelData(info);
+        auto config = Cinema::VideoLoader::GetConfigForLevel(level->i_IPreviewBeatmapLevel());
+        menu->currentVideoConfig = config.value();
     }
     menu->UpdateMenu();
 }

@@ -1,12 +1,12 @@
 #include "main.hpp"
 #include "UI/VideoMenuManager.hpp"
-#include "ModConfig.hpp"
+
 #include "Downloader.hpp"
+#include "Screen/VideoPlayer.hpp"
 
 #include "questui/shared/BeatSaberUI.hpp"
 #include "questui/shared/CustomTypes/Components/MainThreadScheduler.hpp"
-
-#include "GlobalNamespace/SharedCoroutineStarter.hpp"
+#include "GlobalNamespace/HMTask.hpp"
 
 #include "pinkcore/shared/RequirementAPI.hpp"
 
@@ -17,8 +17,10 @@
 
 DEFINE_TYPE(Cinema, VideoMenuManager);
 
-const std::string videosDir = "/sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema/Videos/";
-const std::string thumbnailsDir = "/sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema/Thumbnails/";
+// this file is so messy
+
+#define DEFINE_OFFSET_CHANGE(name, change) \
+void VideoMenuManager::name() { currentVideoConfig.offset += change; UpdateMenu(); }
 
 namespace Cinema
 {
@@ -41,14 +43,14 @@ namespace Cinema
 
         mainVertical->get_gameObject()->SetActive(true);
         noCinemaVertical->get_gameObject()->SetActive(false);
-        videoTitleText->SetText(currentLevelData.title);
+        videoTitleText->SetText(currentVideoConfig.title);
 
-        authorText->SetText(currentLevelData.author);
-        durationText->SetText(ToDuration(currentLevelData.duration));
+        authorText->SetText(currentVideoConfig.author);
+        durationText->SetText(ToDuration(currentVideoConfig.duration));
 
-        bool isCurrentVideoDownloaded = std::filesystem::exists(videosDir + currentLevelData.videoFile);
+        bool isCurrentVideoDownloaded = std::filesystem::exists(videosDir + currentVideoConfig.videoFile.value());
         downloadButton->GetComponentInChildren<HMUI::CurvedTextMeshPro*>()->SetText(isCurrentVideoDownloaded ? "Delete" : "Download");
-        videoOffsetText->SetText(std::to_string(currentLevelData.offset) + " ms");
+        videoOffsetText->SetText(std::to_string(currentVideoConfig.offset) + " ms");
         downloadState = isCurrentVideoDownloaded ? DownloadState::Downloaded : DownloadState::NotDownloaded;
         SetDownloadState(downloadState);
         SetCurrentThumbnail();
@@ -57,11 +59,6 @@ namespace Cinema
     bool VideoMenuManager::ShouldCreateScreen()
     {
         return getModConfig().enabled.GetValue() ? doesCurrentSongUseCinema && downloadState == DownloadState::Downloaded : false;
-    }
-
-    std::string VideoMenuManager::GetCurrentVideoPath()
-    {
-        return videosDir + currentLevelData.videoFile;
     }
 
     std::string VideoMenuManager::ToDuration(int length)
@@ -102,7 +99,7 @@ namespace Cinema
         }
     }
 
-    void VideoMenuManager::DownloadButtonClicked()
+    void VideoMenuManager::DownloadButtonPressed()
     {
         if(downloadState == DownloadState::Downloaded)
         {
@@ -120,12 +117,14 @@ namespace Cinema
             if(!result)
             {
                 getLogger().info("Download failed");
-                std::string path = videosDir + get_currentLevelData().videoId + ".mp4";
+                std::string path = videosDir + currentVideoConfig.videoID.value() + ".mp4";
                 if(std::filesystem::exists(path))
                     std::filesystem::remove(path);
             }
             else
-                std::filesystem::rename(videosDir + currentLevelData.videoId + ".mp4", videosDir + currentLevelData.videoFile);
+            {
+                std::filesystem::rename(videosDir + currentVideoConfig.videoID.value() + ".mp4", videosDir + currentVideoConfig.videoFile.value());
+            }
 
             QuestUI::MainThreadScheduler::Schedule([this]()
             {
@@ -137,16 +136,20 @@ namespace Cinema
 
     }
 
+    void VideoMenuManager::PreviewButtonPressed()
+    {
+    }
+
     void VideoMenuManager::DeleteCurrentVideo()
     {
         if(downloadState == DownloadState::Downloaded)
-            std::filesystem::remove(GetCurrentVideoPath());
+            std::filesystem::remove(currentVideoConfig.get_videoPath());
     }
 
     void VideoMenuManager::UpdateProgressBar(float progress)
     {
         if(!progressBar)
-            progressBar = QuestUI::BeatSaberUI::CreateProgressBar({0, 3.3, 4}, "Downloading Video...", "Cinema");
+            progressBar = QuestUI::BeatSaberUI::CreateProgressBar(UnityEngine::Vector3(0, 3.3, 4), "Downloading Video...", "Cinema");
         progressBar->canvas->get_gameObject()->SetActive(true);
         progressBar->SetProgress(progress / 100);
         progressBar->subText2->SetText(std::to_string(int(progress)) + "%");
@@ -154,8 +157,7 @@ namespace Cinema
 
     bool VideoMenuManager::DownloadCurrentVideo()
     {
-        std::string url = "https://youtu.be/" + currentLevelData.videoId;
-        bool result = Downloader::DownloadVideo(url, [this](float progress)
+        bool result = Downloader::DownloadVideo(currentVideoConfig.videoID.value(), [this](float progress)
         {
             getLogger().info("Video download progress: %f", progress);
             QuestUI::MainThreadScheduler::Schedule([progress, this]()
@@ -169,7 +171,8 @@ namespace Cinema
 
     void VideoMenuManager::SetCurrentThumbnail()
     {
-        std::string path = thumbnailsDir + currentLevelData.videoId + ".jpg";
+        std::string path = thumbnailsDir + currentVideoConfig.videoID.value() + ".jpg";
+        getLogger().info("%s", path.c_str());
         if(std::filesystem::exists(path))
         {
             thumbnailSprite->set_sprite(BSML::Lite::FileToSprite(path));
@@ -180,58 +183,19 @@ namespace Cinema
 
     void VideoMenuManager::DownloadCurrentThumbnail()
     {
-        GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(Downloader::DownloadThumbnail(currentLevelData.videoId, [this]()
+        Downloader::DownloadThumbnail(currentVideoConfig.videoID.value(), [this]()
         {
             getLogger().info("Finished downloading thumbnail");
             SetCurrentThumbnail();
-        })));    
+        });    
     }
 
-    void VideoMenuManager::DecreaseOffsetMajor()
-    {
-        currentLevelData.offset -= 1000;
-        UpdateMenu();
-    }
-
-    void VideoMenuManager::DecreaseOffsetNormal()
-    {
-        currentLevelData.offset -= 100;
-        UpdateMenu();
-    }
-
-    void VideoMenuManager::DecreaseOffsetMinor()
-    {
-        currentLevelData.offset -= 10;
-        UpdateMenu();
-    }
-
-    void VideoMenuManager::IncreaseOffsetMinor()
-    {
-        currentLevelData.offset += 10;
-        UpdateMenu();
-    }
-
-    void VideoMenuManager::IncreaseOffsetNormal()
-    {
-        currentLevelData.offset += 100;
-        UpdateMenu();
-    }
-
-    void VideoMenuManager::IncreaseOffsetMajor()
-    {
-        currentLevelData.offset += 1000;
-        UpdateMenu();
-    }
-
+    DEFINE_OFFSET_CHANGE(DecreaseOffsetMajor, -1000);
+    DEFINE_OFFSET_CHANGE(DecreaseOffsetNormal, -100);
+    DEFINE_OFFSET_CHANGE(DecreaseOffsetMinor, -10)
+    DEFINE_OFFSET_CHANGE(IncreaseOffsetMinor, 10);
+    DEFINE_OFFSET_CHANGE(IncreaseOffsetNormal, 100);
+    DEFINE_OFFSET_CHANGE(IncreaseOffsetMajor, 1000);
 
     void VideoMenuManager::ctor() { }
-
-    bool VideoMenuManager::get_doesCurrentSongUseCinema() { return this->doesCurrentSongUseCinema; }
-    void VideoMenuManager::set_doesCurrentSongUseCinema(bool value) { this->doesCurrentSongUseCinema = value; }
-
-    VideoMenuManager::DownloadState VideoMenuManager::get_downloadState() { return this->downloadState; }
-    void VideoMenuManager::set_downloadState(VideoMenuManager::DownloadState value) { this->downloadState = value; }
-
-    JSON::CinemaInfo VideoMenuManager::get_currentLevelData() { return this->currentLevelData; }
-    void VideoMenuManager::set_currentLevelData(JSON::CinemaInfo value) { this->currentLevelData = value; }
 }

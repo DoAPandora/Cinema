@@ -9,7 +9,7 @@
                 <text id='authorText' font-size='4.0' align='Left' overflow-mode='Ellipsis' text='Author Name'/>
                 <text id='durationText' font-size='4.0' align='Left' overflow-mode='Ellipsis' text='4:20'/>
                 <text id='downloadStateText' font-size='4.0' align='Left' color='red' text='Not downloaded'/>
-				<button id='downloadButton' horizontal-fit='PreferredSize' pref-width='20.0' text='Download Video' on-click='DownloadButtonClicked'/>
+				<button id='downloadButton' horizontal-fit='PreferredSize' pref-width='20.0' text='Download Video' on-click='DownloadButtonPressed'/>
             </vertical>
         </horizontal>
         <vertical vertical-fit='PreferredSize' pref-height='18.0'>

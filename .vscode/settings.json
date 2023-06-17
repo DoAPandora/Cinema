@@ -116,6 +116,12 @@
         "xutility": "cpp",
         "format": "cpp",
         "stop_token": "cpp",
-        "__std_stream": "cpp"
+        "__std_stream": "cpp",
+        "semaphore": "cpp",
+        "*.tcc": "cpp",
+        "memory_resource": "cpp",
+        "source_location": "cpp",
+        "numbers": "cpp",
+        "__functional_03": "cpp"
     }
 }

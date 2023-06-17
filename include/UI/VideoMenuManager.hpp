@@ -1,18 +1,13 @@
 #pragma once
 
 #include "custom-types/shared/macros.hpp"
-#include "json.hpp"
+#include "Video/VideoConfig.hpp"
 
 #include "bsml/shared/BSML/Components/Backgroundable.hpp"
 #include "HMUI/CurvedTextMeshPro.hpp"
 #include "UnityEngine/UI/Button.hpp"
 #include "HMUI/ImageView.hpp"
 #include "questui/shared/CustomTypes/Components/ProgressBar/ProgressBar.hpp"
-
-#define DECLARE_GET_SET(type, name) \
-public: \
-type get_##name(); \
-void set_##name(type value);
 
 DECLARE_CLASS_CODEGEN(Cinema, VideoMenuManager, Il2CppObject,
 
@@ -23,7 +18,6 @@ DECLARE_CLASS_CODEGEN(Cinema, VideoMenuManager, Il2CppObject,
     };
     void SetDownloadState(DownloadState state);
 
-    std::string GetCurrentVideoPath();
     std::string ToDuration(int length);
 
     DECLARE_INSTANCE_METHOD(bool, DownloadCurrentVideo);
@@ -33,6 +27,8 @@ DECLARE_CLASS_CODEGEN(Cinema, VideoMenuManager, Il2CppObject,
     DECLARE_INSTANCE_METHOD(void, UpdateMenu);
     DECLARE_INSTANCE_METHOD(bool, ShouldCreateScreen);
     DECLARE_INSTANCE_METHOD(void, UpdateProgressBar, float progress);
+    DECLARE_INSTANCE_METHOD(void, DownloadButtonPressed);
+    DECLARE_INSTANCE_METHOD(void, PreviewButtonPressed);
 
     DECLARE_INSTANCE_FIELD(QuestUI::ProgressBar*, progressBar);
 
@@ -41,7 +37,6 @@ DECLARE_CLASS_CODEGEN(Cinema, VideoMenuManager, Il2CppObject,
     
     DECLARE_INSTANCE_FIELD(HMUI::CurvedTextMeshPro*, videoTitleText);
     DECLARE_INSTANCE_FIELD(UnityEngine::UI::Button*, downloadButton);
-    DECLARE_INSTANCE_METHOD(void, DownloadButtonClicked);
 
     DECLARE_INSTANCE_FIELD(HMUI::ImageView*, thumbnailSprite);
     DECLARE_INSTANCE_FIELD(HMUI::CurvedTextMeshPro*, authorText);
@@ -57,20 +52,15 @@ DECLARE_CLASS_CODEGEN(Cinema, VideoMenuManager, Il2CppObject,
     DECLARE_INSTANCE_METHOD(void, IncreaseOffsetNormal);
     DECLARE_INSTANCE_METHOD(void, IncreaseOffsetMajor);
 
-
-    DECLARE_GET_SET(bool, doesCurrentSongUseCinema);
-    DECLARE_GET_SET(DownloadState, downloadState);
-    DECLARE_GET_SET(JSON::CinemaInfo, currentLevelData);
-
     DECLARE_CTOR(ctor);
 
     public:
+        bool doesCurrentSongUseCinema;
+        bool isCurrentVideoDownloaded;
+        VideoConfig currentVideoConfig;
+        enum DownloadState downloadState;
+
         static VideoMenuManager *get_instance();
     private:
         static SafePtr<VideoMenuManager> instance;
-        
-        bool doesCurrentSongUseCinema;
-        bool isCurrentVideoDownloaded;
-        JSON::CinemaInfo currentLevelData;
-        enum DownloadState downloadState;
 )

@@ -1,28 +1,28 @@
 #include "main.hpp"
-#include "hooks.hpp"
-#include "ModConfig.hpp"
+#include "Hooks/Hooks.hpp"
+
 #include "BSML/shared/BSML.hpp"
+
+#include "Screen/PlaybackController.hpp"
 
 #include "UI/VideoMenuManager.hpp"
 #include "assets.hpp"
 #include "pinkcore/shared/RequirementAPI.hpp"
 
-using namespace UnityEngine;
-using namespace GlobalNamespace;
+#include "GlobalNamespace/DefaultScenesTransitionsFromInit.hpp"
 
-static ModInfo modInfo; // Stores the ID and version of our mod, and is sent to the modloader upon startup
+static ModInfo modInfo;
+
+MAKE_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &GlobalNamespace::DefaultScenesTransitionsFromInit::TransitionToNextScene, void, GlobalNamespace::DefaultScenesTransitionsFromInit* self, bool goStraightToMenu, bool goStraightToEditor, bool goToRecordingToolScene)
+{
+    DefaultScenesTransitionsFromInit_TransitionToNextScene(self, goStraightToMenu, goStraightToEditor, goToRecordingToolScene);
+    Cinema::PlaybackController::Create();
+}
 
 ModInfo& getModInfo() {
     return modInfo;
 }
 
-// Loads the config from disk using our modInfo, then returns it for use
-Configuration& getConfig() {
-    static Configuration config(modInfo);
-    return config;
-}
-
-// Returns a logger, useful for printing debug messages
 Logger& getLogger() {
     static Logger* logger = new Logger(modInfo);
     return *logger;
@@ -34,20 +34,24 @@ extern "C" void setup(ModInfo& info) {
     info.version = VERSION;
     modInfo = info;
 	
-    getConfig().Load(); // Load the config file
+    getModConfig().Init(modInfo);
     getLogger().info("Completed setup!");
 }
+
 
 // Called later on in the game loading - a good time to install function hooks
 extern "C" void load() {
     il2cpp_functions::Init();
 
-    getLogger().info("Installing hooks...");
-    Cinema::Hooks::InstallVideoPlayerHooks();
-    Cinema::Hooks::InstallVideoDownloadHooks();
-    getLogger().info("Installed all hooks!");
+    mkpath(videosDir);
+    mkpath(thumbnailsDir);
 
-    getModConfig().Init(modInfo);
+    getLogger().info("Installing hooks...");
+    Cinema::Hooks::InstallPlaybackControllerEventHooks();
+    Cinema::Hooks::InstallVideoDownloadHooks();
+    Cinema::Hooks::InstallLevelDataHook();
+    INSTALL_HOOK(getLogger(), DefaultScenesTransitionsFromInit_TransitionToNextScene);
+    getLogger().info("Installed all hooks!");
 
     BSML::Init();
     BSML::Register::RegisterGameplaySetupTab("Cinema", MOD_ID "_settings", Cinema::VideoMenuManager::get_instance(), BSML::MenuType::Solo);

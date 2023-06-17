@@ -10,7 +10,11 @@
 #include "beatsaber-hook/shared/utils/il2cpp-functions.hpp"
 #include "beatsaber-hook/shared/utils/hooking.hpp"
 
+#include "ModConfig.hpp"
+
 // Define these functions here so that we can easily read configuration and log information from other files
-Configuration& getConfig();
 Logger& getLogger();
 ModInfo& getModInfo();
+
+static const std::string videosDir = "/sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema/Videos/";
+static const std::string thumbnailsDir = "/sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema/Thumbnails/";

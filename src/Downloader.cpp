@@ -1,3 +1,6 @@
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-experimental-coroutine"
+
 #include "main.hpp"
 #include "Downloader.hpp"
 
@@ -81,3 +84,4 @@ namespace Cinema::Downloader {
         co_return;
     }
 }
+#pragma clang diagnostic pop
