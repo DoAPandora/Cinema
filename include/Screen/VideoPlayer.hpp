@@ -57,7 +57,11 @@ namespace Cinema {
         void set_isLooping(bool value) {
             static auto isLooping = reinterpret_cast<function_ptr_t<void, UnityEngine::Video::VideoPlayer*, bool>>(il2cpp_functions::resolve_icall("UnityEngine.Video.VideoPlayer::set_isLooping"));
             isLooping(this, value);
+        }
 
+        void set_sendFrameReadyEvents(bool value) {
+            static auto sendFrameReadyEvents = reinterpret_cast<function_ptr_t<void, UnityEngine::Video::VideoPlayer*, bool>>(il2cpp_functions::resolve_icall("UnityEngine.Video.VideoPlayer::set_sendFrameReadyEvents"));
+            sendFrameReadyEvents(this, value);
         }
 
         void set_renderMode(UnityEngine::Video::VideoRenderMode renderMode) {

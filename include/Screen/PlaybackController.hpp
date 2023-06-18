@@ -30,6 +30,9 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_METHOD(void, PauseVideo);
     DECLARE_INSTANCE_METHOD(float, GetReferenceTime, float referenceTime = 0, float playbackSpeed = 0);
 
+    DECLARE_INSTANCE_METHOD(void, FrameReady, long frame);
+    DECLARE_INSTANCE_METHOD(void, OnPrepareComplete);
+
     DECLARE_INSTANCE_METHOD(void, GameSceneActive);
     DECLARE_INSTANCE_METHOD(void, GameSceneLoaded);
     DECLARE_INSTANCE_METHOD(void, OnMenuSceneLoaded);
@@ -61,6 +64,7 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
     public:
 
     VideoConfig videoConfig;
+    std::chrono::system_clock::time_point audioSourceStartTime;
 
     private:
         

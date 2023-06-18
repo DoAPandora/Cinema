@@ -26,7 +26,6 @@ bool runGameSceneLoaded = false, runMenuSceneLoaded = false, runMenuSceneLoadedF
 MAKE_HOOK_MATCH(RichPresenceManager_HandleGameScenesManagerTransitionDidFinish, &RichPresenceManager::HandleGameScenesManagerTransitionDidFinish, void, RichPresenceManager* self, ScenesTransitionSetupDataSO* transitionSetupData, Zenject::DiContainer* container)
 {
     RichPresenceManager_HandleGameScenesManagerTransitionDidFinish(self, transitionSetupData, container);
-    getLogger().info("RichPresenceManager_HandleGameScenesManagerTransitionDidFinish");
 
     // Cinema::PlaybackController::get_instance();
 
@@ -53,8 +52,7 @@ MAKE_HOOK_MATCH(SceneManager_Internal_ActiveSceneChanged, &UnityEngine::SceneMan
 {
     SceneManager_Internal_ActiveSceneChanged(previousActiveScene, newActiveScene);
     if(!previousActiveScene.IsValid() || !newActiveScene.IsValid())
-        return getLogger().info("Scenes were null");
-    getLogger().info("SceneManager_ActiveSceneChanged %s -> %s", static_cast<std::string>(previousActiveScene.get_name()).c_str(), static_cast<std::string>(newActiveScene.get_name()).c_str());
+        return getLogger().info("Scene(s) were null");
 
     if(newActiveScene.get_name() == "GameCore")
     {
@@ -74,6 +72,20 @@ MAKE_HOOK_MATCH(SceneManager_Internal_ActiveSceneChanged, &UnityEngine::SceneMan
         lastMainSceneWasNotMenu = true;
 }
 
+MAKE_HOOK_MATCH(VideoPlayer_InvokePrepareCompletedCallback_Internal, &UnityEngine::Video::VideoPlayer::InvokePrepareCompletedCallback_Internal, void, UnityEngine::Video::VideoPlayer* source)
+{
+    VideoPlayer_InvokePrepareCompletedCallback_Internal(source);
+    if(il2cpp_utils::try_cast<Cinema::VideoPlayer>(source))
+        Cinema::PlaybackController::get_instance()->OnPrepareComplete();
+}
+
+MAKE_HOOK_MATCH(VideoPlayer_InvokeFrameReadyCallback_Internal, &UnityEngine::Video::VideoPlayer::InvokeFrameReadyCallback_Internal, void, UnityEngine::Video::VideoPlayer* source, long frame)
+{
+    VideoPlayer_InvokeFrameReadyCallback_Internal(source, frame);
+    if(il2cpp_utils::try_cast<Cinema::VideoPlayer>(source))
+        Cinema::PlaybackController::get_instance()->FrameReady(frame);
+}
+
 MAKE_HOOK_MATCH(GamePause_Resume, &GamePause::Resume, void, GamePause* self)
 {
     GamePause_Resume(self);
@@ -91,4 +103,6 @@ void Cinema::Hooks::InstallPlaybackControllerEventHooks() {
     INSTALL_HOOK(getLogger(), SceneManager_Internal_ActiveSceneChanged);
     INSTALL_HOOK(getLogger(), GamePause_Resume);
     INSTALL_HOOK(getLogger(), GamePause_Pause);
+    INSTALL_HOOK(getLogger(), VideoPlayer_InvokePrepareCompletedCallback_Internal);
+    INSTALL_HOOK(getLogger(), VideoPlayer_InvokeFrameReadyCallback_Internal);
 }
