@@ -5,9 +5,7 @@
 #include "Downloader.hpp"
 
 #include "pythonlib/shared/Python.hpp"
-#include "pythonlib/shared/Utils/FileUtils.hpp"
 #include "pythonlib/shared/Utils/StringUtils.hpp"
-#include "assets.hpp"
 
 #include "UnityEngine/Networking/DownloadHandler.hpp"
 #include "UnityEngine/Networking/UnityWebRequest.hpp"
@@ -47,9 +45,6 @@ namespace Cinema::Downloader {
             }
         };
         Python::PythonWriteEvent += eventHandler;
-        std::string ytdlp = FileUtils::getScriptsPath() + "/yt_dlp";
-        if(!direxists(ytdlp))
-            FileUtils::ExtractZip(IncludedAssets::ytdlp_zip, ytdlp);
         Python::PyRun_SimpleString("from yt_dlp.__init__ import _real_main");
         std::string command = "_real_main([";
         for(auto splitted : StringUtils::Split("--no-cache-dir -o %(id)s.%(ext)s -P /sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema/Videos " + url, " ")) {

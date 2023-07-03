@@ -11,6 +11,8 @@
 
 #include "GlobalNamespace/DefaultScenesTransitionsFromInit.hpp"
 
+#include "pythonlib/shared/Utils/FileUtils.hpp"
+
 static ModInfo modInfo;
 
 MAKE_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &GlobalNamespace::DefaultScenesTransitionsFromInit::TransitionToNextScene, void, GlobalNamespace::DefaultScenesTransitionsFromInit* self, bool goStraightToMenu, bool goStraightToEditor, bool goToRecordingToolScene)
@@ -52,6 +54,10 @@ extern "C" void load() {
     Cinema::Hooks::InstallLevelDataHook();
     INSTALL_HOOK(getLogger(), DefaultScenesTransitionsFromInit_TransitionToNextScene);
     getLogger().info("Installed all hooks!");
+
+    std::string ytdlp = FileUtils::getScriptsPath() + "/yt_dlp";
+    if(!direxists(ytdlp))
+        FileUtils::ExtractZip(IncludedAssets::ytdlp_zip, ytdlp);
 
     BSML::Init();
     BSML::Register::RegisterGameplaySetupTab("Cinema", MOD_ID "_settings", Cinema::VideoMenuManager::get_instance(), BSML::MenuType::Solo);
