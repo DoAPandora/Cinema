@@ -97,8 +97,9 @@ namespace Cinema {
 
         StringW sceneName = data->environmentInfo->sceneInfo->sceneName;
         auto scene = UnityEngine::SceneManagement::SceneManager::GetSceneByName(sceneName);
-        if(scene.IsValid())
-            UnityEngine::SceneManagement::SceneManager::MoveGameObjectToScene(get_gameObject(), scene);
+		/* Crashes on next scene transition */
+        // if(scene.IsValid())
+        //     UnityEngine::SceneManagement::SceneManager::MoveGameObjectToScene(get_gameObject(), scene);
         getLogger().info("Moving to game scene");
     }
 
@@ -126,10 +127,14 @@ namespace Cinema {
         auto level = data->previewBeatmapLevel;
         auto config = VideoLoader::GetConfigForLevel(level);
         if(!config.has_value())
-            return getLogger().info("Could not find config for level");
+        {
+            videoPlayer->get_gameObject()->SetActive(false);
+            getLogger().info("Could not find config for level");
+            return;
+        }
 
         SetSelectedLevel(level, config.value());
-        if(!videoConfig.get_isPlayable())
+        if(!config->get_isPlayable())
             return;
 
         StartCoroutine(custom_types::Helpers::CoroutineHelper::New(PlayVideoAfterAudioSourceCoroutine(false)));
@@ -286,6 +291,7 @@ namespace Cinema {
             StopCoroutine(prepareVideoCoroutine);
 
         prepareVideoCoroutine = custom_types::Helpers::CoroutineHelper::New(PrepareVideoCoroutine(video));
+        videoPlayer->get_gameObject()->SetActive(true);
         StartCoroutine(prepareVideoCoroutine);
     }
 
