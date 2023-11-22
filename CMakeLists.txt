@@ -11,6 +11,8 @@ include(qpm_defines.cmake)
 cmake_minimum_required(VERSION 3.21)
 project(${COMPILE_ID})
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS true)
+
 # c++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED 20)
@@ -20,7 +22,7 @@ set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # compile options used
-add_compile_options(-frtti -fexceptions)
+add_compile_options(-frtti -fexceptions -fdeclspec)
 add_compile_options(-O3)
 # compile definitions used
 add_compile_definitions(VERSION=\"${MOD_VERSION}\")

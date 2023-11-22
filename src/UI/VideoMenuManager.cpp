@@ -2,7 +2,7 @@
 #include "UI/VideoMenuManager.hpp"
 
 #include "Downloader.hpp"
-#include "Screen/VideoPlayer.hpp"
+#include "Screen/CustomVideoPlayer.hpp"
 
 #include "questui/shared/BeatSaberUI.hpp"
 #include "questui/shared/CustomTypes/Components/MainThreadScheduler.hpp"
@@ -48,7 +48,7 @@ namespace Cinema
         authorText->SetText(currentVideoConfig.author);
         durationText->SetText(ToDuration(currentVideoConfig.duration));
 
-        bool isCurrentVideoDownloaded = std::filesystem::exists(videosDir + currentVideoConfig.videoFile.value());
+        bool isCurrentVideoDownloaded = std::filesystem::exists(VIDEO_DIR + currentVideoConfig.videoFile.value());
         downloadButton->GetComponentInChildren<HMUI::CurvedTextMeshPro*>()->SetText(isCurrentVideoDownloaded ? "Delete" : "Download");
         videoOffsetText->SetText(std::to_string(currentVideoConfig.offset) + " ms");
         downloadState = isCurrentVideoDownloaded ? DownloadState::Downloaded : DownloadState::NotDownloaded;
@@ -108,28 +108,28 @@ namespace Cinema
             return;
         }
 
-        getLogger().info("Downloading video, disabling play button...");
-        PinkCore::RequirementAPI::DisablePlayButton(getModInfo());
+        INFO("Downloading video, disabling play button...");
+        PinkCore::RequirementAPI::DisablePlayButton(modInfo);
         SetDownloadState(DownloadState::Downloading);
         std::thread([this]()
         {
             bool result = DownloadCurrentVideo();
             if(!result)
             {
-                getLogger().info("Download failed");
-                std::string path = videosDir + currentVideoConfig.videoID.value() + ".mp4";
+                INFO("Download failed");
+                std::string path = VIDEO_DIR + currentVideoConfig.videoID.value() + ".mp4";
                 if(std::filesystem::exists(path))
                     std::filesystem::remove(path);
             }
             else
             {
-                std::filesystem::rename(videosDir + currentVideoConfig.videoID.value() + ".mp4", videosDir + currentVideoConfig.videoFile.value());
+                std::filesystem::rename(VIDEO_DIR + currentVideoConfig.videoID.value() + ".mp4", VIDEO_DIR + currentVideoConfig.videoFile.value());
             }
 
             QuestUI::MainThreadScheduler::Schedule([this]()
             {
                 UpdateMenu();
-                PinkCore::RequirementAPI::EnablePlayButton(getModInfo());
+                PinkCore::RequirementAPI::EnablePlayButton(modInfo);
                 progressBar->canvas->get_gameObject()->SetActive(false);
             });
         }).detach();
@@ -159,20 +159,20 @@ namespace Cinema
     {
         bool result = Downloader::DownloadVideo(currentVideoConfig.videoID.value(), [this](float progress)
         {
-            getLogger().info("Video download progress: %f", progress);
+            INFO("Video download progress: %f", progress);
             QuestUI::MainThreadScheduler::Schedule([progress, this]()
             {
                 UpdateProgressBar(progress);
             });
         });
-        getLogger().info("Finished downloading video!");
+        INFO("Finished downloading video!");
         return result;
     }
 
     void VideoMenuManager::SetCurrentThumbnail()
     {
-        std::string path = thumbnailsDir + currentVideoConfig.videoID.value() + ".jpg";
-        getLogger().info("%s", path.c_str());
+        std::string path = THUMBNAIL_DIR + currentVideoConfig.videoID.value() + ".jpg";
+        INFO("%s", path.c_str());
         if(std::filesystem::exists(path))
         {
             thumbnailSprite->set_sprite(BSML::Lite::FileToSprite(path));
@@ -185,7 +185,7 @@ namespace Cinema
     {
         Downloader::DownloadThumbnail(currentVideoConfig.videoID.value(), [this]()
         {
-            getLogger().info("Finished downloading thumbnail");
+            INFO("Finished downloading thumbnail");
             SetCurrentThumbnail();
         });    
     }

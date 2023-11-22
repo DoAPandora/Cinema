@@ -1,6 +1,6 @@
 {
     "env": {
-        "ndkPath": "C:/android-ndk-r25c"
+        "ndkPath": "C:/android-ndk-r26b"
     },
     "configurations": [
         {
@@ -28,8 +28,9 @@
             "name": "Quest",
             "cStandard": "c11",
             "cppStandard": "c++20",
-            "intelliSenseMode": "${default}",
-            "configurationProvider": "ms-vscode.cmake-tools"
+            "intelliSenseMode": "clang-arm64",
+            "configurationProvider": "ms-vscode.cmake-tools",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ],
     "version": 4

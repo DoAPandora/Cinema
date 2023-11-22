@@ -3,5 +3,4 @@
 
 namespace Cinema::Hooks {
     void InstallVideoDownloadHooks();
-    void InstallPlaybackControllerEventHooks();
 }

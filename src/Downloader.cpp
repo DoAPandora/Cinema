@@ -1,6 +1,3 @@
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-experimental-coroutine"
-
 #include "main.hpp"
 #include "Downloader.hpp"
 
@@ -40,7 +37,6 @@ namespace Cinema::Downloader {
                 break;
             case 1:
                 error = true;
-                getLogger().info("Error: %s", data);
                 break;
             }
         };
@@ -73,10 +69,9 @@ namespace Cinema::Downloader {
             if (onFinished)
                 onFinished();
         } else {
-            getLogger().info("Getting thumbnail failed");
+            ERROR("Getting thumbnail failed");
         }
 
         co_return;
     }
 }
-#pragma clang diagnostic pop

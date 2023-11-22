@@ -44,6 +44,7 @@ struct IncludedAsset {
 namespace IncludedAssets {
 
 	DECLARE_FILE(VideoMenu_bsml)
+	DECLARE_FILE(trash_png)
 	DECLARE_FILE(ytdlp_zip)
 
 }

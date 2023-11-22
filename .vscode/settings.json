@@ -123,5 +123,6 @@
         "source_location": "cpp",
         "numbers": "cpp",
         "__functional_03": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": true
 }

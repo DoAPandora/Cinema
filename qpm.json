@@ -7,7 +7,35 @@
     "version": "0.0.1",
     "url": "https://github.com/bsq-ports/Cinema",
     "additionalData": {
-      "overrideSoName": "libcinema.so"
+      "overrideSoName": "libcinema.so",
+      "cmake": true
+    }
+  },
+  "workspace": {
+    "scripts": {
+      "build": [
+        "pwsh ./scripts/build.ps1"
+      ],
+      "copy": [
+        "pwsh ./scripts/copy.ps1"
+      ],
+      "logcat": [
+        "pwsh ./scripts/start-logging.ps1 -self"
+      ],
+      "qmod": [
+        "pwsh ./scripts/build.ps1 -clean",
+        "qpm qmod build",
+        "pwsh ./scripts/createqmod.ps1"
+      ],
+      "restart": [
+        "pwsh ./scripts/restart-game.ps1"
+      ],
+      "stack": [
+        "pwsh ./scripts/ndk-stack.ps1"
+      ],
+      "tomb": [
+        "pwsh ./scripts/pull-tombstone.ps1"
+      ]
     }
   },
   "dependencies": [
@@ -27,7 +55,7 @@
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.15.23",
+      "versionRange": "^0.15.24",
       "additionalData": {}
     },
     {
@@ -64,7 +92,16 @@
       "id": "bsml-lite",
       "versionRange": "^0.1.2",
       "additionalData": {}
+    },
+    {
+      "id": "paper",
+      "versionRange": "^1.2.17",
+      "additionalData": {}
+    },
+    {
+      "id": "bs-events",
+      "versionRange": "^0.0.2",
+      "additionalData": {}
     }
-  ],
-  "workspace": null
+  ]
 }
