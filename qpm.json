@@ -20,7 +20,8 @@
         "pwsh ./scripts/copy.ps1"
       ],
       "logcat": [
-        "pwsh ./scripts/start-logging.ps1 -self"
+        "adb logcat -c",
+        "pwsh ./scripts/start-logging.ps1"
       ],
       "qmod": [
         "pwsh ./scripts/build.ps1 -clean",
