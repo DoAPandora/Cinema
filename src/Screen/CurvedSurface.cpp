@@ -38,8 +38,9 @@ namespace Cinema {
     void CurvedSurface::Update()
     {
         auto dist = Vector3::Distance(get_transform()->get_position(), Vector3::get_zero());
-        if (abs(dist - this->distance) < 0.2f)
+        if (abs(this->distance - dist) < 0.01f)
             return;
+
         Distance = dist;
     }
 
