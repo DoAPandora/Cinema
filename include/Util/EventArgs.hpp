@@ -10,14 +10,6 @@
 
 namespace Cinema {
 
-    struct LevelSelectedArgs {
-
-        GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel;
-        std::string originalPath;
-
-        explicit LevelSelectedArgs(GlobalNamespace::IPreviewBeatmapLevel* level, std::string path = ""): previewBeatmapLevel(level), originalPath(std::move(path)) {}
-    };
-
     struct ExtraSongDataArgs {
 
         std::optional<ExtraSongData::ExtraSongData> songData;
