@@ -7,7 +7,7 @@
 // It also allows creating objects, configuration, and importantly, hooking methods to modify their values
 #include "beatsaber-hook/shared/utils/logging.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-functions.hpp"
-#include "beatsaber-hook/shared/utils/hooking.hpp"
+#include "hooking.hpp"
 
 #include "ModConfig.hpp"
 

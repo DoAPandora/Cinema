@@ -52,6 +52,8 @@ public:
     DECLARE_INSTANCE_METHOD(float, get_height);
     DECLARE_INSTANCE_METHOD(float, get_curvatureDegrees);
 
+public:
+
     __declspec(property(get=get_distance, put=set_distance)) float Distance;
     __declspec(property(get=get_width, put=set_width)) float Width;
     __declspec(property(get=get_height, put=set_height)) float Height;

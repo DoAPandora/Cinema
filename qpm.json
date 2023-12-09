@@ -90,11 +90,6 @@
       "additionalData": {}
     },
     {
-      "id": "bsml-lite",
-      "versionRange": "^0.1.2",
-      "additionalData": {}
-    },
-    {
       "id": "paper",
       "versionRange": "^1.2.17",
       "additionalData": {}
@@ -102,6 +97,11 @@
     {
       "id": "bs-events",
       "versionRange": "^0.0.2",
+      "additionalData": {}
+    },
+    {
+      "id": "songloader",
+      "versionRange": "^0.10.17",
       "additionalData": {}
     }
   ]

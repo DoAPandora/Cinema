@@ -34,12 +34,12 @@ namespace Cinema {
     );
 
     DECLARE_JSON_CLASS(ColorCorrection,
-        VALUE_DEFAULT(float, brightness, 1.0f);
-        VALUE_DEFAULT(float, contrast, 1.0f);
-        VALUE_DEFAULT(float, saturation, 1.0f);
-        VALUE_DEFAULT(float, exposure, 1.0f);
-        VALUE_DEFAULT(float, gamma, 1.0f);
-        VALUE_DEFAULT(float, hue, 0.0f);
+       VALUE_OPTIONAL(float, brightness);
+       VALUE_OPTIONAL(float, contrast);
+       VALUE_OPTIONAL(float, saturation);
+       VALUE_OPTIONAL(float, exposure);
+       VALUE_OPTIONAL(float, gamma);
+       VALUE_OPTIONAL(float, hue);
     );
 
     DECLARE_JSON_CLASS(Vigenette,

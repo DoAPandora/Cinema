@@ -10,7 +10,7 @@
 
 #include "pinkcore/shared/RequirementAPI.hpp"
 
-#include "bsml-lite/shared/Creation/Image.hpp"
+#include "questui/shared/BeatSaberUI.hpp"
 
 #include <filesystem>
 #include <thread>
@@ -175,7 +175,7 @@ namespace Cinema
         INFO("%s", path.c_str());
         if(std::filesystem::exists(path))
         {
-            thumbnailSprite->set_sprite(BSML::Lite::FileToSprite(path));
+            thumbnailSprite->set_sprite(QuestUI::BeatSaberUI::FileToSprite(path));
         }
         else
             DownloadCurrentThumbnail();

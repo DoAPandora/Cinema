@@ -64,6 +64,7 @@ extern "C" void load() {
     mkpath(THUMBNAIL_DIR);
 
     INFO("Installing hooks...");
+    Hooks::InstallHooks(getLogger());
     Cinema::Hooks::InstallVideoDownloadHooks();
     Cinema::Hooks::InstallLevelDataHook();
     INSTALL_HOOK(getLogger(), DefaultScenesTransitionsFromInit_TransitionToNextScene);
@@ -79,7 +80,7 @@ extern "C" void load() {
 
     PinkCore::RequirementAPI::RegisterInstalled("Cinema");
 
-    BSEvents::lateMenuSceneLoadedFresh += TestCurvedSurface;
+//    BSEvents::lateMenuSceneLoadedFresh += TestCurvedSurface;
 }
 
 #include "bsml/shared/BSMLDataCache.hpp"
