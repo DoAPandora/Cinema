@@ -43,9 +43,9 @@ namespace Cinema
 
         mainVertical->get_gameObject()->SetActive(true);
         noCinemaVertical->get_gameObject()->SetActive(false);
-        videoTitleText->SetText(currentVideoConfig.title);
+        videoTitleText->SetText(currentVideoConfig.title.value());
 
-        authorText->SetText(currentVideoConfig.author);
+        authorText->SetText(currentVideoConfig.author.value());
         durationText->SetText(ToDuration(currentVideoConfig.duration));
 
         bool isCurrentVideoDownloaded = std::filesystem::exists(VIDEO_DIR + currentVideoConfig.videoFile.value());

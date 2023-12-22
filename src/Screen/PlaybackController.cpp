@@ -2,6 +2,8 @@
 #include "Screen/PlaybackController.hpp"
 #include "Hooks/LevelData.hpp"
 #include "Video/VideoLoader.hpp"
+#include "Util/Events.hpp"
+
 #include "bs-events/shared/BSEvents.hpp"
 
 #include "UnityEngine/GameObject.hpp"
@@ -91,15 +93,15 @@ namespace Cinema {
         if(!activeAudioSource)
             return 0;
 
-        float time;
+        float time = 0;
         if(referenceTime == 0 && activeAudioSource->get_time() == 0)
             time = lastKnownAudioSourceTime;
         else
             time == referenceTime == 0 ? activeAudioSource->get_time() : referenceTime;
 
-        float speed = playbackSpeed == 0 ? videoConfig->playbackSpeed : playbackSpeed;
+        float speed = playbackSpeed == 0 ? *videoConfig->playbackSpeed : playbackSpeed;
         
-        return time * speed + videoConfig->offset / 1000;
+        return time * speed + (float)videoConfig->offset / 1000;
     }
 
     void PlaybackController::GameSceneActive()
@@ -227,14 +229,14 @@ namespace Cinema {
         {
             songSpeed = data->gameplayModifiers->get_songSpeedMul();
             if(totalOffset + startTime < 0)
-                totalOffset /= songSpeed * videoConfig->playbackSpeed;
+                totalOffset /= songSpeed * * videoConfig->playbackSpeed;
         }
 
         videoPlayer->get_gameObject()->SetActive(true);
-        videoPlayer->set_playbackSpeed(songSpeed * videoConfig->playbackSpeed);
+        videoPlayer->set_playbackSpeed(songSpeed * *videoConfig->playbackSpeed);
         totalOffset += startTime;
         
-        if(songSpeed * videoConfig->playbackSpeed < 1 && totalOffset > 0)
+        if(songSpeed * *videoConfig->playbackSpeed < 1 && totalOffset > 0)
         {
             WARN("Disabling video player to prevent crashing");
             videoPlayer->Pause();
@@ -246,9 +248,9 @@ namespace Cinema {
         if(videoConfig->endVideoAt.value_or(0) > 0)
             totalOffset = videoConfig->endVideoAt.value();
 
-        // if(videoConfig.duration > 0)
-        //     totalOffset = totalOffset % (float)videoConfig.duration;
-        
+         if(videoConfig->duration > 0)
+             totalOffset = fmod(totalOffset, (float)videoConfig->duration);
+
         if(std::abs(totalOffset) < 0.001f)
         {
             totalOffset = 0;

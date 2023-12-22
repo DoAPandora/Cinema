@@ -1,7 +1,16 @@
 #pragma once
 #include "rapidjson-macros/shared/macros.hpp"
 
+#include "UnityEngine/Vector2.hpp"
+#include "UnityEngine/Vector3.hpp"
+#include "UnityEngine/GameObject.hpp"
+
+// Unity type serialization
+#include "config-utils/shared/config-utils.hpp"
+
 #include <filesystem>
+
+class EnvironmentObject;
 
 namespace Cinema {
 
@@ -11,47 +20,38 @@ namespace Cinema {
         NotDownloaded
     };
 
-    DECLARE_JSON_CLASS(Vector3,
-        VALUE_DEFAULT(float, x, 0);
-        VALUE_DEFAULT(float, y, 0);
-        VALUE_DEFAULT(float, z, 0);
-        CONVERSION(Vector3,
-            x = round(other.x); y = round(other.y); z = round(other.z);,
-            (x, y, z)
-        )
-        Vector3() = default;
-        Vector3(float x_, float y_, float z_) : x(x_), y(y_), z(z_) {}
-    )
-
     DECLARE_JSON_CLASS(EnvironmentModification,
         VALUE(std::string, name);
         VALUE_OPTIONAL(std::string, parentName);
         VALUE_OPTIONAL(std::string, cloneFrom);
         VALUE_OPTIONAL(bool, active);
-        VALUE_OPTIONAL(Vector3, position);
-        VALUE_OPTIONAL(Vector3, rotation);
-        VALUE_OPTIONAL(Vector3, scale);
+        VALUE_OPTIONAL(ConfigUtils::Vector3, position);
+        VALUE_OPTIONAL(ConfigUtils::Vector3, rotation);
+        VALUE_OPTIONAL(ConfigUtils::Vector3, scale);
+
+        UnityEngine::GameObject* gameObject;
+        EnvironmentObject* gameObjectClone;
     );
 
     DECLARE_JSON_CLASS(ColorCorrection,
        VALUE_OPTIONAL(float, brightness);
        VALUE_OPTIONAL(float, contrast);
        VALUE_OPTIONAL(float, saturation);
+       VALUE_OPTIONAL(float, hue);
        VALUE_OPTIONAL(float, exposure);
        VALUE_OPTIONAL(float, gamma);
-       VALUE_OPTIONAL(float, hue);
     );
 
     DECLARE_JSON_CLASS(Vigenette,
-        VALUE_DEFAULT(std::string, type, "rectangular");
-        VALUE_DEFAULT(float, radius, 1.0f);
-        VALUE_DEFAULT(float, softness, 0.005f);
+        VALUE_OPTIONAL(std::string, type);
+        VALUE_OPTIONAL(float, radius);
+        VALUE_OPTIONAL(float, softness);
     );
 
     DECLARE_JSON_CLASS(ScreenConfig,
-        VALUE_OPTIONAL(Vector3, position);
-        VALUE_OPTIONAL(Vector3, rotation);
-        VALUE_OPTIONAL(Vector3, scale);
+        VALUE_OPTIONAL(ConfigUtils::Vector3, position);
+        VALUE_OPTIONAL(ConfigUtils::Vector3, rotation);
+        VALUE_OPTIONAL(ConfigUtils::Vector3, scale);
     );
 
     DECLARE_JSON_CLASS(UserSettings,
@@ -61,26 +61,31 @@ namespace Cinema {
 
     DECLARE_JSON_CLASS(VideoConfig,
         VALUE_OPTIONAL(std::string, videoID);
-        VALUE_DEFAULT(std::string, title, "Unknown Title");
-        VALUE_DEFAULT(std::string, author, "Unknown Author");
+        VALUE_OPTIONAL(std::string, videoUrl);
+        VALUE_OPTIONAL(std::string, title);
+        VALUE_OPTIONAL(std::string, author);
         VALUE_OPTIONAL(std::string, videoFile);
-        VALUE_DEFAULT(int, duration, 0);
-        VALUE_DEFAULT(int, offset, 0);
-        VALUE_DEFAULT(float, playbackSpeed, 1);
-        VALUE_DEFAULT(bool, loop, false);
+        VALUE(int, duration); // seconds
+        VALUE(int, offset); // milliseconds
+        VALUE_OPTIONAL(float, playbackSpeed);
+        VALUE_OPTIONAL(bool, loop);
         VALUE_OPTIONAL(float, endVideoAt);
-        VALUE_DEFAULT(bool, configByMapper, false);
+        VALUE_OPTIONAL(bool, configByMapper);
         VALUE_OPTIONAL(bool, bundledConfig);
 
-        VALUE_DEFAULT(Vector3, screenRotation, Vector3(-8.0f, 0.0f, 0.0f));
-        VALUE_DEFAULT(Vector3, screenPosition, Vector3(0.0f, 12.4f, 67.8f));
-        VALUE_DEFAULT(float, screenHeight, 25);
+        VALUE_OPTIONAL(ConfigUtils::Vector3, screenPosition);
+        VALUE_OPTIONAL(ConfigUtils::Vector3, screenRotation);
+        VALUE_OPTIONAL(float, screenHeight);
         VALUE_OPTIONAL(float, screenCurvature);
         VALUE_OPTIONAL(bool, curveYAxis);
         VALUE_OPTIONAL(int, screenSubsurfaces);
-        VALUE_DEFAULT(float, bloom, 1.0f);
-        VALUE_DEFAULT(bool, disableDefaultModifications, false);
+        VALUE_OPTIONAL(float, bloom);
+        VALUE_OPTIONAL(bool, disableDefaultModifications);
         VALUE_OPTIONAL(std::string, environmentName);
+        VALUE_OPTIONAL(bool, forceEnvironmentModifications);
+        VALUE_OPTIONAL(bool, allowCustomPlatforms);
+        VALUE_OPTIONAL(bool, mergePropGroups);
+        VALUE_OPTIONAL(bool, colorBlending);
 
         VALUE_OPTIONAL(ColorCorrection, colorCorrection);
         VALUE_OPTIONAL(Vigenette, vigenette);
