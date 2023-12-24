@@ -15,9 +15,14 @@ class EnvironmentObject;
 namespace Cinema {
 
     enum class DownloadState {
-        Downloaded,
+        NotDownloaded,
+        Preparing,
         Downloading,
-        NotDownloaded
+        DownloadingVideo,
+        DownloadingAudio,
+        Converting,
+        Downloaded,
+        Cancelled
     };
 
     DECLARE_JSON_CLASS(EnvironmentModification,
@@ -57,7 +62,7 @@ namespace Cinema {
     DECLARE_JSON_CLASS(UserSettings,
         VALUE_OPTIONAL(bool, customOffset);
         VALUE_OPTIONAL(int, originalOffset);
-    )
+    );
 
     DECLARE_JSON_CLASS(VideoConfig,
         VALUE_OPTIONAL(std::string, videoID);
@@ -72,6 +77,8 @@ namespace Cinema {
         VALUE_OPTIONAL(float, endVideoAt);
         VALUE_OPTIONAL(bool, configByMapper);
         VALUE_OPTIONAL(bool, bundledConfig);
+
+        VALUE_OPTIONAL(bool, transparency);
 
         VALUE_OPTIONAL(ConfigUtils::Vector3, screenPosition);
         VALUE_OPTIONAL(ConfigUtils::Vector3, screenRotation);
@@ -91,30 +98,53 @@ namespace Cinema {
         VALUE_OPTIONAL(Vigenette, vigenette);
         VECTOR_OPTIONAL(EnvironmentModification, environment);
         VECTOR_OPTIONAL(ScreenConfig, additionalScreens);
+        VALUE_OPTIONAL(UserSettings, userSettings);
 
-        std::string configPath;
+
+
+    public:
 
         DownloadState downloadState;
+        std::string errorMessage;
+        bool backCompat;
+        bool needsToSave;
+        bool playbackDisabledByMissingSuggestion;
+        float downloadProgress;
+        std::optional<std::string> levelDir;
 
-        std::string get_videoPath() {
-            return "/sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema/Videos/" + videoFile.value_or(videoID.value() + ".mp4");
-        }
 
-        DownloadState UpdateDownloadState() {
-            downloadState = std::filesystem::exists(get_videoPath()) ? DownloadState::Downloaded : DownloadState::NotDownloaded;
-            return downloadState;
-        }
+        bool get_IsWIPLevel() const;
+        __declspec(property(get=get_IsWIPLevel)) bool IsWIPLevel;
 
-        float get_offsetInSeconds() {
-            return offset / 1000.0f;
-        }
+        bool get_IsOfficialConfig() const;
+        __declspec(property(get=get_IsOfficialConfig)) bool IsOfficialConfig;
 
-        bool get_isPlayable() {
-            return true;
-        }
+        bool get_TransparencyEnabled() const;
+        __declspec(property(get=get_TransparencyEnabled)) bool TransparencyEnabled;
 
-        DESERIALIZE_ACTION(0,
-            self->UpdateDownloadState();
-        )
+        bool get_IsDownloading() const;
+        __declspec(property(get=get_IsDownloading)) bool IsDownloading;
+
+        std::optional<std::string> get_VideoPath();
+        __declspec(property(get=get_VideoPath)) std::optional<std::string> VideoPath;
+
+        std::optional<std::string> get_ConfigPath() const;
+        __declspec(property(get=get_ConfigPath)) std::optional<std::string> ConfigPath;
+
+        bool get_isPlayable() const;
+
+        std::string GetVideoFileName(std::string levelPath) const;
+
+        std::string ToString() const;
+
+        float GetOffsetInSec() const;
+
+        DownloadState UpdateDownloadState();
+
+    );
+
+    DECLARE_JSON_CLASS(BundledConfig,
+       VALUE(std::string, levelID);
+       VALUE(Cinema::VideoConfig, config);
     );
 }
