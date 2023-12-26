@@ -1,5 +1,6 @@
 #include "main.hpp"
 #include "Video/VideoConfig.hpp"
+#include "Util/Util.hpp"
 
 
 namespace Cinema::VideoLoader {
@@ -54,7 +55,7 @@ namespace Cinema {
             }
             catch (const std::exception& e)
             {
-                ERROR("Failed to combine vidoe path for {}: {}", *videoFile, e.what());
+                ERROR("Failed to combine video path for {}: {}", *videoFile, e.what());
                 return std::nullopt;
             }
         }
@@ -72,13 +73,11 @@ namespace Cinema {
         return std::nullopt;
     }
 
-//    namespace Util{ std::string ReplaceIllegalFilesystemChars(std::string); }
-
     bool VideoConfig::get_isPlayable() const { return true; }
 
     std::string VideoConfig::GetVideoFileName(std::string levelPath) const
     {
-        std::string fileName = videoFile.value_or(title.value_or(videoID.value_or("video")));
+        std::string fileName = videoFile.value_or(Cinema::Util::ReplaceIllegalFilesystemChar(title.value_or(videoID.value_or("video"))));
         // shorten
         if (!fileName.ends_with(".mp4"))
         {
