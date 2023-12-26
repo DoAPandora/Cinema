@@ -18,37 +18,13 @@ struct fmt::formatter<StringW> : formatter<string_view>
 };
 
 template <>
-struct fmt::formatter<GlobalNamespace::BeatmapDifficulty> : formatter<string_view>
+struct fmt::formatter<std::optional<std::string>> : formatter<string_view>
 {
     // parse is inherited from formatter<string_view>.
     template <typename FormatContext>
-    auto format(GlobalNamespace::BeatmapDifficulty difficulty, FormatContext& ctx)
+    auto format(std::optional<std::string> s, FormatContext& ctx)
     {
-        std::string s;
-
-        using GlobalNamespace::BeatmapDifficulty;
-        switch (difficulty) {
-            case BeatmapDifficulty::Easy:
-                s = "Easy";
-                break;
-            case BeatmapDifficulty::Normal:
-                s = "Normal";
-                break;
-            case BeatmapDifficulty::Hard:
-                s = "Hard";
-                break;
-            case BeatmapDifficulty::Expert:
-                s = "Expert";
-                break;
-            case BeatmapDifficulty::ExpertPlus:
-                s = "Expert+";
-                break;
-            default:
-                s = "Unknown";
-                break;
-        }
-
-        return formatter<string_view>::format(s, ctx);
+        return formatter<string_view>::format(s.value_or("NULL"), ctx);
     }
 };
 
