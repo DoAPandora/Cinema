@@ -65,7 +65,6 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
     public:
 
     static PlaybackController* get_instance();
-    __declspec(property(get=get_instance)) PlaybackController* Instance;
 
     static void Create();
     void SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel* level, VideoConfig config);

@@ -221,7 +221,7 @@ namespace Cinema {
 
     void PlaybackController::PlayVideo(float startTime)
     {
-        float totalOffset = videoConfig->get_offsetInSeconds();
+        float totalOffset = videoConfig->GetOffsetInSec();
         float songSpeed = 1;
 
         auto data = LevelData::get_currentGameplayCoreData();
@@ -320,7 +320,7 @@ namespace Cinema {
     {
         videoConfig = video;
 
-        videoPlayer->url = video.get_videoPath();
+        videoPlayer->url = *video.VideoPath;
         videoPlayer->Prepare();
         co_return;
     }
