@@ -131,7 +131,7 @@ public:
     void OnDownloadProgress(const VideoConfig& videoConfig);
     void CheckEntitlementAndEnableSearch(GlobalNamespace::IPreviewBeatmapLevel* level);
     void SetupLevelDetailView(const VideoConfig& videoConfig);
-    void UpdateStatustext(const VideoConfig& videoConfig);
+    void UpdateStatusText(const VideoConfig& videoConfig);
     void SetThumbnail(std::optional<std::string> url);
     void OnDifficultySelected(ExtraSongDataArgs extraSongDataArgs);
     void OnConfigChanged(const std::optional<VideoConfig>& config);// might not be needed

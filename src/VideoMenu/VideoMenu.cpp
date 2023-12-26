@@ -279,19 +279,69 @@ namespace Cinema {
         }
     }
 
-    void VideoMenu::UpdateStatustext(const Cinema::VideoConfig &videoConfig) {}
+    void VideoMenu::UpdateStatusText(const Cinema::VideoConfig &videoConfig) {}
 
     void VideoMenu::SetThumbnail(std::optional<std::string> url) {}
 
     void VideoMenu::SetThumbnailFromCover(GlobalNamespace::IPreviewBeatmapLevel *level) {}
 
-    void VideoMenu::SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel *level) {}
+    void VideoMenu::SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel *level)
+    {
+        if (currentLevel && currentLevel->get_levelID() == level->get_levelID())
+        {
+            return;
+        }
 
-    void VideoMenu::HandleDidSelectLevel(GlobalNamespace::IPreviewBeatmapLevel *level, bool isPlaylistSong) {}
+        DEBUG("Setting level to {}", level->get_levelID());
+        HandleDidSelectLevel(level);
+    }
 
-    void VideoMenu::OnLevelSelected(GlobalNamespace::IPreviewBeatmapLevel *level) {}
+    void VideoMenu::HandleDidSelectLevel(GlobalNamespace::IPreviewBeatmapLevel *level, bool isPlaylistSong)
+    {
+        extraSongData = std::nullopt;
+        difficultyData = std::nullopt;
 
-    void VideoMenu::OnDifficultySelected(Cinema::ExtraSongDataArgs extraSongDataArgs) {}
+        if (!getModConfig().enabled.GetValue() || !level)
+        {
+            return;
+        }
+
+//        PlaybackController::get_instance().
+
+        if (currentVideo->needsToSave)
+        {
+            VideoLoader::SaveVideoConfig(*currentVideo);
+        }
+
+        currentLevelIsPlaylistSong = isPlaylistSong;
+        currentLevel = level;
+        if (!currentLevel)
+        {
+            currentVideo = std::nullopt;
+            PlaybackController::get_instance()->SetSelectedLevel(nullptr, std::nullopt);
+            SetupVideoDetails();
+            return;
+        }
+
+        currentVideo = VideoLoader::GetConfigForLevel(level);
+        PlaybackController::get_instance()->SetSelectedLevel(currentLevel, currentVideo);
+        SetupVideoDetails();
+    }
+
+    void VideoMenu::OnLevelSelected(GlobalNamespace::IPreviewBeatmapLevel *level)
+    {
+        HandleDidSelectLevel(level);
+    }
+
+    void VideoMenu::OnDifficultySelected(Cinema::ExtraSongDataArgs extraSongDataArgs)
+    {
+        extraSongData = extraSongDataArgs.songData;
+        difficultyData = extraSongDataArgs.selectedDifficultyData;
+        if(currentVideo != std::nullopt)
+        {
+            SetupLevelDetailView(*currentVideo);
+        }
+    }
 
     void VideoMenu::OnConfigChanged(const std::optional<VideoConfig> &config) {}
 

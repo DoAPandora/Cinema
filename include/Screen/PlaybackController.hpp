@@ -67,8 +67,8 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
     static PlaybackController* get_instance();
 
     static void Create();
-    void SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel* level, VideoConfig config);
-    void PrepareVideo(VideoConfig video);
+    void SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel* level, std::optional<VideoConfig> config);
+    void PrepareVideo(const VideoConfig& video);
     custom_types::Helpers::Coroutine PlayVideoAfterAudioSourceCoroutine(bool preview);
     custom_types::Helpers::Coroutine PrepareVideoCoroutine(VideoConfig video);
     custom_types::Helpers::Coroutine PlayVideoDelayedCoroutine(float delayStartTime);

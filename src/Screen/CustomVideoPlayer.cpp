@@ -88,6 +88,44 @@ namespace Cinema {
     void CustomVideoPlayer::OnDestroy()
     {}
 
+    Shader* CustomVideoPlayer::GetShader()
+    {
+        return nullptr;
+    }
+
+    void CustomVideoPlayer::FadeControllerUpdate(float value) {}
+
+    void CustomVideoPlayer::OnMenuSceneLoaded() {}
+
+    void CustomVideoPlayer::FirstFrameReady(UnityEngine::Video::VideoPlayer *, uint64_t frame) {}
+
+    void CustomVideoPlayer::SetBrightness(float brightness) {}
+
+    void CustomVideoPlayer::SetBloomIntensity(std::optional<float> bloomIntensity) {}
+
+    void CustomVideoPlayer::LoopVideo(bool loop) {}
+
+    void CustomVideoPlayer::Show()
+    {
+        FadeIn(0);
+    }
+
+    void CustomVideoPlayer::FadeIn(float duration) {}
+
+    void CustomVideoPlayer::Hide()
+    {
+        FadeOut(0);
+    }
+
+    void CustomVideoPlayer::FadeOut(float duration)
+    {
+        waitingForFadeOut = true;
+    }
+
+    void CustomVideoPlayer::ShowScreenBody() {}
+
+    void CustomVideoPlayer::HideScreenBody() {}
+
     void CustomVideoPlayer::CreateScreen()
     {}
 
@@ -102,59 +140,101 @@ namespace Cinema {
         func(player);
     }
 
+    void CustomVideoPlayer::Stop() {}
+
     void CustomVideoPlayer::Prepare()
     {
         static auto func = RESOLVE_ICALL(Prepare, void);
         func(player);
     }
 
-    void CustomVideoPlayer::VideoPlayerErrorReceived(UnityEngine::Video::VideoPlayer *source, StringW message)
-    {}
+    void CustomVideoPlayer::Update() {}
+
+    void CustomVideoPlayer::UpdateScreenContent() {}
+
+    void CustomVideoPlayer::SetTexture(UnityEngine::Texture *texture) {}
+
+    void CustomVideoPlayer::SetCoverTexture(UnityEngine::Texture *texture) {}
+
+    void CustomVideoPlayer::SetStaticTexture(UnityEngine::Texture *texture) {}
 
     void CustomVideoPlayer::VideoPlayerPrepareComplete(UnityEngine::Video::VideoPlayer *source)
-    {}
-
-    void CustomVideoPlayer::VideoPlayerFinished(UnityEngine::Video::VideoPlayer *source)
     {}
 
     void CustomVideoPlayer::VideoPlayerStarted(UnityEngine::Video::VideoPlayer *source)
     {}
 
-    float CustomVideoPlayer::get_playbackSpeed()
+    void CustomVideoPlayer::VideoPlayerFinished(UnityEngine::Video::VideoPlayer *source)
+    {}
+
+    void CustomVideoPlayer::VideoPlayerErrorReceived(UnityEngine::Video::VideoPlayer *source, StringW message)
+    {}
+
+    float CustomVideoPlayer::GetVideoAspectRatio() {}
+
+    void CustomVideoPlayer::Mute() {}
+
+    void CustomVideoPlayer::Unmute() {}
+
+    void CustomVideoPlayer::SetSoftParent(UnityEngine::Transform *parent) {}
+
+    Color CustomVideoPlayer::get_ScreenColor()
+    {
+        return screenRenderer->get_material()->get_color();
+    }
+
+    void CustomVideoPlayer::set_ScreenColor(UnityEngine::Color value)
+    {
+        screenRenderer->get_material()->set_color(value);
+    }
+
+    float CustomVideoPlayer::get_PlaybackSpeed()
     {
         static auto func = RESOLVE_ICALL(get_playbackSpeed, float);
         return func(player);
     }
 
-    void CustomVideoPlayer::set_playbackSpeed(float value)
+    void CustomVideoPlayer::set_PlaybackSpeed(float value)
     {
         player->set_playbackSpeed(value);
     }
 
-    StringW CustomVideoPlayer::get_url()
+    float CustomVideoPlayer::get_VideoDuration()
+    {
+    }
+
+    void CustomVideoPlayer::set_Volume(float value)
+    {
+        static auto func = reinterpret_cast<function_ptr_t<void, AudioSource*, float>>(il2cpp_functions::resolve_icall("UnityEngine.AudioSource::set_volume"));
+        func(videoPlayerAudioSource, value);
+    }
+
+    void CustomVideoPlayer::set_PanStereo(float value)
+    {
+        static auto func = reinterpret_cast<function_ptr_t<void, AudioSource*, float>>(il2cpp_functions::resolve_icall("UnityEngine.AudioSource::set_panStereo"));
+        func(videoPlayerAudioSource, value);
+    }
+
+    StringW CustomVideoPlayer::get_Url()
     {
         static auto func = RESOLVE_ICALL(get_url, StringW);
         return func(player);
     }
 
-    void CustomVideoPlayer::set_url(StringW value)
+    void CustomVideoPlayer::set_Url(StringW value)
     {
         static auto func = RESOLVE_ICALL(set_url, void, StringW);
         func(player, value);
     }
 
-    void CustomVideoPlayer::set_volume(float value)
-    {
-        static auto func = RESOLVE_ICALL(set_volume, void, float);
-        func(player, value);
-    }
-
-    bool CustomVideoPlayer::get_isPlaying()
+    bool CustomVideoPlayer::get_IsPlaying()
     {
         return player->get_isPlaying();
     }
 
-    bool CustomVideoPlayer::get_isPrepared()
+    bool CustomVideoPlayer::get_IsFading() {}
+
+    bool CustomVideoPlayer::get_IsPrepared()
     {
         static auto func = RESOLVE_ICALL(get_isPrepared, bool);
         return func(player);

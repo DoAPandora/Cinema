@@ -67,7 +67,7 @@ namespace Cinema {
 
     void PlaybackController::ResumeVideo()
     {
-        if(!getModConfig().enabled.GetValue() || videoPlayer->get_isPlaying())
+        if(!getModConfig().enabled.GetValue() || videoPlayer->IsPlaying)
             return;
 
         float referenceTime = GetReferenceTime();
@@ -82,7 +82,7 @@ namespace Cinema {
     void PlaybackController::PauseVideo()
     {
         StopAllCoroutines();
-        if(videoPlayer->get_isPlaying())
+        if(videoPlayer->IsPrepared)
         {
             videoPlayer->Pause();
         }
@@ -233,7 +233,7 @@ namespace Cinema {
         }
 
         videoPlayer->get_gameObject()->SetActive(true);
-        videoPlayer->set_playbackSpeed(songSpeed * *videoConfig->playbackSpeed);
+        videoPlayer->PlaybackSpeed = songSpeed * *videoConfig->playbackSpeed;
         totalOffset += startTime;
         
         if(songSpeed * *videoConfig->playbackSpeed < 1 && totalOffset > 0)
@@ -269,7 +269,7 @@ namespace Cinema {
         else
         {
             videoPlayer->Play();
-            if(!videoPlayer->get_isPrepared())
+            if(!videoPlayer->IsPrepared)
             {
                 offsetAfterPrepare = totalOffset;
                 audioSourceStartTime = std::chrono::system_clock::now();
@@ -291,7 +291,7 @@ namespace Cinema {
         videoPlayer->Play();
     }
 
-    void PlaybackController::SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel* level, VideoConfig config)
+    void PlaybackController::SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel* level, std::optional<VideoConfig> config)
     {
         previewWaitingForPreviewPlayer = true;
         previewWaitingForVideoPlayer = true;
@@ -300,10 +300,21 @@ namespace Cinema {
         videoConfig = config;
 
         DEBUG("Selected level: {}", level->get_levelID());
-        PrepareVideo(config);
+
+        if(config == std::nullopt)
+        {
+            //f adeout
+            StopAllCoroutines();
+            return;
+        }
+
+        DEBUG("Preparing video");
+        PrepareVideo(*config);
+        if(level && VideoLoader::IsDlcSong(level))
+        {}
     }
 
-    void PlaybackController::PrepareVideo(VideoConfig video)
+    void PlaybackController::PrepareVideo(const VideoConfig& video)
     {
         DEBUG("Preparing video");
         previewWaitingForVideoPlayer = true;
@@ -320,7 +331,7 @@ namespace Cinema {
     {
         videoConfig = video;
 
-        videoPlayer->url = *video.VideoPath;
+        videoPlayer->Url = *video.VideoPath;
         videoPlayer->Prepare();
         co_return;
     }
