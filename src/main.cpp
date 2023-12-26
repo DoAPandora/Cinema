@@ -1,11 +1,13 @@
 #include "main.hpp"
 #include "Hooks/Hooks.hpp"
+#include "VideoMenu/VideoMenu.hpp"
+#include "Video/VideoLoader.hpp"
+#include "Util/Util.hpp"
 
 #include "BSML/shared/BSML.hpp"
 
 #include "Screen/PlaybackController.hpp"
 
-#include "UI/VideoMenuManager.hpp"
 #include "assets.hpp"
 #include "pinkcore/shared/RequirementAPI.hpp"
 
@@ -26,6 +28,8 @@ MAKE_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &GlobalN
 {
     DefaultScenesTransitionsFromInit_TransitionToNextScene(self, goStraightToMenu, goStraightToEditor, goToRecordingToolScene);
     Cinema::PlaybackController::Create();
+    Cinema::VideoMenu::get_instance()->AddTab();
+    Cinema::VideoMenu::get_instance()->Init();
 }
 
 void TestCurvedSurface(GlobalNamespace::ScenesTransitionSetupDataSO*)
@@ -51,21 +55,25 @@ extern "C" void setup(ModInfo& info) {
     info.id = MOD_ID;
     info.version = VERSION;
     modInfo = info;
+
+    INFO("Beginning setup");
 	
     getModConfig().Init(modInfo);
+    Cinema::VideoLoader::Init();
+
     INFO("Completed setup!");
 }
 
 extern "C" void load() {
     il2cpp_functions::Init();
     BSEvents::Init();
+	custom_types::Register::AutoRegister();
 
     mkpath(VIDEO_DIR);
     mkpath(THUMBNAIL_DIR);
 
     INFO("Installing hooks...");
     Hooks::InstallHooks(getLogger());
-    Cinema::Hooks::InstallVideoDownloadHooks();
     Cinema::Hooks::InstallLevelDataHook();
     INSTALL_HOOK(getLogger(), DefaultScenesTransitionsFromInit_TransitionToNextScene);
     INFO("Installed all hooks!");
@@ -75,8 +83,8 @@ extern "C" void load() {
         FileUtils::ExtractZip(IncludedAssets::ytdlp_zip, ytdlp);
 
     BSML::Init();
-	custom_types::Register::AutoRegister();
-    BSML::Register::RegisterGameplaySetupTab("Cinema", MOD_ID "_settings", Cinema::VideoMenuManager::get_instance(), BSML::MenuType::Solo);
+//    BSML::Register::RegisterGameplaySetupTab("Cinema", MOD_ID "_settings", Cinema::VideoMenuManager::get_instance(), BSML::MenuType::Solo);
+//    BSML::Register::RegisterGameplaySetupTab<Cinema::VideoMenu*>("Cinema");
 
     PinkCore::RequirementAPI::RegisterInstalled("Cinema");
 

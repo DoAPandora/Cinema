@@ -1,32 +1,63 @@
-<bg id='root' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='https://raw.githubusercontent.com/RedBrumbler/Quest-BSML-Docs/gh-pages/schema.xsd'>
-    <vertical id='mainVertical' active='false' spacing='3.0' pad-top='-3.0' child-align='Top'>
-        <horizontal horizontal-fit='PreferredSize' pref-width='100.0' child-expand-height='false' child-align='top'>
-            <text id='videoTitleText' font-size='5.0' align='Center' overflow-mode='Ellipsis' preferred-width='85.0' text='Video Title'/>
-        </horizontal>
-        <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' width='50' height='25' child-expand-width='false' child-expand-height='false'>
-            <image id='thumbnailSprite' pref-width='40' pref-height='25' preserve-aspect='true'/>
-            <vertical align='Top' pad-left='4.0' spacing='0.0' pref-width='40.0' child-expand-width='false' vertical-fit='PreferredSize'>
-                <text id='authorText' font-size='4.0' align='Left' overflow-mode='Ellipsis' text='Author Name'/>
-                <text id='durationText' font-size='4.0' align='Left' overflow-mode='Ellipsis' text='4:20'/>
-                <text id='downloadStateText' font-size='4.0' align='Left' color='red' text='Not downloaded'/>
-				<button id='downloadButton' horizontal-fit='PreferredSize' pref-width='20.0' text='Download Video' on-click='DownloadButtonPressed'/>
-            </vertical>
-        </horizontal>
-        <vertical vertical-fit='PreferredSize' pref-height='18.0'>
-            <text font-size='3.5' text='Video Offset' align='Center'/>
-            <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='1.0' child-align='Center'>
-                <button id='majorDecreaseButton' horizontal-fit='PreferredSize' pref-width='11.0' font-size='3.0' text='---' on-click='DecreaseOffsetMajor'/>
-                <button id='normalDecreaseButton' horizontal-fit='PreferredSize' pref-width='11.0' font-size='3.0' text='--' on-click='DecreaseOffsetNormal'/>
-                <button id='minorDecreaseButton' horizontal-fit='PreferredSize' pref-width='11.0' font-size='3.0' text='-' on-click='DecreaseOffsetMinor'/>
-                <text id='videoOffsetText' font-size='5.0' text='0ms'/>
-                <button id='minorIncreaseButton' horizontal-fit='PreferredSize' pref-width='11.0' font-size='3.0' text='+' on-click='IncreaseOffsetMinor'/>
-                <button id='normalIncreaseButton' horizontal-fit='PreferredSize' pref-width='11.0' font-size='3.0' text='++' on-click='IncreaseOffsetNormal'/>
-                <button id='majorIncreaseButton' horizontal-fit='PreferredSize' pref-width='11.0' font-size='3.0' text='+++' on-click='IncreaseOffsetMajor'/>
-            </horizontal>
-            <button id='previewButton' text='Preview' interactable='false'/>
+<!--suppress CheckTagEmptyBody -->
+<bg id='rootObject' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
+    <bg id='noVideoBg' height='30' vertical-fit='PreferredSize'>
+        <vertical align='Center' vertical-fit='PreferredSize' child-expand-height='false'>
+            <text id='noVideoText' align='Center' text="No video configured"></text>
+			<button id='searchButton' text='Search' on-click='OnSearchAction'/>
         </vertical>
-    </vertical>
-    <vertical id='noCinemaVertical'>
-        <text text='Current selected level does not use cinema' active='true'/>
-    </vertical>
+    </bg>
+    <bg id='videoDetails'>
+        <vertical child-expand-height="false" spacing="0" vertical-fit="PreferredSize" pad-top="-3" align="top">
+            <horizontal preferred-width='100' horizontal-fit='PreferredSize' align="Center">
+                <text id='videoTitle' font-size='5' align='Center' overflow-mode='Ellipsis' preferred-width='90' text='Video Title'></text>
+				<button-with-icon id='deleteConfigButton' icon='BeatSaberCinema.Resources.trash.png' align='Right' text=' ' horizontal-fit='PreferredSize' vertical-fit='PreferredSize' hover-hint='Delete video configuration&#xD;&#xA;&#xD;&#xA;(will also delete the video if downloaded)' on-click='OnDeleteConfigAction'/>
+            </horizontal>
+
+            <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' width='50' height='25' child-expand-width='false' child-expand-height='false'>
+                <image id='videoThumbnail' pref-width='40' pref-height='25' preserve-aspect='true'/>
+                <vertical align='Top' pad-left='3' spacing='0' pref-width='40' child-expand-width='false' vertical-fit='PreferredSize'>
+                    <text id='videoAuthor' font-size='3' align='Left' overflow-mode='Ellipsis' text='Author Name'></text>
+                    <text id='videoDuration' font-size='3' align='Left' overflow-mode='Ellipsis' text='4:20'></text>
+                    <text id='videoStatus' align='Left' color='red' text='Not downloaded'></text>
+					<button id='deleteVideoButton' text='Delete Video' on-click='OnDeleteVideoAction'/>
+                </vertical>
+            </horizontal>
+
+            <vertical pad-top='2'>
+				<vertical id="offsetControls">
+					<text id='videoOffsetLabel' align='Center' font-size='3' text='Video Offset'></text>
+					<horizontal horizontal-fit='PreferredSize'  align='Center' spacing="1">
+						<button id='offsetDecreaseButtonHigh' font-size='3' pref-width='10' hover-hint='Starts video later (-1000 ms)' text='---' on-click='OnOffsetDecreaseActionHigh'/>
+						<button id='offsetDecreaseButtonMid' font-size='3' pref-width='10' hover-hint='Starts video later (-100 ms)' text='--' on-click='OnOffsetDecreaseActionMid'/>
+						<button id='offsetDecreaseButtonLow' font-size='3' pref-width='10' hover-hint='Starts video later (-20 ms)' text='-' on-click='OnOffsetDecreaseActionLow'/>
+						<vertical pref-width='16'>
+							<text   id='video-offset' text="0" pad-left='5' pad-right='5' font-size='5' align='Center'></text>
+						</vertical>
+						<button id='offsetIncreaseButtonLow' font-size='3' pref-width='10' hover-hint='Starts video earlier (+20 ms)' text='+' on-click='OnOffsetIncreaseActionLow'/>
+						<button id='offsetIncreaseButtonMid' font-size='3' pref-width='10' hover-hint='Starts video earlier (+100 ms)' text='++' on-click='OnOffsetIncreaseActionMid'/>
+						<button id='offsetIncreaseButtonHigh' font-size='3' pref-width='10' hover-hint='Starts video earlier (+1000 ms)' text='+++' on-click='OnOffsetIncreaseActionHigh'/>
+					</horizontal>
+				</vertical>
+				<horizontal id="customizeOffsetToggle" preferred-width="45">
+					<bool-setting apply-on-change="true" text='Customize offset' value='CustomizeOffset' bind-value="true" get-event="update-customize-offset"
+								  hover-hint="Change the offset that was configured by the mapper.&#xD;&#xA;&#xD;&#xA;Only check this if the video is out of sync for you."></bool-setting>
+				</horizontal>
+				<button id='previewButton' hover-hint='Left ear is the video, right ear is the map' text='Preview' on-click='OnPreviewAction'/>
+            </vertical>
+        </vertical>
+    </bg>
+
+    <bg id='videoSearchResults'>
+        <horizontal pad-top='-3' pad-bottom='8' pad-left="8" pad-right="8">
+            <list pad-top='3' id='video-list' list-width='100' visible-cells='6' select-cell='on-select-cell' stick-scrolling="true" show-scrollbar="true"/>
+        </horizontal>
+        <text id='searchResultsLoading' active='false' font-size='3' text='Loading Results...' align='Center' anchor-pos-y='5'/>
+        <modal-keyboard id='searchKeyboard' on-enter='OnQueryAction' clear-on-open='false' show-event='show-keyboard'
+                        hide-event='hide-keyboard' move-to-center='true' click-off-closes='true'/>
+        <horizontal pad-top='50'>
+            <button text='Go Back' on-click='OnBackAction' pad-right="7"/>
+            <button id='downloadButton' text='Download' on-click='OnDownloadAction'/>
+            <button id='refineButton' text='Refine Search' on-click='OnRefineAction'/>
+        </horizontal>
+    </bg>
 </bg>
