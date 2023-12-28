@@ -6,6 +6,7 @@
 #include "Screen/PlaybackController.hpp"
 
 #include "bsml/shared/BSML.hpp"
+#include "bsml/shared/Helpers/utilities.hpp"
 
 DEFINE_TYPE(Cinema, VideoMenu);
 DEFINE_TYPE(Cinema, VideoMenuStatus);
@@ -95,8 +96,9 @@ namespace Cinema {
             if (firstActivation)
             {
                 auto parser = BSML::parse_and_construct(IncludedAssets::VideoMenu_bsml, go->get_transform(), this);
-                bsmlParserParams = parser->parserParams.get();
+                bsmlParserParams = parser->parserParams;
                 Init();
+                StatusViewerDidEnable();
             }
         });
     }
@@ -109,6 +111,7 @@ namespace Cinema {
 
     void VideoMenu::ResetVideoMenu()
     {
+        DEBUG("BSMLParserParams: {}", fmt::ptr(bsmlParserParams.get()));
         bsmlParserParams->EmitEvent("hide-keyboard");
         noVideoBg->get_gameObject()->SetActive(true);
         videoDetails->get_gameObject()->SetActive(false);
@@ -131,7 +134,7 @@ namespace Cinema {
 
     void VideoMenu::OnDownloadProgress(const Cinema::VideoConfig &videoConfig)
     {
-        UpdateStatustext(videoConfig);
+        UpdateStatusText(videoConfig);
         SetupLevelDetailView(videoConfig);
     }
 
@@ -203,15 +206,17 @@ namespace Cinema {
 
     void VideoMenu::SetupVideoDetails()
     {
-        if (!videoSearchResults || videoSearchResults->m_CachedPtr.m_value)
+        if (!videoSearchResults || !videoSearchResults->m_CachedPtr.m_value)
         {
             WARN("Video search results view rect is null, skipping UI setup");
             return;
         }
 
         videoSearchResults->get_gameObject()->SetActive(false);
+
         if (currentVideo == std::nullopt)
         {
+            DEBUG("Current video is null");
             ResetVideoMenu();
             return;
         }
@@ -220,6 +225,7 @@ namespace Cinema {
 
         if(!videoMenuActive)
         {
+            DEBUG("VideoMenu not active");
             ResetVideoMenu();
             return;
         }
@@ -249,9 +255,9 @@ namespace Cinema {
         videoDuration->SetText("Duration: " + std::to_string(currentVideo->duration));
 
         videoOffset->SetText(fmt::format("{:10L} ms", currentVideo->offset));
-        SetThumbnail(currentVideo->videoID.has_value() ? fmt::format("https://i.ytimg.com/vi/{}/hqdefault.jpg", *currentVideo->videoID) : "");
+        SetThumbnail(currentVideo->videoID.has_value() ? std::make_optional(fmt::format("https://i.ytimg.com/vi/{}/hqdefault.jpg", *currentVideo->videoID)) : std::nullopt);
 
-        UpdateStatustext(*currentVideo);
+        UpdateStatusText(*currentVideo);
         if (CustomizeOffset)
         {
             customizeOffsetToggle->SetActive(false);
@@ -277,11 +283,39 @@ namespace Cinema {
         {
             return;
         }
+
+        switch (videoConfig.downloadState) {
+            case DownloadState::Downloaded:
+                if (videoConfig.IsWIPLevel && !difficultyData->HasCinema() && !extraSongData->HasCinemaInAnyDifficulty())
+                {
+
+                }
+                else if (!videoConfig.errorMessage.empty())
+                {}
+                else
+                {}
+        }
     }
 
     void VideoMenu::UpdateStatusText(const Cinema::VideoConfig &videoConfig) {}
 
-    void VideoMenu::SetThumbnail(std::optional<std::string> url) {}
+    void VideoMenu::SetThumbnail(std::optional<std::string> url)
+    {
+        if (url != std::nullopt && url == thumbnailURL)
+        {
+            return;
+        }
+
+        thumbnailURL = url;
+
+        if (url == std::nullopt)
+        {
+            SetThumbnailFromCover(currentLevel);
+            return;
+        }
+
+        BSML::Utilities::SetImage(videoThumbnail, *url);
+    }
 
     void VideoMenu::SetThumbnailFromCover(GlobalNamespace::IPreviewBeatmapLevel *level) {}
 
@@ -308,7 +342,7 @@ namespace Cinema {
 
 //        PlaybackController::get_instance().
 
-        if (currentVideo->needsToSave)
+        if (currentVideo != std::nullopt && currentVideo->needsToSave)
         {
             VideoLoader::SaveVideoConfig(*currentVideo);
         }
@@ -343,11 +377,19 @@ namespace Cinema {
         }
     }
 
-    void VideoMenu::OnConfigChanged(const std::optional<VideoConfig> &config) {}
+    void VideoMenu::OnConfigChanged(const std::optional<VideoConfig> config) {}
 
-    void VideoMenu::StatusViewerDidEnable() {}
+    void VideoMenu::StatusViewerDidEnable()
+    {
+        DEBUG("VideoMenu Active");
+        videoMenuActive = true;
+    }
 
-    void VideoMenu::StatusViewerDidDisable() {}
+    void VideoMenu::StatusViewerDidDisable()
+    {
+        DEBUG("VideoMenu Inactive");
+        videoMenuActive = false;
+    }
 
     void VideoMenu::ApplyOffset(int offset) {}
 

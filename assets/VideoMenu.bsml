@@ -31,7 +31,7 @@
 						<button id='offsetDecreaseButtonMid' font-size='3' pref-width='10' hover-hint='Starts video later (-100 ms)' text='--' on-click='OnOffsetDecreaseActionMid'/>
 						<button id='offsetDecreaseButtonLow' font-size='3' pref-width='10' hover-hint='Starts video later (-20 ms)' text='-' on-click='OnOffsetDecreaseActionLow'/>
 						<vertical pref-width='16'>
-							<text   id='video-offset' text="0" pad-left='5' pad-right='5' font-size='5' align='Center'></text>
+							<text   id='videoOffset' text="0" pad-left='5' pad-right='5' font-size='5' align='Center'></text>
 						</vertical>
 						<button id='offsetIncreaseButtonLow' font-size='3' pref-width='10' hover-hint='Starts video earlier (+20 ms)' text='+' on-click='OnOffsetIncreaseActionLow'/>
 						<button id='offsetIncreaseButtonMid' font-size='3' pref-width='10' hover-hint='Starts video earlier (+100 ms)' text='++' on-click='OnOffsetIncreaseActionMid'/>

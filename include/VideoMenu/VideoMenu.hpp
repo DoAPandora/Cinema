@@ -85,7 +85,7 @@ public:
     std::string searchText;
     std::optional<std::string> thumbnailURL;
 
-    BSML::BSMLParserParams* bsmlParserParams;
+    std::shared_ptr<BSML::BSMLParserParams> bsmlParserParams;
     // download controller, search controller, result array
 
     DECLARE_DEFAULT_CTOR();
@@ -134,7 +134,7 @@ public:
     void UpdateStatusText(const VideoConfig& videoConfig);
     void SetThumbnail(std::optional<std::string> url);
     void OnDifficultySelected(ExtraSongDataArgs extraSongDataArgs);
-    void OnConfigChanged(const std::optional<VideoConfig>& config);// might not be needed
+    void OnConfigChanged(const std::optional<VideoConfig> config);// might not be needed
 //    custom_types::Helpers::Coroutine UpdateSearchResults()
     void OnDownloadFinished(const VideoConfig& video);
     // search progress

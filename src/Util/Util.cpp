@@ -1,14 +1,11 @@
-#include "main.hpp"
 #include "Util/Util.hpp"
-
-#include "System/IO/Path.hpp"
 
 #include <regex>
 
 /*
  * https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/java/android/os/FileUtils.java;l=997?q=isValidFatFilenameChar
  */
-#define INVALID_FILENAME_CHARS "\"*/:<>?\\|\\"
+#define INVALID_FILENAME_CHARS "\"\\*\\:\\<\\>\\?\\\\|"
 
 namespace Cinema::Util {
 
