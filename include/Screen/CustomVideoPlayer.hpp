@@ -39,7 +39,7 @@ DECLARE_CLASS_CODEGEN(Cinema, CustomVideoPlayer, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_METHOD(void, CreateScreen);
     DECLARE_INSTANCE_METHOD(void, FadeControllerUpdate, float value);
     DECLARE_INSTANCE_METHOD(void, OnMenuSceneLoaded);
-    DECLARE_INSTANCE_METHOD(void, FirstFrameReady, UnityEngine::Video::VideoPlayer*, uint64_t frame);
+    DECLARE_INSTANCE_METHOD(void, FirstFrameReady, UnityEngine::Video::VideoPlayer*, int64_t frame);
     DECLARE_INSTANCE_METHOD(void, SetBrightness, float brightness);
     DECLARE_INSTANCE_METHOD(void, LoopVideo, bool loop);
     DECLARE_INSTANCE_METHOD(void, Show);

@@ -97,7 +97,7 @@ namespace Cinema {
 
     void CustomVideoPlayer::OnMenuSceneLoaded() {}
 
-    void CustomVideoPlayer::FirstFrameReady(UnityEngine::Video::VideoPlayer *, uint64_t frame) {}
+    void CustomVideoPlayer::FirstFrameReady(UnityEngine::Video::VideoPlayer *, int64_t frame) {}
 
     void CustomVideoPlayer::SetBrightness(float brightness) {}
 
@@ -157,6 +157,8 @@ namespace Cinema {
     void CustomVideoPlayer::SetCoverTexture(UnityEngine::Texture *texture) {}
 
     void CustomVideoPlayer::SetStaticTexture(UnityEngine::Texture *texture) {}
+
+    void CustomVideoPlayer::ClearTexture() {}
 
     void CustomVideoPlayer::VideoPlayerPrepareComplete(UnityEngine::Video::VideoPlayer *source)
     {}

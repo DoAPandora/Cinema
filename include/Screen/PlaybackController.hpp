@@ -5,6 +5,7 @@
 
 #include "Screen/CustomVideoPlayer.hpp"
 #include "Video/VideoConfig.hpp"
+#include "Util/EventArgs.hpp"
 
 #include "UnityEngine/MonoBehaviour.hpp"
 #include "UnityEngine/AudioSource.hpp"
@@ -39,38 +40,55 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
     std::optional<VideoConfig> videoConfig;
     std::chrono::system_clock::time_point audioSourceStartTime;
 
-    DelegateW<UnityEngine::Video::VideoPlayer::EventHandler> prepareCompleted;
-    DelegateW<UnityEngine::Video::VideoPlayer::FrameReadyEventHandler> frameReady;
+    DelegateW<UnityEngine::Video::VideoPlayer::EventHandler> configChangedPrepareHandler;
+    DelegateW<UnityEngine::Video::VideoPlayer::FrameReadyEventHandler> configChangedFrameReadyHandler;
+    DelegateW<UnityEngine::Video::VideoPlayer::EventHandler> onPrepareComplete;
 
     private:
 
     static PlaybackController* instance;
 
+    DECLARE_INSTANCE_METHOD(void, Destroy);
     DECLARE_INSTANCE_METHOD(void, Start);
-    DECLARE_INSTANCE_METHOD(void, Update);
-
-    DECLARE_INSTANCE_METHOD(void, PlayVideo, float startTime);
-    DECLARE_INSTANCE_METHOD(void, ResumeVideo);
+    DECLARE_INSTANCE_METHOD(void, OnDestroy);
     DECLARE_INSTANCE_METHOD(void, PauseVideo);
-    DECLARE_INSTANCE_METHOD(float, GetReferenceTime, float referenceTime = 0, float playbackSpeed = 0);
-
+    DECLARE_INSTANCE_METHOD(void, ResumeVideo);
+    DECLARE_INSTANCE_METHOD(void, ApplyOffset, int offset);
+    DECLARE_INSTANCE_METHOD(void, PlayerStartedAfterResync, UnityEngine::Video::VideoPlayer*, int64_t frame);
     DECLARE_INSTANCE_METHOD(void, FrameReady, UnityEngine::Video::VideoPlayer*, int64_t frame);
-    DECLARE_INSTANCE_METHOD(void, OnPrepareComplete, UnityEngine::Video::VideoPlayer*);
-
-    DECLARE_INSTANCE_METHOD(void, GameSceneActive);
-    DECLARE_INSTANCE_METHOD(void, GameSceneLoaded);
+    DECLARE_INSTANCE_METHOD(void, Update);
+    DECLARE_INSTANCE_METHOD(void, StartPreview);
+    DECLARE_INSTANCE_METHOD(void, StopPreview, bool stopPreviewMusic);
     DECLARE_INSTANCE_METHOD(void, OnMenuSceneLoaded);
     DECLARE_INSTANCE_METHOD(void, OnMenuSceneLoadedFresh, GlobalNamespace::ScenesTransitionSetupDataSO* transitionSetupData);
+    DECLARE_INSTANCE_METHOD(void, SceneChanged);
+    DECLARE_INSTANCE_METHOD(void, ConfigChangedPrepareHandler, UnityEngine::Video::VideoPlayer* sender);
+    DECLARE_INSTANCE_METHOD(void, ConfigChangedFrameReadyHandler, UnityEngine::Video::VideoPlayer* sender, int64_t frameIdx);
+    DECLARE_INSTANCE_METHOD(void, ShowSongCover);
+    DECLARE_INSTANCE_METHOD(void, GameSceneActive);
+    DECLARE_INSTANCE_METHOD(void, GameSceneLoaded);
+    DECLARE_INSTANCE_METHOD(void, SetAudioSourcePanning, float pan);
+    DECLARE_INSTANCE_METHOD(void, PlayVideo, float startTime);
+    DECLARE_INSTANCE_METHOD(void, OnPrepareComplete, UnityEngine::Video::VideoPlayer*);
+    DECLARE_INSTANCE_METHOD(void, StopPlayback);
+    DECLARE_INSTANCE_METHOD(void, SceneTransitionInitCalled);
+    DECLARE_INSTANCE_METHOD(void, UpdateSongPreviewPlayer, UnityEngine::AudioSource* activeAudioSource, float startTime, float timeRemaining, bool isDefault);
+    DECLARE_INSTANCE_METHOD(void, StartSongPreview);
 
     public:
 
     static PlaybackController* get_instance();
 
     static void Create();
+    float GetReferenceTime(std::optional<float> referenceTime = std::nullopt, std::optional<float> playbackSpeed = std::nullopt);
+    void ResyncVideo(std::optional<float> referenceTime = std::nullopt, std::optional<float> playbackSpeed = std::nullopt);
+    void OnConfigChanged(std::optional<VideoConfig> config);
+    void OnConfigChanged(std::optional<VideoConfig> config, bool reloadVideo);
     void SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel* level, std::optional<VideoConfig> config);
-    void PrepareVideo(const VideoConfig& video);
+    void DifficultySelected(ExtraSongDataArgs extraSongDataArgs);
     custom_types::Helpers::Coroutine PlayVideoAfterAudioSourceCoroutine(bool preview);
-    custom_types::Helpers::Coroutine PrepareVideoCoroutine(VideoConfig video);
     custom_types::Helpers::Coroutine PlayVideoDelayedCoroutine(float delayStartTime);
+    void PrepareVideo(const VideoConfig& video);
+    custom_types::Helpers::Coroutine PrepareVideoCoroutine(VideoConfig video);
 
 )
