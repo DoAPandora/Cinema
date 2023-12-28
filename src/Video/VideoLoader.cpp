@@ -17,8 +17,6 @@
 #include "System/Threading/Tasks/Task_1.hpp"
 #include "System/Action_1.hpp"
 
-#include "custom-types/shared/delegate.hpp"
-
 #include <filesystem>
 
 using namespace GlobalNamespace;
@@ -339,7 +337,7 @@ namespace Cinema::VideoLoader {
 
         if(videoConfig != std::nullopt)
         {
-            videoConfig->levelDir = std::filesystem::path(configPath).string();
+            videoConfig->levelDir = std::filesystem::path(configPath).parent_path().string();
             videoConfig->UpdateDownloadState();
         }
         else

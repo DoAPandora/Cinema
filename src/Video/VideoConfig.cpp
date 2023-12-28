@@ -1,11 +1,7 @@
 #include "main.hpp"
 #include "Video/VideoConfig.hpp"
+#include "Video/VideoLoader.hpp"
 #include "Util/Util.hpp"
-
-
-namespace Cinema::VideoLoader {
-    extern std::string GetConfigPath(const std::string& levelPath);
-}
 
 namespace Cinema {
 
