@@ -19,7 +19,7 @@ MAKE_AUTO_HOOK_MATCH(StandardLevelDetailView_RefreshContent, &StandardLevelDetai
         return;
     }
 
-    auto cast = il2cpp_utils::try_cast<CustomBeatmapLevel>(self->level);
+    auto cast = il2cpp_utils::try_cast<CustomBeatmapLevel>(self->_level);
     auto level = cast.has_value() ? cast.value() : nullptr;
     if (!level)
     {

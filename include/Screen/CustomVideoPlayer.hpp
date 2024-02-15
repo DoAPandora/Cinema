@@ -8,8 +8,6 @@
 #include "UnityEngine/Renderer.hpp"
 #include "UnityEngine/RenderTexture.hpp"
 #include "UnityEngine/Transform.hpp"
-#include "UnityEngine/Video/VideoPlayer_EventHandler.hpp"
-#include "UnityEngine/Video/VideoPlayer_ErrorEventHandler.hpp"
 
 #include "DelegateW.hpp"
 

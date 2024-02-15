@@ -4,7 +4,7 @@
 #include "Video/VideoLoader.hpp"
 #include "Util/Util.hpp"
 
-#include "BSML/shared/BSML.hpp"
+#include "bsml/shared/BSML.hpp"
 
 #include "Screen/PlaybackController.hpp"
 
@@ -22,7 +22,7 @@
 #include "UnityEngine/MeshFilter.hpp"
 #include "UnityEngine/MeshRenderer.hpp"
 
-ModInfo modInfo;
+modloader::ModInfo modInfo{MOD_ID, VERSION, 0};
 
 MAKE_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &GlobalNamespace::DefaultScenesTransitionsFromInit::TransitionToNextScene, void, GlobalNamespace::DefaultScenesTransitionsFromInit* self, bool goStraightToMenu, bool goStraightToEditor, bool goToRecordingToolScene)
 {
@@ -46,15 +46,13 @@ void TestCurvedSurface(GlobalNamespace::ScenesTransitionSetupDataSO*)
     body->Generate();
 }
 
-Logger& getLogger() {
-    static Logger* logger = new Logger(modInfo);
+Paper::BaseLoggerContext<std::string>& getLogger() {
+    static Logger* logger = new Paper::BaseLoggerContext<std::string>("CINEMA");
     return *logger;
 }
 
-extern "C" void setup(ModInfo& info) {
-    info.id = MOD_ID;
-    info.version = VERSION;
-    modInfo = info;
+CINEMA_EXPORT void setup(CModInfo* info) noexcept {
+    *info = modInfo.to_c();
 
     INFO("Beginning setup");
 	
@@ -64,7 +62,7 @@ extern "C" void setup(ModInfo& info) {
     INFO("Completed setup!");
 }
 
-extern "C" void load() {
+CINEMA_EXPORT void late_load() noexcept {
     il2cpp_functions::Init();
     BSEvents::Init();
 	custom_types::Register::AutoRegister();
@@ -82,7 +80,7 @@ extern "C" void load() {
     if(!direxists(ytdlp))
         FileUtils::ExtractZip(IncludedAssets::ytdlp_zip, ytdlp);
 
-    BSML::Init();
+    // BSML::Init();
 //    BSML::Register::RegisterGameplaySetupTab("Cinema", MOD_ID "_settings", Cinema::VideoMenuManager::get_instance(), BSML::MenuType::Solo);
 //    BSML::Register::RegisterGameplaySetupTab<Cinema::VideoMenu*>("Cinema");
 

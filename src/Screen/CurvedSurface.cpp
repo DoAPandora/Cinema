@@ -2,6 +2,7 @@
 #include "Screen/CurvedSurface.hpp"
 
 #include "UnityEngine/Mathf.hpp"
+#include "UnityEngine/Transform.hpp"
 #include "UnityEngine/MeshFilter.hpp"
 
 #include <cmath>

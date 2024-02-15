@@ -7,7 +7,6 @@
 #include "Util/EventArgs.hpp"
 #include "Video/VideoConfig.hpp"
 
-#include "GlobalNamespace/PersistentSingleton_1.hpp"
 #include "GlobalNamespace/IPreviewBeatmapLevel.hpp"
 
 #include "UnityEngine/GameObject.hpp"

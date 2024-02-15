@@ -22,7 +22,7 @@ namespace Cinema {
         DEBUG("Creating CustomVideoPlayer");
 //        CreateScreen();
 
-        player = CreateVideoPlayer(get_transform());
+        player = CreateVideoPlayer(get_transform().ptr());
         auto set_source = RESOLVE_ICALL(set_source, void, Video::VideoSource);
         set_source(player, Video::VideoSource::Url);
         auto set_renderMode = RESOLVE_ICALL(set_renderMode, void, Video::VideoRenderMode);
@@ -61,7 +61,7 @@ namespace Cinema {
          screenGo->get_transform()->set_parent(parent);
          GameObject::DontDestroyOnLoad(screenGo);
 
-         auto material = Resources::FindObjectsOfTypeAll<Material*>().LastOrDefault([](Material* x) {
+         auto material = Resources::FindObjectsOfTypeAll<Material*>().back_or_default([](Material* x) {
              return x->get_name() == "PyroVideo (Instance)";
          });
         

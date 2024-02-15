@@ -28,6 +28,8 @@ struct fmt::formatter<std::optional<std::string>> : formatter<string_view>
     }
 };
 
+Paper::BaseLoggerContext<std::string>& getLogger();
+
 #define INFO(message, ...) Paper::Logger::fmtLogTag<Paper::LogLevel::INF>(message, "CINEMA", ## __VA_ARGS__)
 #define ERROR(message, ...) Paper::Logger::fmtLogTag<Paper::LogLevel::ERR>(message, "CINEMA", ## __VA_ARGS__)
 #define WARN(message, ...) Paper::Logger::fmtLogTag<Paper::LogLevel::WRN>(message, "CINEMA", ## __VA_ARGS__)

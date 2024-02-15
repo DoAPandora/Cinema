@@ -84,12 +84,12 @@ namespace Collections {
         {
             return std::nullopt;
         }
-        if (customLevels.Length() <= 0)
+        if (customLevels.size() <= 0)
         {
             return std::nullopt;
         }
 
-        auto beatmap = customLevels.FirstOrDefault([&hash](const auto& level) { return level->levelID.ends_with(hash);});
+        auto beatmap = customLevels.front_or_default([&hash](const auto& level) { return level->levelID.ends_with(hash);});
         if (!beatmap)
         {
             return std::nullopt;
@@ -106,7 +106,7 @@ namespace Collections {
 
     std::optional<ExtraSongData::DifficultyData> RetrieveDifficultyData(GlobalNamespace::IDifficultyBeatmap* beatmap)
     {
-        auto songData = RetrieveExtraSongData(beatmap->get_level()->i_IPreviewBeatmapLevel()->get_levelID());
+        auto songData = RetrieveExtraSongData(beatmap->get_level()->i___GlobalNamespace__IPreviewBeatmapLevel()->get_levelID());
         auto result = std::find_if(songData->difficulties.begin(), songData->difficulties.end(), [&beatmap](const auto& diff)
         {
             return diff.difficulty == beatmap->get_difficulty() &&

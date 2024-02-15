@@ -15,7 +15,7 @@ namespace Cinema {
 
     VideoMenu* VideoMenu::get_instance()
     {
-        if (!instance || !instance->m_CachedPtr.m_value)
+        if (!instance || !instance->m_CachedPtr)
             instance = UnityEngine::GameObject::New_ctor("CinemaVideoMenu")->AddComponent<VideoMenu*>();
         return instance;
     }
@@ -48,7 +48,7 @@ namespace Cinema {
         Events::difficultySelected -= {&VideoMenu::OnDifficultySelected, this};
         Events::difficultySelected += {&VideoMenu::OnDifficultySelected, this};
 
-        if (!rootObject || !rootObject->m_CachedPtr.m_value)
+        if (!rootObject || !rootObject->m_CachedPtr)
         {
             return;
         }
@@ -75,7 +75,7 @@ namespace Cinema {
 
     void VideoMenu::CreateStatusListener()
     {
-        if (menuStatus && menuStatus->m_CachedPtr.m_value)
+        if (menuStatus && menuStatus->m_CachedPtr)
         {
             menuStatus->didEnable -= {&VideoMenu::StatusViewerDidEnable, this};
             menuStatus->didDisable -= {&VideoMenu::StatusViewerDidDisable, this};
@@ -119,17 +119,17 @@ namespace Cinema {
 
         if (!getModConfig().enabled.GetValue())
         {
-             noVideoText->SetText("Cinema is disabled.\\r\\nYou can re-enable it on the left side of the main menu.");
+             noVideoText->SetTextInternal("Cinema is disabled.\\r\\nYou can re-enable it on the left side of the main menu.");
             return;
         }
 
         if (!currentLevel)
         {
-            noVideoText->SetText("No level Selected");
+            noVideoText->SetTextInternal("No level Selected");
             return;
         }
 
-        noVideoText->SetText("No video configured");
+        noVideoText->SetTextInternal("No video configured");
     }
 
     void VideoMenu::OnDownloadProgress(const Cinema::VideoConfig &videoConfig)
@@ -144,7 +144,7 @@ namespace Cinema {
         deleteConfigButton->set_interactable(state);
         deleteVideoButton->set_interactable(state);
         searchButton->get_gameObject()->SetActive(currentLevel != nullptr);
-//        previewButtonText->SetText(PlaybackController::get_instance)
+//        previewButtonText->SetTextInternal(PlaybackController::get_instance)
 
         if (currentLevel)
         {
@@ -165,7 +165,7 @@ namespace Cinema {
             case DownloadState::Downloading:
             case DownloadState::DownloadingVideo:
             case DownloadState::DownloadingAudio: {
-                deleteVideoButtonText->SetText("Cancel");
+                deleteVideoButtonText->SetTextInternal("Cancel");
                 previewButton->set_interactable(false);
                 deleteVideoButton->get_transform()->Find(
                         "Underline")->get_gameObject()->GetComponent<UnityEngine::UI::Image *>()->set_color(
@@ -174,7 +174,7 @@ namespace Cinema {
             }
             case DownloadState::NotDownloaded:
             case DownloadState::Cancelled: {
-                deleteVideoButtonText->SetText("Download");
+                deleteVideoButtonText->SetTextInternal("Download");
                 deleteVideoButton->set_interactable(false);
                 auto underlineColor = UnityEngine::Color::get_clear();
                 if (state) {
@@ -189,7 +189,7 @@ namespace Cinema {
                 break;
             }
             default: {
-                deleteVideoButtonText->SetText("Delete Video");
+                deleteVideoButtonText->SetTextInternal("Delete Video");
                 deleteVideoButton->get_transform()->Find(
                         "Underline")->get_gameObject()->GetComponent<UnityEngine::UI::Image *>()->set_color(
                         UnityEngine::Color::get_gray());
@@ -206,7 +206,7 @@ namespace Cinema {
 
     void VideoMenu::SetupVideoDetails()
     {
-        if (!videoSearchResults || !videoSearchResults->m_CachedPtr.m_value)
+        if (!videoSearchResults || !videoSearchResults->m_CachedPtr)
         {
             WARN("Video search results view rect is null, skipping UI setup");
             return;
@@ -238,7 +238,7 @@ namespace Cinema {
                 return;
             }
 
-            noVideoText->SetText("This map uses Cinema to modify the environment\\r\\nwithout displaying a video.\\r\\n\\r\\nNo configuration options available.");
+            noVideoText->SetTextInternal("This map uses Cinema to modify the environment\\r\\nwithout displaying a video.\\r\\n\\r\\nNo configuration options available.");
             searchButton->set_interactable(false);
             searchButton->get_gameObject()->SetActive(false);
 
@@ -250,11 +250,11 @@ namespace Cinema {
 
         SetButtonState(true);
 
-        videoTitle->SetText(currentVideo->title.value_or("Untitled Video"));
-        videoAuthor->SetText("Author: " + currentVideo->author.value_or("Unknown Author"));
-        videoDuration->SetText("Duration: " + std::to_string(currentVideo->duration));
+        videoTitle->SetTextInternal(currentVideo->title.value_or("Untitled Video"));
+        videoAuthor->SetTextInternal("Author: " + currentVideo->author.value_or("Unknown Author"));
+        videoDuration->SetTextInternal("Duration: " + std::to_string(currentVideo->duration));
 
-        videoOffset->SetText(fmt::format("{:10L} ms", currentVideo->offset));
+        videoOffset->SetTextInternal(fmt::format("{:10L} ms", currentVideo->offset));
         SetThumbnail(currentVideo->videoID.has_value() ? std::make_optional(fmt::format("https://i.ytimg.com/vi/{}/hqdefault.jpg", *currentVideo->videoID)) : std::nullopt);
 
         UpdateStatusText(*currentVideo);

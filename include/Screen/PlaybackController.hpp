@@ -9,8 +9,6 @@
 
 #include "UnityEngine/MonoBehaviour.hpp"
 #include "UnityEngine/AudioSource.hpp"
-#include "UnityEngine/Video/VideoPlayer_EventHandler.hpp"
-#include "UnityEngine/Video/VideoPlayer_FrameReadyEventHandler.hpp"
 
 #include "GlobalNamespace/SongPreviewPlayer.hpp"
 #include "GlobalNamespace/AudioTimeSyncController.hpp"
