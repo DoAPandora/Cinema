@@ -8,6 +8,11 @@
 #include "UnityEngine/Video/VideoRenderMode.hpp"
 #include "UnityEngine/Video/VideoAudioOutputMode.hpp"
 #include "UnityEngine/Video/VideoSource.hpp"
+#include "UnityEngine/Shader.hpp"
+#include "UnityEngine/Resources.hpp"
+#include "UnityEngine/Material.hpp"
+#include "UnityEngine/Quaternion.hpp"
+#include "GlobalNamespace/IDifficultyBeatmap.hpp"
 
 using namespace UnityEngine;
 

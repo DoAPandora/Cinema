@@ -4,6 +4,7 @@
 
 #include "UnityEngine/MonoBehaviour.hpp"
 #include "UnityEngine/Video/VideoPlayer.hpp"
+#include "System/MulticastDelegate.hpp"
 #include "UnityEngine/AudioSource.hpp"
 #include "UnityEngine/Renderer.hpp"
 #include "UnityEngine/RenderTexture.hpp"

@@ -46,8 +46,8 @@ void TestCurvedSurface(GlobalNamespace::ScenesTransitionSetupDataSO*)
     body->Generate();
 }
 
-Paper::BaseLoggerContext<std::string>& getLogger() {
-    static Logger* logger = new Paper::BaseLoggerContext<std::string>("CINEMA");
+Logger& getLogger() {
+    static Logger* logger = new Logger(modInfo, {false, true});
     return *logger;
 }
 
@@ -71,9 +71,11 @@ CINEMA_EXPORT void late_load() noexcept {
     mkpath(THUMBNAIL_DIR);
 
     INFO("Installing hooks...");
+    
     Hooks::InstallHooks(getLogger());
     Cinema::Hooks::InstallLevelDataHook();
     INSTALL_HOOK(getLogger(), DefaultScenesTransitionsFromInit_TransitionToNextScene);
+
     INFO("Installed all hooks!");
 
     std::string ytdlp = FileUtils::getScriptsPath() + "/yt_dlp";

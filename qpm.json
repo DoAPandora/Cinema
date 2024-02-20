@@ -17,6 +17,9 @@
       "build": [
         "pwsh ./scripts/build.ps1"
       ],
+      "clean": [
+        "pwsh ./scripts/build.ps1 -clean"
+      ],
       "copy": [
         "pwsh ./scripts/copy.ps1"
       ],
@@ -52,7 +55,7 @@
     },
     {
       "id": "bs-events",
-      "versionRange": "^0.0.3",
+      "versionRange": "^0.0.4",
       "additionalData": {}
     },
     {

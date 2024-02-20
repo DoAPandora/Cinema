@@ -42,25 +42,35 @@ namespace Cinema::Downloader {
         };
         Python::PythonWriteEvent += eventHandler;
         Python::PyRun_SimpleString("from yt_dlp.__init__ import _real_main");
-        std::string command = "_real_main([";
-        for(auto splitted : StringUtils::Split("--no-cache-dir -o %(id)s.%(ext)s -P /sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema/Videos " + url, " ")) {
-            command += "\"" + splitted + "\",";
+        std::string commandFormatted = "_real_main([";
+    
+        std::string command{"--no-cache-dir -o %(id)s.%(ext)s -P /sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema/Videos "};
+        command.append(url);
+        for(auto splitted : StringUtils::Split(command, " ")) {
+            commandFormatted += "\"" + splitted + "\",";
         }
-        command = command.substr(0, command.length()-1) + "])";
-        int result = Python::PyRun_SimpleString(command.c_str());
+        commandFormatted = commandFormatted.substr(0, command.length()-1) + "])";
+        int result = Python::PyRun_SimpleString(commandFormatted.c_str());
         Python::PythonWriteEvent -= eventHandler;
         return !error;
     }
 
     custom_types::Helpers::Coroutine DownloadThumbnail(std::string_view id, std::function<void()> onFinished)
     {
-        
-        auto www = UnityEngine::Networking::UnityWebRequest::Get("https://i.ytimg.com/vi/" + id + "/hqdefault.jpg");
+        std::string url{"https://i.ytimg.com/vi/"};
+        url.append(id);
+        url.append("/hqdefault.jpg");
+
+        auto www = UnityEngine::Networking::UnityWebRequest::Get(url);
         www->set_timeout(3);
         co_yield reinterpret_cast<System::Collections::IEnumerator*>(www->SendWebRequest());
         
-        if (!www->get_isNetworkError() && !www->get_isHttpError()) {
-            std::ofstream f("/sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema/Thumbnails/" + id + ".jpg",  std::ios_base::binary | std::ios_base::trunc);
+        if (www->get_result() != UnityEngine::Networking::UnityWebRequest::Result::Success) {
+            std::string filepath{"/sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema/Thumbnails/"};
+            filepath.append(id);
+            filepath.append(".jpg");
+
+            std::ofstream f(url,  std::ios_base::binary | std::ios_base::trunc);
             auto arr = www->get_downloadHandler()->GetData();
             f.write((char*)arr.begin(), arr.size());
             f.flush();

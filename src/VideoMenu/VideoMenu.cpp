@@ -57,7 +57,8 @@ namespace Cinema {
         deleteVideoButtonText = deleteVideoButton->GetComponentInChildren<TMPro::TextMeshProUGUI*>();
 
         CreateStatusListener();
-        deleteConfigButton->get_transform()->set_localScale(deleteConfigButton->get_transform()->get_localScale() * 0.5f);
+        auto scale = UnityEngine::Vector3::op_Multiply(deleteConfigButton->transform->localScale, 0.5f);
+        deleteConfigButton->get_transform()->set_localScale(scale);
 
         searchKeyboard->clearOnOpen = false;
 
@@ -132,7 +133,7 @@ namespace Cinema {
         noVideoText->SetTextInternal("No video configured");
     }
 
-    void VideoMenu::OnDownloadProgress(const Cinema::VideoConfig &videoConfig)
+    void VideoMenu::OnDownloadProgress(Cinema::VideoConfig &videoConfig)
     {
         UpdateStatusText(videoConfig);
         SetupLevelDetailView(videoConfig);
@@ -272,7 +273,7 @@ namespace Cinema {
         bsmlParserParams->EmitEvent("update-customize-offset");
     }
 
-    void VideoMenu::SetupLevelDetailView(const Cinema::VideoConfig &videoConfig)
+    void VideoMenu::SetupLevelDetailView(Cinema::VideoConfig &videoConfig)
     {
         if (videoConfig != currentVideo)
         {
@@ -297,7 +298,7 @@ namespace Cinema {
         }
     }
 
-    void VideoMenu::UpdateStatusText(const Cinema::VideoConfig &videoConfig) {}
+    void VideoMenu::UpdateStatusText(Cinema::VideoConfig &videoConfig) {}
 
     void VideoMenu::SetThumbnail(std::optional<std::string> url)
     {
@@ -395,7 +396,7 @@ namespace Cinema {
 
     void VideoMenu::SearchAction() {}
 
-    void VideoMenu::OnDownloadFinished(const Cinema::VideoConfig &video) {}
+    void VideoMenu::OnDownloadFinished(Cinema::VideoConfig &video) {}
 
     void VideoMenu::ShowKeyboard()
     {

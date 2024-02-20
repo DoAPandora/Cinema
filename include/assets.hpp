@@ -19,11 +19,11 @@ struct IncludedAsset {
     }
 
     operator std::string_view() const {
-        return { reinterpret_cast<char*>(array->values), array->Length() };
+        return { reinterpret_cast<char*>(array->_values), array->get_Length() };
     }
     
     operator std::span<uint8_t>() const {
-        return { array->values, array->Length() };
+        return { array->_values, array->get_Length() };
     }
 
     void init() const {
@@ -46,6 +46,7 @@ namespace IncludedAssets {
 	DECLARE_FILE(VideoMenu_bsml)
 	DECLARE_FILE(configs_json)
 	DECLARE_FILE(trash_png)
+	DECLARE_FILE(videoshader)
 	DECLARE_FILE(ytdlp_zip)
 
 }

@@ -13,7 +13,13 @@
 #include "GlobalNamespace/PreviewBeatmapLevelSO.hpp"
 #include "GlobalNamespace/IBeatmapLevelData.hpp"
 #include "GlobalNamespace/BeatmapLevelPackCollectionContainerSO.hpp"
+#include "GlobalNamespace/PreviewBeatmapLevelCollectionSO.hpp"
+#include "GlobalNamespace/PreviewBeatmapLevelPackSO.hpp"
 
+#include "UnityEngine/Resources.hpp"
+
+#include "System/Collections/Generic/List_1.hpp"
+#include "System/Collections/Generic/IReadOnlyList_1.hpp"
 #include "System/Threading/Tasks/Task_1.hpp"
 #include "System/Action_1.hpp"
 
@@ -26,14 +32,16 @@ std::map<std::string, Cinema::VideoConfig> cachedConfigs;
 std::map<std::string, Cinema::VideoConfig> bundledConfigs;
 
 GlobalNamespace::BeatmapLevelsModel* beatmapLevelsModel;
-AdditionalContentModel* additionalContentModel;
+IAdditionalContentModel* additionalContentModel;
 AudioClipAsyncLoader* audioClipAsyncLoader;
+
+using System::Collections::Generic::List_1;
 
 namespace Cinema::VideoLoader {
 
     GlobalNamespace::BeatmapLevelsModel *get_BeatmapLevelsModel() {
-        if (!beatmapLevelsModel || !beatmapLevelsModel->m_CachedPtr.m_value) {
-            beatmapLevelsModel = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::BeatmapLevelsModel *>().FirstOrDefault(
+        if (!beatmapLevelsModel || !beatmapLevelsModel->m_CachedPtr) {
+            beatmapLevelsModel = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::BeatmapLevelsModel *>().front_or_default(
                     [](const auto &x) { return x->get_name()->Contains("(Clone)"); });
             if (!beatmapLevelsModel) {
                 ERROR("Failed to get a reference to BeatmapLevelsModel");
@@ -43,20 +51,20 @@ namespace Cinema::VideoLoader {
     }
     __declspec(property(get=get_BeatmapLevelsModel)) GlobalNamespace::BeatmapLevelsModel *BeatmapLevelsModel;
 
-    GlobalNamespace::AdditionalContentModel *get_AdditionalContentModel() {
-        if (!additionalContentModel || !additionalContentModel->m_CachedPtr.m_value) {
-            additionalContentModel = BeatmapLevelsModel->additionalContentModel;
+    GlobalNamespace::IAdditionalContentModel *get_AdditionalContentModel() {
+        if (!additionalContentModel) {
+            additionalContentModel = BeatmapLevelsModel->_additionalContentModel;
             if (!additionalContentModel) {
                 ERROR("Failed to get a reference to AdditionalContentModel");
             }
         }
         return additionalContentModel;
     }
-    __declspec(property(get=get_AdditionalContentModel)) GlobalNamespace::AdditionalContentModel *AdditionalContentModel;
+    __declspec(property(get=get_AdditionalContentModel)) GlobalNamespace::IAdditionalContentModel *AdditionalContentModel;
 
     GlobalNamespace::AudioClipAsyncLoader *get_AudioClipAsyncLoader() {
         if (!audioClipAsyncLoader) {
-            audioClipAsyncLoader = BeatmapLevelsModel->audioClipAsyncLoader;
+            audioClipAsyncLoader = BeatmapLevelsModel->_audioClipAsyncLoader;
             if (!audioClipAsyncLoader) {
                 ERROR("Failed to get a reference to AudioClipAsyncLoader");
             }
@@ -78,21 +86,21 @@ namespace Cinema::VideoLoader {
         }
     }
 
-    List<IPreviewBeatmapLevel *> *GetOfficialMaps() {
-        auto officialMaps = List<IPreviewBeatmapLevel*>::New_ctor();
+    List_1<IPreviewBeatmapLevel *> *GetOfficialMaps() {
+        auto officialMaps = List_1<IPreviewBeatmapLevel*>::New_ctor();
 
         if (!BeatmapLevelsModel)
         {
             return officialMaps;
         }
 
-        for(auto levelPack : BeatmapLevelsModel->ostAndExtrasPackCollection->beatmapLevelPacks)
+        for(auto levelPack : BeatmapLevelsModel->ostAndExtrasPackCollection->previewBeatmapLevelPack)
         {
-            officialMaps->AddRange(reinterpret_cast<System::Collections::Generic::IEnumerable_1<IPreviewBeatmapLevel*>*>(levelPack->beatmapLevelCollection->beatmapLevels->GetEnumerator()));
+            officialMaps->AddRange(levelPack->_previewBeatmapLevelCollection->beatmapLevels->i___System__Collections__Generic__IEnumerable_1_T_());
         }
-        for(auto levelPack : BeatmapLevelsModel->dlcLevelPackCollectionContainer->beatmapLevelPackCollection->beatmapLevelPacks)
+        for(auto levelPack : BeatmapLevelsModel->_dlcLevelPackCollectionContainer->beatmapLevelPackCollection->previewBeatmapLevelPack)
         {
-            officialMaps->AddRange(reinterpret_cast<System::Collections::Generic::IEnumerable_1<IPreviewBeatmapLevel*>*>(levelPack->beatmapLevelCollection->beatmapLevels->GetEnumerator()));
+            officialMaps->AddRange(levelPack->_previewBeatmapLevelCollection->beatmapLevels->i___System__Collections__Generic__IEnumerable_1_T_());
         }
 
         return officialMaps;
@@ -109,7 +117,7 @@ namespace Cinema::VideoLoader {
         return p / CONFIG_FILENAME;
     }
 
-    void AddConfigToCache(const VideoConfig &config, IPreviewBeatmapLevel *level) {
+    void AddConfigToCache(VideoConfig &config, IPreviewBeatmapLevel *level) {
         auto success = cachedConfigs.insert({static_cast<std::string>(level->get_levelID()), config});
         if (success.second) {
             DEBUG("Adding config for {} to cache", level->get_levelID());
@@ -170,7 +178,7 @@ namespace Cinema::VideoLoader {
     }
 
     void
-    LoadAudioClipAsync(IPreviewBeatmapLevel *level, const std::function<void(UnityEngine::AudioClip *)> &callback) {
+    LoadAudioClipAsync(IPreviewBeatmapLevel *level, const std::function<void(UnityW<UnityEngine::AudioClip>)> &callback) {
         auto loaderTask = AudioClipAsyncLoader->LoadPreview(level);
         if (!loaderTask) {
             ERROR("AudioClipAsyncLoader.LoadPreview() Failed");
@@ -180,15 +188,14 @@ namespace Cinema::VideoLoader {
         DelegateHelper::ContinueWith(loaderTask, callback);
     }
 
-    void GetEntitlementForLevel(IPreviewBeatmapLevel *level, const std::function<void(
-            GlobalNamespace::AdditionalContentModel::EntitlementStatus)> &callback) {
+    void GetEntitlementForLevel(IPreviewBeatmapLevel *level, const std::function<void(GlobalNamespace::EntitlementStatus)> &callback) {
         if (AdditionalContentModel) {
             return DelegateHelper::ContinueWith(
                     AdditionalContentModel->GetLevelEntitlementStatusAsync(level->get_levelID(),
                                                                            System::Threading::CancellationToken::get_None()),
                     callback);
         }
-        callback(AdditionalContentModel::EntitlementStatus::Owned);
+        callback(EntitlementStatus::Owned);
     }
 
     std::optional<VideoConfig> GetConfigForLevel(IPreviewBeatmapLevel *level) {

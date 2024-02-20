@@ -9,6 +9,7 @@
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/WaitForSeconds.hpp"
 #include "UnityEngine/SceneManagement/SceneManager.hpp"
+#include "UnityEngine/Resources.hpp"
 
 #include "GlobalNamespace/GameplayCoreSceneSetupData.hpp"
 #include "GlobalNamespace/EnvironmentInfoSO.hpp"
@@ -29,14 +30,14 @@ namespace Cinema {
 
     void PlaybackController::Create()
     {
-        if(instance && instance->m_CachedPtr.m_value)
+        if(instance && instance->m_CachedPtr)
             return;
         GameObject::New_ctor("CinemaPlaybackController")->AddComponent<PlaybackController*>();
     }
 
     void PlaybackController::Start()
     {
-        if(instance && instance->m_CachedPtr.m_value)
+        if(instance && instance->m_CachedPtr)
         {
             Object::Destroy(this);
             return;
@@ -289,13 +290,13 @@ namespace Cinema {
         if(!preview)
         {
             GlobalNamespace::AudioTimeSyncController* timeSyncController;
-            while(timeSyncController = Resources::FindObjectsOfTypeAll<GlobalNamespace::AudioTimeSyncController*>().FirstOrDefault(), !timeSyncController)
+            while(timeSyncController = Resources::FindObjectsOfTypeAll<GlobalNamespace::AudioTimeSyncController*>().front_or_default(), !timeSyncController)
             {
                 co_yield nullptr;
             }
 
-            audioTimeSyncController = Resources::FindObjectsOfTypeAll<GlobalNamespace::AudioTimeSyncController*>().FirstOrDefault([](GlobalNamespace::AudioTimeSyncController* x) { return x->get_transform()->get_parent()->get_parent()->get_name()->Contains("StandardGameplay"); });
-            activeAudioSource = audioTimeSyncController->audioSource;
+            audioTimeSyncController = Resources::FindObjectsOfTypeAll<GlobalNamespace::AudioTimeSyncController*>().front_or_default([](GlobalNamespace::AudioTimeSyncController* x) { return x->get_transform()->get_parent()->get_parent()->get_name()->Contains("StandardGameplay"); });
+            activeAudioSource = audioTimeSyncController->_audioSource;
 
             if(activeAudioSource)
             {
@@ -346,7 +347,7 @@ namespace Cinema {
         {}
     }
 
-    void PlaybackController::PrepareVideo(const VideoConfig& video)
+    void PlaybackController::PrepareVideo(VideoConfig& video)
     {
         DEBUG("Preparing video");
         previewWaitingForVideoPlayer = true;

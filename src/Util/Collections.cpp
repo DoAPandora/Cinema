@@ -6,6 +6,7 @@
 #include "GlobalNamespace/IBeatmapLevel.hpp"
 #include "GlobalNamespace/DifficultyBeatmapSet.hpp"
 #include "GlobalNamespace/BeatmapCharacteristicSO.hpp"
+#include "GlobalNamespace/IDifficultyBeatmapSet.hpp"
 
 #include "rapidjson-macros/shared/macros.hpp"
 

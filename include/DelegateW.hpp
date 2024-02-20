@@ -48,7 +48,7 @@ const auto bind(TRet(TName::*fp)(TArgs...), TObj obj)
 template<typename T>
 struct DelegateW
 {
-    static_assert(std::is_convertible_v<T, System::MulticastDelegate>, "T must be a delegate type");
+    static_assert(std::is_convertible_v<T*, System::MulticastDelegate*>, "T must be a delegate type");
     DelegateW() {}
     DelegateW(std::function<delegate_func_t<T>> function)
     {

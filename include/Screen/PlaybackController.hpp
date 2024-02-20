@@ -86,7 +86,7 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
     void DifficultySelected(ExtraSongDataArgs extraSongDataArgs);
     custom_types::Helpers::Coroutine PlayVideoAfterAudioSourceCoroutine(bool preview);
     custom_types::Helpers::Coroutine PlayVideoDelayedCoroutine(float delayStartTime);
-    void PrepareVideo(const VideoConfig& video);
+    void PrepareVideo(VideoConfig& video);
     custom_types::Helpers::Coroutine PrepareVideoCoroutine(VideoConfig video);
 
 )
