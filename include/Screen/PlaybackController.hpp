@@ -38,13 +38,14 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
     std::optional<VideoConfig> videoConfig;
     std::chrono::system_clock::time_point audioSourceStartTime;
 
-    DelegateW<UnityEngine::Video::VideoPlayer::EventHandler> configChangedPrepareHandler;
-    DelegateW<UnityEngine::Video::VideoPlayer::FrameReadyEventHandler> configChangedFrameReadyHandler;
-    DelegateW<UnityEngine::Video::VideoPlayer::EventHandler> onPrepareComplete;
+    UnityEngine::Video::VideoPlayer::EventHandler* configChangedPrepareHandler;
+    UnityEngine::Video::VideoPlayer::FrameReadyEventHandler* configChangedFrameReadyHandler;
+    UnityEngine::Video::VideoPlayer::EventHandler* onPrepareComplete;
 
     private:
 
-    static PlaybackController* instance;
+    static inline UnityW<PlaybackController> instance;
+    
 
     DECLARE_INSTANCE_METHOD(void, Destroy);
     DECLARE_INSTANCE_METHOD(void, Start);
@@ -73,6 +74,8 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_METHOD(void, UpdateSongPreviewPlayer, UnityEngine::AudioSource* activeAudioSource, float startTime, float timeRemaining, bool isDefault);
     DECLARE_INSTANCE_METHOD(void, StartSongPreview);
 
+    DECLARE_DEFAULT_CTOR();
+
     public:
 
     static PlaybackController* get_instance();
@@ -88,5 +91,4 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
     custom_types::Helpers::Coroutine PlayVideoDelayedCoroutine(float delayStartTime);
     void PrepareVideo(VideoConfig& video);
     custom_types::Helpers::Coroutine PrepareVideoCoroutine(VideoConfig video);
-
 )

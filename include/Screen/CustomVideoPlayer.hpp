@@ -25,11 +25,10 @@ DECLARE_CLASS_CODEGEN(Cinema, CustomVideoPlayer, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_FIELD(bool, bodyVisible);
     DECLARE_INSTANCE_FIELD(bool, waitingForFadeOut);
 
-    DelegateW<UnityEngine::Video::VideoPlayer::ErrorEventHandler> videoPlayerErrorReceived;
-    DelegateW<UnityEngine::Video::VideoPlayer::EventHandler> videoPlayerPrepareComplete;
-    DelegateW<UnityEngine::Video::VideoPlayer::EventHandler> videoPlayerStarted;
-    DelegateW<UnityEngine::Video::VideoPlayer::EventHandler> videoPlayerFinished;
-
+    UnityEngine::Video::VideoPlayer::ErrorEventHandler* videoPlayerErrorReceived;
+    UnityEngine::Video::VideoPlayer::EventHandler* videoPlayerPrepareComplete;
+    UnityEngine::Video::VideoPlayer::EventHandler* videoPlayerStarted;
+    UnityEngine::Video::VideoPlayer::EventHandler* videoPlayerFinished;
 
     DECLARE_DEFAULT_CTOR();
 

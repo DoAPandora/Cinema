@@ -2,7 +2,9 @@ param($p1, $p2)
 
 if ($p1 -and $p2)
 {
-    & C:\android-ndk-r26b\toolchains\llvm\prebuilt\windows-x86_64\bin\llvm-addr2line.exe -e .\build\debug\$p1 $p2
+    $ndkpath = Get-Content "./ndkpath.txt"
+    $child = Get-ChildItem -Path $ndkpath/toolchains/llvm/prebuilt -Name
+    & $ndkpath/toolchains/llvm/prebuilt/$child/bin/llvm-addr2line -e ./build/debug/$p1 $p2
 }
 else
 {

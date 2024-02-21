@@ -28,7 +28,7 @@
         "pwsh ./scripts/start-logging.ps1"
       ],
       "qmod": [
-        "pwsh ./scripts/build.ps1 -clean",
+        "pwsh ./scripts/build.ps1",
         "qpm qmod build",
         "pwsh ./scripts/createqmod.ps1"
       ],

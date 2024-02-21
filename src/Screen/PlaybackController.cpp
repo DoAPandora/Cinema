@@ -23,15 +23,16 @@ using namespace Video;
 
 namespace Cinema {
     
-    PlaybackController* PlaybackController::instance = nullptr;
     PlaybackController* PlaybackController::get_instance() { return instance; }
 
     void PlaybackController::Destroy() {}
 
     void PlaybackController::Create()
     {
-        if(instance && instance->m_CachedPtr)
+        if(instance)
+        {
             return;
+        }
         GameObject::New_ctor("CinemaPlaybackController")->AddComponent<PlaybackController*>();
     }
 
@@ -45,15 +46,20 @@ namespace Cinema {
         instance = this;
         INFO("Created PlaybackController");
 
-        GameObject::DontDestroyOnLoad(this->get_gameObject());
-        videoPlayer = get_gameObject()->AddComponent<CustomVideoPlayer*>();
-        videoPlayer->get_gameObject()->SetActive(false);
-        videoPlayer->set_sendFrameReadyEvents(true);
+        GameObject::DontDestroyOnLoad(gameObject);
+        videoPlayer = gameObject->AddComponent<CustomVideoPlayer*>();
+//         videoPlayer->set_sendFrameReadyEvents(true);
 
-        onPrepareComplete = {&PlaybackController::OnPrepareComplete, this};
-        videoPlayer->player->prepareCompleted += onPrepareComplete;
-//        fr = {&PlaybackController::FrameReady, this};
-//        videoPlayer->player->frameReady += frameReady;
+        onPrepareComplete = custom_types::MakeDelegate<VideoPlayer::EventHandler*>(
+            std::function<void(VideoPlayer*)>(
+                std::bind(&PlaybackController::OnPrepareComplete, this, std::placeholders::_1)
+            )
+        );
+        videoPlayer->player->prepareCompleted = (VideoPlayer::EventHandler*)System::Delegate::Combine(videoPlayer->player->prepareCompleted, onPrepareComplete);
+
+//         videoPlayer->player->prepareCompleted += onPrepareComplete;
+// //        fr = {&PlaybackController::FrameReady, this};
+// //        videoPlayer->player->frameReady += frameReady;
 
         BSEvents::songPaused += {&PlaybackController::PauseVideo, this};
         BSEvents::songUnpaused += {&PlaybackController::ResumeVideo, this};
@@ -125,7 +131,6 @@ namespace Cinema {
         previewWaitingForPreviewPlayer = true;
         get_gameObject()->SetActive(true);
         videoPlayer->Pause();
-        videoPlayer->get_gameObject()->SetActive(false);
     }
 
     void PlaybackController::OnMenuSceneLoadedFresh(GlobalNamespace::ScenesTransitionSetupDataSO* transitionSetupData)

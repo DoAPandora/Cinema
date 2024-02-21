@@ -15,6 +15,7 @@
 #include "GlobalNamespace/IDifficultyBeatmap.hpp"
 
 using namespace UnityEngine;
+using namespace UnityEngine::Video;
 
 DEFINE_TYPE(Cinema, CustomVideoPlayer);
 
@@ -25,15 +26,14 @@ namespace Cinema {
     void CustomVideoPlayer::Awake()
     {
         DEBUG("Creating CustomVideoPlayer");
-//        CreateScreen();
-
-        player = CreateVideoPlayer(get_transform().ptr());
+        CreateScreen();
+        player = CreateVideoPlayer(transform);
         auto set_source = RESOLVE_ICALL(set_source, void, Video::VideoSource);
         set_source(player, Video::VideoSource::Url);
-        auto set_renderMode = RESOLVE_ICALL(set_renderMode, void, Video::VideoRenderMode);
-//        set_renderMode(player, Video::VideoRenderMode::);
-//        auto set_targetTexture = RESOLVE_ICALL(set_targetTexture, void, RenderTexture*);
-//        set_targetTexture(player, )
+        // auto set_renderMode = RESOLVE_ICALL(set_renderMode, void, Video::VideoRenderMode);
+        // set_renderMode(player, Video::VideoRenderMode::);
+        // auto set_targetTexture = RESOLVE_ICALL(set_targetTexture, void, RenderTexture*);
+        // set_targetTexture(player, )
 
         auto set_playOnAwake = RESOLVE_ICALL(set_playOnAwake, void, bool);
         set_playOnAwake(player, false);
@@ -41,14 +41,34 @@ namespace Cinema {
         set_waitForFirstFrame(player, true);
 
         DEBUG("Adding event callbacks");
-        videoPlayerErrorReceived = {&CustomVideoPlayer::VideoPlayerErrorReceived, this};
-        player->errorReceived += videoPlayerErrorReceived;
-        videoPlayerPrepareComplete = {&CustomVideoPlayer::VideoPlayerPrepareComplete, this};
-        player->prepareCompleted += videoPlayerPrepareComplete;
-        videoPlayerStarted = {&CustomVideoPlayer::VideoPlayerStarted, this};
-        player->started += videoPlayerStarted;
-        videoPlayerFinished = {&CustomVideoPlayer::VideoPlayerFinished, this};
-        player->loopPointReached += videoPlayerFinished;
+        
+        videoPlayerErrorReceived = custom_types::MakeDelegate<Video::VideoPlayer::ErrorEventHandler*>(
+            std::function<void(Video::VideoPlayer*, StringW)>(
+                std::bind(&CustomVideoPlayer::VideoPlayerErrorReceived, this, std::placeholders::_1, std::placeholders::_2)
+            )
+        );
+        player->errorReceived = (Video::VideoPlayer::ErrorEventHandler*)System::Delegate::Combine(player->errorReceived, videoPlayerErrorReceived);
+        
+        videoPlayerPrepareComplete = custom_types::MakeDelegate<VideoPlayer::EventHandler*>(
+            std::function<void(VideoPlayer*)>(
+                std::bind(&CustomVideoPlayer::VideoPlayerPrepareComplete, this, std::placeholders::_1)
+            )
+        );
+        player->prepareCompleted = (VideoPlayer::EventHandler*)System::Delegate::Combine(player->prepareCompleted, videoPlayerPrepareComplete);
+
+        videoPlayerStarted = custom_types::MakeDelegate<VideoPlayer::EventHandler*>(
+            std::function<void(VideoPlayer*)>(
+                std::bind(&CustomVideoPlayer::VideoPlayerStarted, this, std::placeholders::_1)
+            )
+        );
+        player->started = (VideoPlayer::EventHandler*)System::Delegate::Combine(player->started, videoPlayerStarted);
+        
+        videoPlayerFinished = custom_types::MakeDelegate<VideoPlayer::EventHandler*>(
+            std::function<void(VideoPlayer*)>(
+                std::bind(&CustomVideoPlayer::VideoPlayerFinished, this, std::placeholders::_1)
+            )
+        );
+        player->loopPointReached = (VideoPlayer::EventHandler*)System::Delegate::Combine(player->loopPointReached, videoPlayerFinished);
 
         DEBUG("Creating audio source");
         videoPlayerAudioSource = get_gameObject()->AddComponent<AudioSource*>();
