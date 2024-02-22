@@ -30,7 +30,7 @@ public:
 
     std::optional<float> curvatureDegreesFixed;
 
-
+    DECLARE_INSTANCE_METHOD(void, Start);
     DECLARE_INSTANCE_METHOD(void, Update);
     DECLARE_INSTANCE_METHOD(void , UpdateRadius);
     DECLARE_INSTANCE_METHOD(float, GetCircleFraction);

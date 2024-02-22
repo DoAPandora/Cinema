@@ -39,8 +39,6 @@ void TestCurvedSurface(GlobalNamespace::ScenesTransitionSetupDataSO *)
     auto go = UnityEngine::GameObject::New_ctor("CurvedSurfaceTest");
     UnityEngine::Object::DontDestroyOnLoad(go);
     go->get_transform()->set_position({0, 1, 1});
-    go->AddComponent<UnityEngine::MeshFilter *>();
-    go->AddComponent<UnityEngine::MeshRenderer *>();
     auto body = go->AddComponent<Cinema::CurvedSurface *>();
 
     body->Initialise(16.0f / 10.0f, 9.0f / 10.0f, 5, 60, 30, false);
@@ -92,7 +90,7 @@ CINEMA_EXPORT void late_load() noexcept
 
     PinkCore::RequirementAPI::RegisterInstalled("Cinema");
 
-       BSEvents::lateMenuSceneLoadedFresh += TestCurvedSurface;
+    BSEvents::lateMenuSceneLoadedFresh += TestCurvedSurface;
 }
 
 #include "bsml/shared/BSMLDataCache.hpp"
