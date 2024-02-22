@@ -133,7 +133,7 @@ public:
     void UpdateStatusText(VideoConfig& videoConfig);
     void SetThumbnail(std::optional<std::string> url);
     void OnDifficultySelected(ExtraSongDataArgs extraSongDataArgs);
-    void OnConfigChanged(const std::optional<VideoConfig> config);// might not be needed
+    void OnConfigChanged(OptionalReference<VideoConfig> config);// might not be needed
 //    custom_types::Helpers::Coroutine UpdateSearchResults()
     void OnDownloadFinished(VideoConfig& video);
     // search progress

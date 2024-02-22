@@ -10,61 +10,69 @@
 
 #include <filesystem>
 
+#include <functional>
+
+template <typename T>
+using OptionalReference = std::optional<std::reference_wrapper<T>>;
+
 class EnvironmentObject;
 
 namespace Cinema {
 
-    enum class DownloadState {
-        NotDownloaded,
-        Preparing,
-        Downloading,
-        DownloadingVideo,
-        DownloadingAudio,
-        Converting,
-        Downloaded,
-        Cancelled
-    };
-
-    DECLARE_JSON_CLASS(EnvironmentModification,
-        VALUE(std::string, name);
-        VALUE_OPTIONAL(std::string, parentName);
-        VALUE_OPTIONAL(std::string, cloneFrom);
-        VALUE_OPTIONAL(bool, active);
-        VALUE_OPTIONAL(ConfigUtils::Vector3, position);
-        VALUE_OPTIONAL(ConfigUtils::Vector3, rotation);
-        VALUE_OPTIONAL(ConfigUtils::Vector3, scale);
-
-        UnityEngine::GameObject* gameObject;
-        EnvironmentObject* gameObjectClone;
-    );
-
-    DECLARE_JSON_CLASS(ColorCorrection,
-       VALUE_OPTIONAL(float, brightness);
-       VALUE_OPTIONAL(float, contrast);
-       VALUE_OPTIONAL(float, saturation);
-       VALUE_OPTIONAL(float, hue);
-       VALUE_OPTIONAL(float, exposure);
-       VALUE_OPTIONAL(float, gamma);
-    );
-
-    DECLARE_JSON_CLASS(Vigenette,
-        VALUE_OPTIONAL(std::string, type);
-        VALUE_OPTIONAL(float, radius);
-        VALUE_OPTIONAL(float, softness);
-    );
-
-    DECLARE_JSON_CLASS(ScreenConfig,
-        VALUE_OPTIONAL(ConfigUtils::Vector3, position);
-        VALUE_OPTIONAL(ConfigUtils::Vector3, rotation);
-        VALUE_OPTIONAL(ConfigUtils::Vector3, scale);
-    );
-
-    DECLARE_JSON_CLASS(UserSettings,
-        VALUE_OPTIONAL(bool, customOffset);
-        VALUE_OPTIONAL(int, originalOffset);
-    );
+        enum class DownloadState {
+            NotDownloaded,
+            Preparing,
+            Downloading,
+            DownloadingVideo,
+            DownloadingAudio,
+            Converting,
+            Downloaded,
+            Cancelled
+        };
 
     DECLARE_JSON_CLASS(VideoConfig,
+
+    public:
+
+        DECLARE_JSON_CLASS(EnvironmentModification,
+            VALUE(std::string, name);
+            VALUE_OPTIONAL(std::string, parentName);
+            VALUE_OPTIONAL(std::string, cloneFrom);
+            VALUE_OPTIONAL(bool, active);
+            VALUE_OPTIONAL(ConfigUtils::Vector3, position);
+            VALUE_OPTIONAL(ConfigUtils::Vector3, rotation);
+            VALUE_OPTIONAL(ConfigUtils::Vector3, scale);
+
+            UnityEngine::GameObject* gameObject;
+            EnvironmentObject* gameObjectClone;
+        );
+
+        DECLARE_JSON_CLASS(ColorCorrection,
+        VALUE_OPTIONAL(float, brightness);
+        VALUE_OPTIONAL(float, contrast);
+        VALUE_OPTIONAL(float, saturation);
+        VALUE_OPTIONAL(float, hue);
+        VALUE_OPTIONAL(float, exposure);
+        VALUE_OPTIONAL(float, gamma);
+        );
+
+        DECLARE_JSON_CLASS(Vigenette,
+            VALUE_OPTIONAL(std::string, type);
+            VALUE_OPTIONAL(float, radius);
+            VALUE_OPTIONAL(float, softness);
+        );
+
+        DECLARE_JSON_CLASS(ScreenConfig,
+            VALUE_OPTIONAL(ConfigUtils::Vector3, position);
+            VALUE_OPTIONAL(ConfigUtils::Vector3, rotation);
+            VALUE_OPTIONAL(ConfigUtils::Vector3, scale);
+        );
+
+        DECLARE_JSON_CLASS(UserSettings,
+            VALUE_OPTIONAL(bool, customOffset);
+            VALUE_OPTIONAL(int, originalOffset);
+        );
+
         VALUE_OPTIONAL(std::string, videoID);
         VALUE_OPTIONAL(std::string, videoUrl);
         VALUE_OPTIONAL(std::string, title);

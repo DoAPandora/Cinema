@@ -32,7 +32,7 @@ namespace Cinema {
             return;
         }
 
-        currentVideo->userSettings = currentVideo->userSettings.value_or(UserSettings());
+        currentVideo->userSettings = currentVideo->userSettings.value_or(VideoConfig::UserSettings());
         currentVideo->userSettings->customOffset = true;
         currentVideo->userSettings->originalOffset = currentVideo->offset;
         currentVideo->needsToSave = true;
@@ -378,7 +378,7 @@ namespace Cinema {
         }
     }
 
-    void VideoMenu::OnConfigChanged(const std::optional<VideoConfig> config) {}
+    void VideoMenu::OnConfigChanged(const OptionalReference<VideoConfig> config) {}
 
     void VideoMenu::StatusViewerDidEnable()
     {

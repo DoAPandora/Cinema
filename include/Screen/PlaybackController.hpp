@@ -83,8 +83,8 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
     static void Create();
     float GetReferenceTime(std::optional<float> referenceTime = std::nullopt, std::optional<float> playbackSpeed = std::nullopt);
     void ResyncVideo(std::optional<float> referenceTime = std::nullopt, std::optional<float> playbackSpeed = std::nullopt);
-    void OnConfigChanged(std::optional<VideoConfig> config);
-    void OnConfigChanged(std::optional<VideoConfig> config, bool reloadVideo);
+    void OnConfigChanged(OptionalReference<VideoConfig> config);
+    void OnConfigChanged(OptionalReference<VideoConfig> config, bool reloadVideo);
     void SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel* level, std::optional<VideoConfig> config);
     void DifficultySelected(ExtraSongDataArgs extraSongDataArgs);
     custom_types::Helpers::Coroutine PlayVideoAfterAudioSourceCoroutine(bool preview);

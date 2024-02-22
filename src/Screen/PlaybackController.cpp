@@ -141,9 +141,9 @@ namespace Cinema {
 
     void PlaybackController::SceneChanged() {}
 
-    void PlaybackController::OnConfigChanged(std::optional<VideoConfig> config) {}
+    void PlaybackController::OnConfigChanged(OptionalReference<VideoConfig> config) {}
 
-    void PlaybackController::OnConfigChanged(std::optional<VideoConfig> config, bool reloadVideo) {}
+    void PlaybackController::OnConfigChanged(OptionalReference<VideoConfig> config, bool reloadVideo) {}
 
     void PlaybackController::ConfigChangedPrepareHandler(UnityEngine::Video::VideoPlayer *sender) {}
 
@@ -282,8 +282,7 @@ namespace Cinema {
 
     void PlaybackController::SceneTransitionInitCalled() {}
 
-    void PlaybackController::UpdateSongPreviewPlayer(UnityEngine::AudioSource *activeAudioSource, float startTime,
-                                                     float timeRemaining, bool isDefault) {}
+    void PlaybackController::UpdateSongPreviewPlayer(UnityEngine::AudioSource *activeAudioSource, float startTime, float timeRemaining, bool isDefault) {}
 
     void PlaybackController::StartSongPreview() {}
 
