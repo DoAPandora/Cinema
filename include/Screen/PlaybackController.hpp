@@ -35,7 +35,7 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
 
     public:
 
-    std::optional<VideoConfig> videoConfig;
+    VideoConfigPtr videoConfig;
     std::chrono::system_clock::time_point audioSourceStartTime;
 
     UnityEngine::Video::VideoPlayer::EventHandler* configChangedPrepareHandler;
@@ -83,12 +83,12 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
     static void Create();
     float GetReferenceTime(std::optional<float> referenceTime = std::nullopt, std::optional<float> playbackSpeed = std::nullopt);
     void ResyncVideo(std::optional<float> referenceTime = std::nullopt, std::optional<float> playbackSpeed = std::nullopt);
-    void OnConfigChanged(OptionalReference<VideoConfig> config);
-    void OnConfigChanged(OptionalReference<VideoConfig> config, bool reloadVideo);
-    void SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel* level, std::optional<VideoConfig> config);
+    void OnConfigChanged(VideoConfigPtr config);
+    void OnConfigChanged(VideoConfigPtr config, bool reloadVideo);
+    void SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel* level, VideoConfigPtr config);
     void DifficultySelected(ExtraSongDataArgs extraSongDataArgs);
     custom_types::Helpers::Coroutine PlayVideoAfterAudioSourceCoroutine(bool preview);
     custom_types::Helpers::Coroutine PlayVideoDelayedCoroutine(float delayStartTime);
-    void PrepareVideo(VideoConfig& video);
-    custom_types::Helpers::Coroutine PrepareVideoCoroutine(VideoConfig video);
+    void PrepareVideo(VideoConfigPtr video);
+    custom_types::Helpers::Coroutine PrepareVideoCoroutine(VideoConfigPtr video);
 )

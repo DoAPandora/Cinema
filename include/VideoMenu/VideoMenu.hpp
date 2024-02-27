@@ -80,7 +80,7 @@ public:
 
     std::optional<ExtraSongData::ExtraSongData> extraSongData;
     std::optional<ExtraSongData::DifficultyData> difficultyData;
-    std::optional<VideoConfig> currentVideo;
+    VideoConfigPtr currentVideo;
     std::string searchText;
     std::optional<std::string> thumbnailURL;
 
@@ -127,15 +127,15 @@ public:
 
 public:
 
-    void OnDownloadProgress(VideoConfig& videoConfig);
+    void OnDownloadProgress(VideoConfigPtr videoConfig);
     void CheckEntitlementAndEnableSearch(GlobalNamespace::IPreviewBeatmapLevel* level);
-    void SetupLevelDetailView(VideoConfig& videoConfig);
-    void UpdateStatusText(VideoConfig& videoConfig);
+    void SetupLevelDetailView(VideoConfigPtr videoConfig);
+    void UpdateStatusText(VideoConfigPtr videoConfig);
     void SetThumbnail(std::optional<std::string> url);
     void OnDifficultySelected(ExtraSongDataArgs extraSongDataArgs);
-    void OnConfigChanged(OptionalReference<VideoConfig> config);// might not be needed
+    void OnConfigChanged(VideoConfigPtr config);// might not be needed
 //    custom_types::Helpers::Coroutine UpdateSearchResults()
-    void OnDownloadFinished(VideoConfig& video);
+    void OnDownloadFinished(VideoConfigPtr video);
     // search progress
     custom_types::Helpers::Coroutine SearchLoadingCoroutine();
 

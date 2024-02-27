@@ -22,12 +22,12 @@ namespace Cinema {
 
     bool VideoMenu::get_CustomizeOffset()
     {
-        return currentVideo != std::nullopt && (currentVideo->IsOfficialConfig || (currentVideo->userSettings.has_value() && currentVideo->userSettings.value().customOffset) || currentVideo->IsWIPLevel);
+        return currentVideo != nullptr && (currentVideo->IsOfficialConfig || (currentVideo->userSettings.has_value() && currentVideo->userSettings.value().customOffset) || currentVideo->IsWIPLevel);
     }
 
     void VideoMenu::set_CustomizeOffset(bool value)
     {
-        if (currentVideo == std::nullopt || !value)
+        if (currentVideo == nullptr || !value)
         {
             return;
         }
@@ -133,7 +133,7 @@ namespace Cinema {
         noVideoText->SetTextInternal("No video configured");
     }
 
-    void VideoMenu::OnDownloadProgress(Cinema::VideoConfig &videoConfig)
+    void VideoMenu::OnDownloadProgress(Cinema::VideoConfigPtr videoConfig)
     {
         UpdateStatusText(videoConfig);
         SetupLevelDetailView(videoConfig);
@@ -152,7 +152,7 @@ namespace Cinema {
             CheckEntitlementAndEnableSearch(currentLevel);
         }
 
-        if (currentVideo == std::nullopt)
+        if (currentVideo == nullptr)
         {
             return;
         }
@@ -215,14 +215,14 @@ namespace Cinema {
 
         videoSearchResults->get_gameObject()->SetActive(false);
 
-        if (currentVideo == std::nullopt)
+        if (currentVideo == nullptr)
         {
             DEBUG("Current video is null");
             ResetVideoMenu();
             return;
         }
 
-        SetupLevelDetailView(*currentVideo);
+        SetupLevelDetailView(currentVideo);
 
         if(!videoMenuActive)
         {
@@ -258,7 +258,7 @@ namespace Cinema {
         videoOffset->SetTextInternal(fmt::format("{:10L} ms", currentVideo->offset));
         SetThumbnail(currentVideo->videoID.has_value() ? std::make_optional(fmt::format("https://i.ytimg.com/vi/{}/hqdefault.jpg", *currentVideo->videoID)) : std::nullopt);
 
-        UpdateStatusText(*currentVideo);
+        UpdateStatusText(currentVideo);
         if (CustomizeOffset)
         {
             customizeOffsetToggle->SetActive(false);
@@ -273,7 +273,7 @@ namespace Cinema {
         bsmlParserParams->EmitEvent("update-customize-offset");
     }
 
-    void VideoMenu::SetupLevelDetailView(Cinema::VideoConfig &videoConfig)
+    void VideoMenu::SetupLevelDetailView(Cinema::VideoConfigPtr videoConfig)
     {
         if (videoConfig != currentVideo)
         {
@@ -285,20 +285,20 @@ namespace Cinema {
             return;
         }
 
-        switch (videoConfig.downloadState) {
+        switch (videoConfig->downloadState) {
             case DownloadState::Downloaded:
-                if (videoConfig.IsWIPLevel && !difficultyData->HasCinema() && !extraSongData->HasCinemaInAnyDifficulty())
+                if (videoConfig->IsWIPLevel && !difficultyData->HasCinema() && !extraSongData->HasCinemaInAnyDifficulty())
                 {
 
                 }
-                else if (!videoConfig.errorMessage.empty())
+                else if (!videoConfig->errorMessage.empty())
                 {}
                 else
                 {}
         }
     }
 
-    void VideoMenu::UpdateStatusText(Cinema::VideoConfig &videoConfig) {}
+    void VideoMenu::UpdateStatusText(Cinema::VideoConfigPtr videoConfig) {}
 
     void VideoMenu::SetThumbnail(std::optional<std::string> url)
     {
@@ -343,17 +343,17 @@ namespace Cinema {
 
 //        PlaybackController::get_instance().
 
-        if (currentVideo != std::nullopt && currentVideo->needsToSave)
+        if (currentVideo != nullptr && currentVideo->needsToSave)
         {
-            VideoLoader::SaveVideoConfig(*currentVideo);
+            VideoLoader::SaveVideoConfig(currentVideo);
         }
 
         currentLevelIsPlaylistSong = isPlaylistSong;
         currentLevel = level;
         if (!currentLevel)
         {
-            currentVideo = std::nullopt;
-            PlaybackController::get_instance()->SetSelectedLevel(nullptr, std::nullopt);
+            currentVideo = nullptr;
+            PlaybackController::get_instance()->SetSelectedLevel(nullptr, nullptr);
             SetupVideoDetails();
             return;
         }
@@ -372,13 +372,13 @@ namespace Cinema {
     {
         extraSongData = extraSongDataArgs.songData;
         difficultyData = extraSongDataArgs.selectedDifficultyData;
-        if(currentVideo != std::nullopt)
+        if(currentVideo != nullptr)
         {
-            SetupLevelDetailView(*currentVideo);
+            SetupLevelDetailView(currentVideo);
         }
     }
 
-    void VideoMenu::OnConfigChanged(const OptionalReference<VideoConfig> config) {}
+    void VideoMenu::OnConfigChanged(VideoConfigPtr config) {}
 
     void VideoMenu::StatusViewerDidEnable()
     {
@@ -396,7 +396,7 @@ namespace Cinema {
 
     void VideoMenu::SearchAction() {}
 
-    void VideoMenu::OnDownloadFinished(Cinema::VideoConfig &video) {}
+    void VideoMenu::OnDownloadFinished(Cinema::VideoConfigPtr video) {}
 
     void VideoMenu::ShowKeyboard()
     {

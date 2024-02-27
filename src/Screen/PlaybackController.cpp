@@ -38,17 +38,18 @@ namespace Cinema {
 
     void PlaybackController::Start()
     {
-        if(instance && instance->m_CachedPtr)
+        if(instance)
         {
             Object::Destroy(this);
             return;
         }
         instance = this;
         INFO("Created PlaybackController");
-
         GameObject::DontDestroyOnLoad(gameObject);
         videoPlayer = gameObject->AddComponent<CustomVideoPlayer*>();
 //         videoPlayer->set_sendFrameReadyEvents(true);
+
+
 
         onPrepareComplete = custom_types::MakeDelegate<VideoPlayer::EventHandler*>(
             std::function<void(VideoPlayer*)>(
@@ -141,9 +142,9 @@ namespace Cinema {
 
     void PlaybackController::SceneChanged() {}
 
-    void PlaybackController::OnConfigChanged(OptionalReference<VideoConfig> config) {}
+    void PlaybackController::OnConfigChanged(VideoConfigPtr config) {}
 
-    void PlaybackController::OnConfigChanged(OptionalReference<VideoConfig> config, bool reloadVideo) {}
+    void PlaybackController::OnConfigChanged(VideoConfigPtr config, bool reloadVideo) {}
 
     void PlaybackController::ConfigChangedPrepareHandler(UnityEngine::Video::VideoPlayer *sender) {}
 
@@ -188,14 +189,14 @@ namespace Cinema {
 
         auto level = data->previewBeatmapLevel;
         auto config = VideoLoader::GetConfigForLevel(level);
-        if(!config.has_value())
+        if(config != nullptr)
         {
             videoPlayer->get_gameObject()->SetActive(false);
             INFO("Could not find config for level");
             return;
         }
 
-        SetSelectedLevel(level, config.value());
+        SetSelectedLevel(level, config);
         if(!config->get_isPlayable())
             return;
 
@@ -328,17 +329,17 @@ namespace Cinema {
         videoPlayer->Play();
     }
 
-    void PlaybackController::SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel* level, std::optional<VideoConfig> config)
+    void PlaybackController::SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel* level, VideoConfigPtr config)
     {
         previewWaitingForPreviewPlayer = true;
         previewWaitingForVideoPlayer = true;
-
+        
         currentLevel = level;
         videoConfig = config;
 
         DEBUG("Selected level: {}", level->get_levelID());
 
-        if(config == std::nullopt)
+        if(config == nullptr)
         {
             //f adeout
             StopAllCoroutines();
@@ -346,12 +347,12 @@ namespace Cinema {
         }
 
         DEBUG("Preparing video");
-        PrepareVideo(*config);
+        PrepareVideo(config);
         if(level && VideoLoader::IsDlcSong(level))
         {}
     }
 
-    void PlaybackController::PrepareVideo(VideoConfig& video)
+    void PlaybackController::PrepareVideo(VideoConfigPtr video)
     {
         DEBUG("Preparing video");
         previewWaitingForVideoPlayer = true;
@@ -364,11 +365,11 @@ namespace Cinema {
         StartCoroutine(prepareVideoCoroutine);
     }
 
-    custom_types::Helpers::Coroutine PlaybackController::PrepareVideoCoroutine(VideoConfig video)
+    custom_types::Helpers::Coroutine PlaybackController::PrepareVideoCoroutine(VideoConfigPtr video)
     {
         videoConfig = video;
 
-        videoPlayer->Url = *video.VideoPath;
+        videoPlayer->Url = video->VideoPath.value();
         videoPlayer->Prepare();
         co_return;
     }

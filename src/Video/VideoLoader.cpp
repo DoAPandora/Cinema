@@ -27,9 +27,9 @@
 
 using namespace GlobalNamespace;
 
-std::map<std::string, Cinema::VideoConfig> mapsWithVideo;
-std::map<std::string, Cinema::VideoConfig> cachedConfigs;
-std::map<std::string, Cinema::VideoConfig> bundledConfigs;
+std::map<std::string, Cinema::VideoConfigPtr> mapsWithVideo;
+std::map<std::string, Cinema::VideoConfigPtr> cachedConfigs;
+std::map<std::string, Cinema::VideoConfigPtr> bundledConfigs;
 
 GlobalNamespace::BeatmapLevelsModel* beatmapLevelsModel;
 IAdditionalContentModel* additionalContentModel;
@@ -82,7 +82,9 @@ namespace Cinema::VideoLoader {
         DEBUG("Loading bundled configs");
         auto configs = LoadBundledConfigs();
         for (const auto &config: configs) {
-            bundledConfigs.insert_or_assign(config.levelID, config.config);
+            VideoConfigPtr ptr(new VideoConfig);
+            *ptr = config.config;
+            bundledConfigs.insert_or_assign(config.levelID, ptr);
         }
     }
 
@@ -117,7 +119,11 @@ namespace Cinema::VideoLoader {
         return p / CONFIG_FILENAME;
     }
 
-    void AddConfigToCache(VideoConfig &config, IPreviewBeatmapLevel *level) {
+    void AddConfigToCache(VideoConfigPtr config, IPreviewBeatmapLevel *level) {
+        if (config == nullptr)
+        {
+            return;
+        }
         auto success = cachedConfigs.insert({static_cast<std::string>(level->get_levelID()), config});
         if (success.second) {
             DEBUG("Adding config for {} to cache", level->get_levelID());
@@ -131,28 +137,28 @@ namespace Cinema::VideoLoader {
         }
     }
 
-    std::optional<VideoConfig> GetConfigFromCache(IPreviewBeatmapLevel *level) {
+    VideoConfigPtr GetConfigFromCache(IPreviewBeatmapLevel *level) {
         auto key = static_cast<std::string>(level->get_levelID());
         if (cachedConfigs.contains(key)) {
             DEBUG("Loading config for {} from cache", key);
             return cachedConfigs.at(key);
         }
-        return std::nullopt;
+        return nullptr;
     }
 
-    std::optional<VideoConfig> GetConfigFromBundledConfigs(IPreviewBeatmapLevel *level) {
+    VideoConfigPtr GetConfigFromBundledConfigs(IPreviewBeatmapLevel *level) {
         auto cast = il2cpp_utils::try_cast<CustomPreviewBeatmapLevel>(level);
         auto levelID = cast.has_value() ? static_cast<std::string>(level->get_levelID())
                                         : Cinema::Util::ReplaceIllegalFilesystemChar(static_cast<std::string>(level->get_songName()->Trim()));
 
         if (!bundledConfigs.contains(levelID)) {
             DEBUG("No bundled config found for {}", levelID);
-            return std::nullopt;
+            return nullptr;
         }
 
         auto config = bundledConfigs.at(levelID);
-        config.levelDir = GetLevelPath(level);
-        config.bundledConfig = true;
+        config->levelDir = GetLevelPath(level);
+        config->bundledConfig = true;
         return config;
     }
 
@@ -160,8 +166,7 @@ namespace Cinema::VideoLoader {
         return il2cpp_utils::try_cast<PreviewBeatmapLevelSO>(level).has_value();
     }
 
-    void GetAudioClipForLevel(GlobalNamespace::IPreviewBeatmapLevel *level,
-                              const std::function<void(UnityEngine::AudioClip *)> &callback) {
+    void GetAudioClipForLevel(GlobalNamespace::IPreviewBeatmapLevel *level, const std::function<void(UnityEngine::AudioClip *)> &callback) {
         if (!IsDlcSong(level) || !BeatmapLevelsModel) {
             return LoadAudioClipAsync(level, callback);
         }
@@ -198,16 +203,16 @@ namespace Cinema::VideoLoader {
         callback(EntitlementStatus::Owned);
     }
 
-    std::optional<VideoConfig> GetConfigForLevel(IPreviewBeatmapLevel *level) {
+    VideoConfigPtr GetConfigForLevel(IPreviewBeatmapLevel *level) {
         auto cachedConfig = GetConfigFromCache(level);
-        if (cachedConfig.has_value()) {
+        if (cachedConfig != nullptr) {
             if (cachedConfig->downloadState == DownloadState::Downloaded) {
                 RemoveConfigFromCache(level);
                 return cachedConfig;
             }
         }
 
-        std::optional<VideoConfig> videoConfig = std::nullopt;
+        VideoConfigPtr videoConfig;
         auto levelPath = GetLevelPath(level);
         if (std::filesystem::exists(levelPath)) {
             videoConfig = LoadConfig(GetConfigPath(levelPath));
@@ -215,9 +220,9 @@ namespace Cinema::VideoLoader {
             DEBUG("Path does not exist: {}", levelPath);
         }
 
-        if (videoConfig == std::nullopt) {
+        if (videoConfig == nullptr) {
             videoConfig = GetConfigFromBundledConfigs(level);
-            if (videoConfig == std::nullopt) {
+            if (videoConfig == nullptr) {
                 return videoConfig;
             }
             DEBUG("Loaded from bundled configs");
@@ -236,23 +241,23 @@ namespace Cinema::VideoLoader {
         return p / OST_DIRECTORY_NAME / Cinema::Util::ReplaceIllegalFilesystemChar(songName);
     }
 
-    void SaveVideoConfig(VideoConfig &videoConfig) {
-        if (videoConfig.levelDir == std::nullopt || videoConfig.ConfigPath == std::nullopt ||
-            !std::filesystem::exists(*videoConfig.levelDir)) {
-            WARN("Failed to save video. Path {} does not exist.", *videoConfig.levelDir);
+    void SaveVideoConfig(VideoConfigPtr videoConfig) {
+        if (videoConfig->levelDir == std::nullopt || videoConfig->ConfigPath == std::nullopt ||
+            !std::filesystem::exists(*videoConfig->levelDir)) {
+            WARN("Failed to save video. Path {} does not exist.", *videoConfig->levelDir);
             return;
         }
 
-        auto configPath = *videoConfig.ConfigPath;
+        auto configPath = *videoConfig->ConfigPath;
         SaveVideoConfigToPath(videoConfig, configPath);
     }
 
-    void SaveVideoConfigToPath(VideoConfig &config, std::string path) {
+    void SaveVideoConfigToPath(VideoConfigPtr config, std::string path) {
         INFO("Saving video config to {}", path);
 
         try {
-            WriteToFile(path, config);
-            config.needsToSave = false;
+            WriteToFile(path, *config);
+            config->needsToSave = false;
         }
         catch (std::exception &e) {
             ERROR("Failed to save level data:\n{}", e.what());
@@ -265,9 +270,9 @@ namespace Cinema::VideoLoader {
         }
     }
 
-    void DeleteVideo(VideoConfig& videoConfig)
+    void DeleteVideo(VideoConfigPtr videoConfig)
     {
-        if (videoConfig.VideoPath == std::nullopt)
+        if (videoConfig->VideoPath == std::nullopt)
         {
             WARN("Tried to delete video, but its path was null");
             return;
@@ -275,24 +280,24 @@ namespace Cinema::VideoLoader {
 
         try
         {
-            std::filesystem::remove(*videoConfig.VideoPath);
-            INFO("Deleted video at {}", videoConfig.VideoPath);
-            if(videoConfig.downloadState != DownloadState::Cancelled)
+            std::filesystem::remove(*videoConfig->VideoPath);
+            INFO("Deleted video at {}", videoConfig->VideoPath);
+            if(videoConfig->downloadState != DownloadState::Cancelled)
             {
-                videoConfig.downloadState = DownloadState::NotDownloaded;
+                videoConfig->downloadState = DownloadState::NotDownloaded;
             }
 
-            videoConfig.videoFile = std::nullopt;
+            videoConfig->videoFile = std::nullopt;
         }
         catch (const std::exception& e)
         {
-            ERROR("Failed to delete video at {}\n{}", videoConfig.VideoPath, e.what());
+            ERROR("Failed to delete video at {}\n{}", videoConfig->VideoPath, e.what());
         }
     }
 
-    bool DeleteConfig(Cinema::VideoConfig &videoConfig, GlobalNamespace::IPreviewBeatmapLevel *level)
+    bool DeleteConfig(VideoConfigPtr videoConfig, GlobalNamespace::IPreviewBeatmapLevel *level)
     {
-        if (videoConfig.levelDir == std::nullopt)
+        if (videoConfig->levelDir == std::nullopt)
         {
             ERROR("levelDir was null when trying to delete config");
             return false;
@@ -300,7 +305,7 @@ namespace Cinema::VideoLoader {
 
         try
         {
-            auto cinemaConfigPath = GetConfigPath(*videoConfig.levelDir);
+            auto cinemaConfigPath = GetConfigPath(*videoConfig->levelDir);
             if (std::filesystem::exists(cinemaConfigPath))
             {
                 std::filesystem::remove(cinemaConfigPath);
@@ -322,27 +327,25 @@ namespace Cinema::VideoLoader {
         return true;
     }
 
-    std::optional<VideoConfig> LoadConfig(std::string configPath)
+    VideoConfigPtr LoadConfig(std::string configPath)
     {
         if (!std::filesystem::exists(configPath))
         {
-            return std::nullopt;
+            return nullptr;
         }
 
-        std::optional<VideoConfig> videoConfig;
+        VideoConfigPtr videoConfig(new VideoConfig);
         try
         {
-            VideoConfig c;
-            ReadFromFile(configPath, c);
-            videoConfig = c;
+            ReadFromFile(configPath, *videoConfig);
         }
         catch (const std::exception& e)
         {
             ERROR("Error parsing video json {}:\n{}", configPath, e.what());
-            return std::nullopt;
+            return nullptr;
         }
 
-        if(videoConfig != std::nullopt)
+        if(videoConfig != nullptr)
         {
             videoConfig->levelDir = std::filesystem::path(configPath).parent_path().string();
             videoConfig->UpdateDownloadState();

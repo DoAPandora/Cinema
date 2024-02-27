@@ -12,23 +12,23 @@
 
 #include <functional>
 
-template <typename T>
-using OptionalReference = std::optional<std::reference_wrapper<T>>;
-
 class EnvironmentObject;
 
 namespace Cinema {
 
-        enum class DownloadState {
-            NotDownloaded,
-            Preparing,
-            Downloading,
-            DownloadingVideo,
-            DownloadingAudio,
-            Converting,
-            Downloaded,
-            Cancelled
-        };
+    class VideoConfig;
+    using VideoConfigPtr = std::shared_ptr<VideoConfig>;
+
+    enum class DownloadState {
+        NotDownloaded,
+        Preparing,
+        Downloading,
+        DownloadingVideo,
+        DownloadingAudio,
+        Converting,
+        Downloaded,
+        Cancelled
+    };
 
     DECLARE_JSON_CLASS(VideoConfig,
 

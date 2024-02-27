@@ -47,9 +47,9 @@ namespace Cinema {
 
         void RemoveConfigFromCache(GlobalNamespace::IPreviewBeatmapLevel *level);
 
-        std::optional<Cinema::VideoConfig> GetConfigFromCache(GlobalNamespace::IPreviewBeatmapLevel *level);
+        VideoConfigPtr GetConfigFromCache(GlobalNamespace::IPreviewBeatmapLevel *level);
 
-        std::optional<Cinema::VideoConfig> GetConfigFromBundledConfigs(GlobalNamespace::IPreviewBeatmapLevel *level);
+        VideoConfigPtr GetConfigFromBundledConfigs(GlobalNamespace::IPreviewBeatmapLevel *level);
 
         void StopFileSystemWatcher();
 
@@ -71,19 +71,19 @@ namespace Cinema {
 
         void GetEntitlementForLevel(GlobalNamespace::IPreviewBeatmapLevel *level, const std::function<void(GlobalNamespace::EntitlementStatus)> &callback);
 
-        std::optional<Cinema::VideoConfig> GetConfigForLevel(GlobalNamespace::IPreviewBeatmapLevel *level);
+        VideoConfigPtr GetConfigForLevel(GlobalNamespace::IPreviewBeatmapLevel *level);
 
         std::string GetLevelPath(GlobalNamespace::IPreviewBeatmapLevel *level);
 
-        void SaveVideoConfig(Cinema::VideoConfig &videoConfig);
+        void SaveVideoConfig(VideoConfigPtr);
 
-        void SaveVideoConfigToPath(Cinema::VideoConfig &videoConfig, std::string path);
+        void SaveVideoConfigToPath(VideoConfigPtr videoConfig, std::string path);
 
-        void DeleteVideo(Cinema::VideoConfig &videoConfig);
+        void DeleteVideo(VideoConfigPtr videoConfig);
 
-        bool DeleteConfig(Cinema::VideoConfig &videoConfig, GlobalNamespace::IPreviewBeatmapLevel *level);
+        bool DeleteConfig(VideoConfigPtr videoConfig, GlobalNamespace::IPreviewBeatmapLevel *level);
 
-        std::optional<VideoConfig> LoadConfig(std::string path);
+        VideoConfigPtr LoadConfig(std::string path);
 
         std::vector<BundledConfig> LoadBundledConfigs();
     }
