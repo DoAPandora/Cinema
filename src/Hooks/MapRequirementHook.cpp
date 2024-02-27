@@ -14,7 +14,7 @@ MAKE_AUTO_HOOK_MATCH(StandardLevelDetailView_RefreshContent, &StandardLevelDetai
 {
     StandardLevelDetailView_RefreshContent(self);
 
-    if (Cinema::PlaybackController::get_instance()->videoConfig == std::nullopt)
+    if (Cinema::PlaybackController::get_instance()->videoConfig == nullptr)
     {
         return;
     }

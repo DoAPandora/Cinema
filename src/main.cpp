@@ -24,6 +24,8 @@
 
 modloader::ModInfo modInfo{MOD_ID, VERSION, 0};
 
+Cinema::Placement Cinema::Placement::MenuPlacement { UnityEngine::Vector3(0, 4, 16), UnityEngine::Vector3(0, 0, 0), 8.0f};
+
 MAKE_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &GlobalNamespace::DefaultScenesTransitionsFromInit::TransitionToNextScene, void, GlobalNamespace::DefaultScenesTransitionsFromInit *self, bool goStraightToMenu, bool goStraightToEditor, bool goToRecordingToolScene)
 {
     DefaultScenesTransitionsFromInit_TransitionToNextScene(self, goStraightToMenu, goStraightToEditor, goToRecordingToolScene);
@@ -90,7 +92,7 @@ CINEMA_EXPORT void late_load() noexcept
 
     PinkCore::RequirementAPI::RegisterInstalled("Cinema");
 
-    BSEvents::lateMenuSceneLoadedFresh += TestCurvedSurface;
+    // BSEvents::lateMenuSceneLoadedFresh += TestCurvedSurface;
 }
 
 #include "bsml/shared/BSMLDataCache.hpp"

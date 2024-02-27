@@ -4,15 +4,18 @@
 
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/PrimitiveType.hpp"
-#include "UnityEngine/Video/VideoAspectRatio.hpp"
 #include "UnityEngine/Video/VideoRenderMode.hpp"
 #include "UnityEngine/Video/VideoAudioOutputMode.hpp"
 #include "UnityEngine/Video/VideoSource.hpp"
-#include "UnityEngine/Shader.hpp"
 #include "UnityEngine/Resources.hpp"
 #include "UnityEngine/Material.hpp"
 #include "UnityEngine/Quaternion.hpp"
+#include "UnityEngine/AssetBundle.hpp"
+#include "UnityEngine/TextureWrapMode.hpp"
+
 #include "GlobalNamespace/IDifficultyBeatmap.hpp"
+
+#include "assets.hpp"
 
 using namespace UnityEngine;
 using namespace UnityEngine::Video;
@@ -25,23 +28,33 @@ namespace Cinema {
 
     void CustomVideoPlayer::Awake()
     {
+        screenColorOn.a = 0;
+
         DEBUG("Creating CustomVideoPlayer");
         CreateScreen();
+        screenRenderer = screenController->GetRenderer();
+        screenRenderer->material = Material::New_ctor(GetShader());
+        screenRenderer->material->color = screenColorOff;
+        screenRenderer->material->enableInstancing = true;
+
         player = CreateVideoPlayer(transform);
         auto set_source = RESOLVE_ICALL(set_source, void, Video::VideoSource);
         set_source(player, Video::VideoSource::Url);
-        // auto set_renderMode = RESOLVE_ICALL(set_renderMode, void, Video::VideoRenderMode);
-        // set_renderMode(player, Video::VideoRenderMode::);
-        // auto set_targetTexture = RESOLVE_ICALL(set_targetTexture, void, RenderTexture*);
-        // set_targetTexture(player, )
+
+        auto set_renderMode = RESOLVE_ICALL(set_renderMode, void, Video::VideoRenderMode);
+        set_renderMode(player, Video::VideoRenderMode::RenderTexture);
+        renderTexture = screenController->CreateRenderTexture();
+        renderTexture->wrapMode = TextureWrapMode::Mirror;
+
+        auto set_targetTexture = RESOLVE_ICALL(set_targetTexture, void, RenderTexture*);
+        set_targetTexture(player, renderTexture);
 
         auto set_playOnAwake = RESOLVE_ICALL(set_playOnAwake, void, bool);
         set_playOnAwake(player, false);
+
         auto set_waitForFirstFrame = RESOLVE_ICALL(set_waitForFirstFrame, void, bool);
         set_waitForFirstFrame(player, true);
 
-        DEBUG("Adding event callbacks");
-        
         videoPlayerErrorReceived = custom_types::MakeDelegate<Video::VideoPlayer::ErrorEventHandler*>(
             std::function<void(Video::VideoPlayer*, StringW)>(
                 std::bind(&CustomVideoPlayer::VideoPlayerErrorReceived, this, std::placeholders::_1, std::placeholders::_2)
@@ -70,15 +83,34 @@ namespace Cinema {
         );
         player->loopPointReached = (VideoPlayer::EventHandler*)System::Delegate::Combine(player->loopPointReached, videoPlayerFinished);
 
-        DEBUG("Creating audio source");
         videoPlayerAudioSource = get_gameObject()->AddComponent<AudioSource*>();
+
         auto set_audioOutputMode = RESOLVE_ICALL(set_audioOutputMode, void, Video::VideoAudioOutputMode);
         set_audioOutputMode(player, Video::VideoAudioOutputMode::AudioSource);
+
         auto SetTargetAudioSource = RESOLVE_ICALL(SetTargetAudioSource, void, uint16_t, AudioSource*);
         SetTargetAudioSource(player, 0, videoPlayerAudioSource);
+
+        Mute();
+//        screenController->SetScreensActive(false);
+
+        screenController->EnableColorBlending(true);
+        SetDefaultMenuPlacement();
     }
 
+    void CustomVideoPlayer::SetDefaultMenuPlacement(std::optional<float> width)
+    {
+        Placement placement = Placement::MenuPlacement;
+        placement.width = width.value_or(placement.height * (21.0f / 9.0f));
+        SetPlacement(placement);
+    }
 
+    void CustomVideoPlayer::SetPlacement(Placement& placement)
+    {
+        screenController->SetPlacement(placement);
+    }
+
+    // Flat plane video player
     Video::VideoPlayer* CustomVideoPlayer::CreateVideoPlayer(UnityEngine::Transform* parent)
     {
          INFO("Creating VideoPlayer");
@@ -115,7 +147,20 @@ namespace Cinema {
 
     Shader* CustomVideoPlayer::GetShader()
     {
-        return nullptr;
+        using AssetBundle_LoadFromMemory = function_ptr_t<UnityEngine::AssetBundle*, ArrayW<uint8_t>, int>;
+        static AssetBundle_LoadFromMemory assetBundle_LoadFromMemory = reinterpret_cast<AssetBundle_LoadFromMemory>(il2cpp_functions::resolve_icall("UnityEngine.AssetBundle::LoadFromMemory_Internal"));
+
+        UnityW<AssetBundle> bundle = assetBundle_LoadFromMemory(IncludedAssets::videoshader, 0);
+        if(!bundle)
+        {
+            ERROR("Loading asset bundle failed!");
+            return Shader::Find("Hidden/BlitAdd");
+        }
+
+        Shader* shader = bundle->LoadAsset<Shader*>("assets/videoshader.shader");
+        bundle->Unload(false);
+
+        return shader;
     }
 
     void CustomVideoPlayer::FadeControllerUpdate(float value) {}
@@ -152,7 +197,12 @@ namespace Cinema {
     void CustomVideoPlayer::HideScreenBody() {}
 
     void CustomVideoPlayer::CreateScreen()
-    {}
+    {
+        screenController = ScreenController::New_ctor();
+        screenController->CreateScreen(transform);
+        screenController->SetScreensActive(true);
+        SetDefaultMenuPlacement();
+    }
 
     void CustomVideoPlayer::Play()
     {
