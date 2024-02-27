@@ -66,7 +66,7 @@
       },
       {
         "id": "custom-types",
-        "versionRange": "<=0.16.18",
+        "versionRange": "^0.16.18",
         "additionalData": {}
       },
       {
@@ -110,17 +110,13 @@
     {
       "dependency": {
         "id": "bsml",
-        "versionRange": "=0.4.9",
+        "versionRange": "=0.4.10",
         "additionalData": {
-          "soLink": "https://github.com/RedBrumbler/Quest-BSML/releases/download/v0.4.9/libbsml.so",
-          "debugSoLink": "https://github.com/RedBrumbler/Quest-BSML/releases/download/v0.4.9/debug_libbsml.so",
           "overrideSoName": "libbsml.so",
-          "modLink": "https://github.com/RedBrumbler/Quest-BSML/releases/download/v0.4.9/BSML.qmod",
-          "branchName": "version/v0_4_9",
           "cmake": true
         }
       },
-      "version": "0.4.9"
+      "version": "0.4.10"
     },
     {
       "dependency": {
