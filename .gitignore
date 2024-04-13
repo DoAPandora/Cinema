@@ -56,3 +56,6 @@ mod.json
 tombstone*
 ffmpeg/
 cmake-build-debug/
+
+
+include/assets.hpp

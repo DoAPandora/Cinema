@@ -125,5 +125,6 @@
         "__functional_03": "cpp",
         "ranges": "cpp"
     },
-    "cmake.configureOnOpen": true
+    "cmake.configureOnOpen": true,
+    "C_Cpp.default.compilerPath": "/home/kodenamekrak/ndk/r27-canary/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++"
 }

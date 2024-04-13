@@ -7,7 +7,7 @@
 #include "Util/EventArgs.hpp"
 #include "Video/VideoConfig.hpp"
 
-#include "GlobalNamespace/IPreviewBeatmapLevel.hpp"
+#include "GlobalNamespace/BeatmapLevel.hpp"
 
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/RectTransform.hpp"
@@ -67,7 +67,7 @@ DECLARE_CLASS_CODEGEN(Cinema, VideoMenu, UnityEngine::MonoBehaviour,
     //Menu status + detail view controller
     DECLARE_INSTANCE_FIELD(VideoMenuStatus*, menuStatus);
     DECLARE_INSTANCE_FIELD(bool, videoMenuInitialized);
-    DECLARE_INSTANCE_FIELD(GlobalNamespace::IPreviewBeatmapLevel*, currentLevel);
+    DECLARE_INSTANCE_FIELD(GlobalNamespace::BeatmapLevel*, currentLevel);
     DECLARE_INSTANCE_FIELD(bool, currentLevelIsPlaylistSong); // is this even needed on quest ?
     DECLARE_INSTANCE_FIELD(bool, videoMenuActive);
     DECLARE_INSTANCE_FIELD(int, selectedCell);
@@ -96,10 +96,10 @@ public:
     DECLARE_INSTANCE_METHOD(void, ResetVideoMenu);
     DECLARE_INSTANCE_METHOD(void, SetButtonState, bool state);
     DECLARE_INSTANCE_METHOD(void, SetupVideoDetails);
-    DECLARE_INSTANCE_METHOD(void, SetThumbnailFromCover, GlobalNamespace::IPreviewBeatmapLevel* level);
-    DECLARE_INSTANCE_METHOD(void, SetSelectedLevel, GlobalNamespace::IPreviewBeatmapLevel* level);
-    DECLARE_INSTANCE_METHOD(void, HandleDidSelectLevel, GlobalNamespace::IPreviewBeatmapLevel* level, bool isPlaylistSong = false);
-    DECLARE_INSTANCE_METHOD(void, OnLevelSelected, GlobalNamespace::IPreviewBeatmapLevel* level);
+    DECLARE_INSTANCE_METHOD(void, SetThumbnailFromCover, GlobalNamespace::BeatmapLevel* level);
+    DECLARE_INSTANCE_METHOD(void, SetSelectedLevel, GlobalNamespace::BeatmapLevel* level);
+    DECLARE_INSTANCE_METHOD(void, HandleDidSelectLevel, GlobalNamespace::BeatmapLevel* level, bool isPlaylistSong = false);
+    DECLARE_INSTANCE_METHOD(void, OnLevelSelected, GlobalNamespace::BeatmapLevel* level);
     DECLARE_INSTANCE_METHOD(void, StatusViewerDidEnable);
     DECLARE_INSTANCE_METHOD(void, StatusViewerDidDisable);
     DECLARE_INSTANCE_METHOD(void, ApplyOffset, int offset);
@@ -128,7 +128,7 @@ public:
 public:
 
     void OnDownloadProgress(VideoConfigPtr videoConfig);
-    void CheckEntitlementAndEnableSearch(GlobalNamespace::IPreviewBeatmapLevel* level);
+    void CheckEntitlementAndEnableSearch(GlobalNamespace::BeatmapLevel* level);
     void SetupLevelDetailView(VideoConfigPtr videoConfig);
     void UpdateStatusText(VideoConfigPtr videoConfig);
     void SetThumbnail(std::optional<std::string> url);

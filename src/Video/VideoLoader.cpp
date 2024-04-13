@@ -96,13 +96,17 @@ namespace Cinema::VideoLoader {
             return officialMaps;
         }
 
-        for(auto levelPack : BeatmapLevelsModel->ostAndExtrasPackCollection->previewBeatmapLevelPack)
+        ListW<BeatmapLevelPack*> list;
+        l.insert_range(BeatmapLevelsModel->ostAndExtrasBeatmapLevelsRepository->beatmapLevelPacks);
+        for(BeatmapLevelPack* levelPack : list)
         {
-            officialMaps->AddRange(levelPack->_previewBeatmapLevelCollection->beatmapLevels->i___System__Collections__Generic__IEnumerable_1_T_());
+            officialMaps->AddRange(levelPack->beatmapLevels);
         }
-        for(auto levelPack : BeatmapLevelsModel->_dlcLevelPackCollectionContainer->beatmapLevelPackCollection->previewBeatmapLevelPack)
+        list.clear();
+        list.insert_range(BeatmapLevelsModel->dlcBeatmapLevelsRepository->beatmapLevelPacks);
+        for(BeatmapLevelPack* levelPack : list)
         {
-            officialMaps->AddRange(levelPack->_previewBeatmapLevelCollection->beatmapLevels->i___System__Collections__Generic__IEnumerable_1_T_());
+            officialMaps->AddRange(levelPack->beatmapLevels);
         }
 
         return officialMaps;

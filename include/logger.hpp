@@ -5,17 +5,6 @@
 #include "paper/shared/logger.hpp"
 
 template <>
-struct fmt::formatter<StringW> : formatter<string_view>
-{
-    // parse is inherited from formatter<string_view>.
-    template <typename FormatContext>
-    auto format(StringW s, FormatContext& ctx)
-    {
-        return formatter<string_view>::format(s ? static_cast<std::string>(s) : std::string("NULL"), ctx);
-    }
-};
-
-template <>
 struct fmt::formatter<std::optional<std::string>> : formatter<string_view>
 {
     // parse is inherited from formatter<string_view>.
@@ -26,10 +15,12 @@ struct fmt::formatter<std::optional<std::string>> : formatter<string_view>
     }
 };
 
-Logger& getLogger();
+static constexpr auto Logger = Paper::ConstLoggerContext("CINEMA");
 
-#define INFO(message, ...) Paper::Logger::fmtLogTag<Paper::LogLevel::INF>(message, "CINEMA", ## __VA_ARGS__)
-#define ERROR(message, ...) Paper::Logger::fmtLogTag<Paper::LogLevel::ERR>(message, "CINEMA", ## __VA_ARGS__)
-#define WARN(message, ...) Paper::Logger::fmtLogTag<Paper::LogLevel::WRN>(message, "CINEMA", ## __VA_ARGS__)
-#define CRITICAL(message, ...) Paper::Logger::fmtLogTag<Paper::LogLevel::ERR>(message, "CINEMA", ## __VA_ARGS__)
-#define DEBUG(message, ...) Paper::Logger::fmtLogTag<Paper::LogLevel::DBG>(message, "CINEMA", ## __VA_ARGS__)
+#define INFO(message, ...) Logger.info(message, ## __VA_ARGS__)
+#define ERROR(message, ...) Logger.error(message, ## __VA_ARGS__)
+#define WARN(message, ...) Logger.warn(message, ## __VA_ARGS__)
+#define CRITICAL(message, ...) Logger.critical(message, ## __VA_ARGS__)
+#define DEBUG(message, ...) Logger.debug(message, ## __VA_ARGS__)
+
+using Logger_T = decltype(Logger);

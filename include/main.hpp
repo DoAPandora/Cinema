@@ -7,7 +7,6 @@
 // It also allows creating objects, configuration, and importantly, hooking methods to modify their values
 #include "beatsaber-hook/shared/utils/il2cpp-functions.hpp"
 #include "beatsaber-hook/shared/utils/logging.hpp"
-#include "hooking.hpp"
 
 #include "ModConfig.hpp"
 
@@ -18,5 +17,7 @@ extern modloader::ModInfo modInfo;
 #define THUMBNAIL_DIR "/sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema/Thumbnails/"
 
 #include "logger.hpp"
+// Relies on include order :(
+#include "hooking.hpp"
 
 #define CINEMA_EXPORT extern "C" __attribute__((visibility("default")))

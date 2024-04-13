@@ -1,5 +1,4 @@
 #include "main.hpp"
-#include "Hooks/Hooks.hpp"
 #include "VideoMenu/VideoMenu.hpp"
 #include "Video/VideoLoader.hpp"
 #include "Util/Util.hpp"
@@ -9,9 +8,10 @@
 #include "Screen/PlaybackController.hpp"
 
 #include "assets.hpp"
-#include "pinkcore/shared/RequirementAPI.hpp"
 
 #include "GlobalNamespace/DefaultScenesTransitionsFromInit.hpp"
+
+#include "songcore/shared/SongCore.hpp"
 
 #include "pythonlib/shared/Utils/FileUtils.hpp"
 
@@ -24,7 +24,11 @@
 
 modloader::ModInfo modInfo{MOD_ID, VERSION, 0};
 
-MAKE_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &GlobalNamespace::DefaultScenesTransitionsFromInit::TransitionToNextScene, void, GlobalNamespace::DefaultScenesTransitionsFromInit *self, bool goStraightToMenu, bool goStraightToEditor, bool goToRecordingToolScene)
+Cinema::Placement Cinema::Placement::MenuPlacement { UnityEngine::Vector3(0, 4, 16), UnityEngine::Vector3(0, 0, 0), 8.0f};
+
+Cinema::Placement Cinema::Placement::MenuPlacement { UnityEngine::Vector3(0, 4, 16), UnityEngine::Vector3(0, 0, 0), 8.0f};
+
+MAKE_AUTO_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &GlobalNamespace::DefaultScenesTransitionsFromInit::TransitionToNextScene, void, GlobalNamespace::DefaultScenesTransitionsFromInit *self, bool goStraightToMenu, bool goStraightToEditor, bool goToRecordingToolScene)
 {
     DefaultScenesTransitionsFromInit_TransitionToNextScene(self, goStraightToMenu, goStraightToEditor, goToRecordingToolScene);
     INFO("Creating PlaybackController");
@@ -33,23 +37,17 @@ MAKE_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &GlobalN
     Cinema::VideoMenu::get_instance()->AddTab();
 }
 
-void TestCurvedSurface(GlobalNamespace::ScenesTransitionSetupDataSO *)
-{
-    DEBUG("Testing curved surface");
-    auto go = UnityEngine::GameObject::New_ctor("CurvedSurfaceTest");
-    UnityEngine::Object::DontDestroyOnLoad(go);
-    go->get_transform()->set_position({0, 1, 1});
-    auto body = go->AddComponent<Cinema::CurvedSurface *>();
+// void TestCurvedSurface(GlobalNamespace::ScenesTransitionSetupDataSO *)
+// {
+//     DEBUG("Testing curved surface");
+//     auto go = UnityEngine::GameObject::New_ctor("CurvedSurfaceTest");
+//     UnityEngine::Object::DontDestroyOnLoad(go);
+//     go->get_transform()->set_position({0, 1, 1});
+//     auto body = go->AddComponent<Cinema::CurvedSurface *>();
 
-    body->Initialise(16.0f / 10.0f, 9.0f / 10.0f, 5, 60, 30, false);
-    body->Generate();
-}
-
-Logger &getLogger()
-{
-    static Logger *logger = new Logger(modInfo, {false, true});
-    return *logger;
-}
+//     body->Initialise(16.0f / 10.0f, 9.0f / 10.0f, 5, 60, 30, false);
+//     body->Generate();
+// }
 
 CINEMA_EXPORT void setup(CModInfo *info) noexcept
 {
@@ -74,23 +72,21 @@ CINEMA_EXPORT void late_load() noexcept
 
     INFO("Installing hooks...");
 
-    Hooks::InstallHooks(getLogger());
-    Cinema::Hooks::InstallLevelDataHook();
-    INSTALL_HOOK(getLogger(), DefaultScenesTransitionsFromInit_TransitionToNextScene);
+    Hooks::InstallHooks(Logger);
 
     INFO("Installed all hooks!");
 
-    // std::string ytdlp = FileUtils::getScriptsPath() + "/yt_dlp";
-    // if(!direxists(ytdlp))
-    //     FileUtils::ExtractZip(IncludedAssets::ytdlp_zip, ytdlp);
+    std::string ytdlp = FileUtils::getScriptsPath() + "/yt_dlp";
+    if(!direxists(ytdlp))
+        FileUtils::ExtractZip(IncludedAssets::ytdlp_zip, ytdlp);
 
-    // BSML::Init();
-    //    BSML::Register::RegisterGameplaySetupTab("Cinema", MOD_ID "_settings", Cinema::VideoMenuManager::get_instance(), BSML::MenuType::Solo);
-    //    BSML::Register::RegisterGameplaySetupTab<Cinema::VideoMenu*>("Cinema");
+    BSML::Init();
+    BSML::Register::RegisterGameplaySetupTab("Cinema", MOD_ID "_settings", Cinema::VideoMenuManager::get_instance(), BSML::MenuType::Solo);
+    BSML::Register::RegisterGameplaySetupTab<Cinema::VideoMenu*>("Cinema");
 
-    PinkCore::RequirementAPI::RegisterInstalled("Cinema");
+    SongCore::API::Capabilities::RegisterCapability("Cinema");
 
-    BSEvents::lateMenuSceneLoadedFresh += TestCurvedSurface;
+    // BSEvents::lateMenuSceneLoadedFresh += TestCurvedSurface;
 }
 
 #include "bsml/shared/BSMLDataCache.hpp"

@@ -4,7 +4,7 @@
 namespace Cinema::Events {
 
     UnorderedEventCallback<bool> cinemaActivated;
-    UnorderedEventCallback<GlobalNamespace::IPreviewBeatmapLevel*> levelSelected;
+    UnorderedEventCallback<GlobalNamespace::BeatmapLevel*> levelSelected;
     UnorderedEventCallback<ExtraSongDataArgs> difficultySelected;
 
     template <typename T>
@@ -29,7 +29,7 @@ namespace Cinema::Events {
         cinemaActivated.invoke(activated);
     }
 
-    void SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel* level)
+    void SetSelectedLevel(GlobalNamespace::BeatmapLevel* level)
     {
         InvokeSafe(levelSelected, level, "LevelSelected");
     }

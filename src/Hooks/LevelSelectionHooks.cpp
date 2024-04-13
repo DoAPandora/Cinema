@@ -7,7 +7,7 @@
 
 using namespace GlobalNamespace;
 
-MAKE_AUTO_HOOK_MATCH(LevelCollectionViewController_HandleLevelCollectionTableViewDidSelectLevel, &LevelCollectionViewController::HandleLevelCollectionTableViewDidSelectLevel, void, LevelCollectionViewController* self, LevelCollectionTableView* tableView, IPreviewBeatmapLevel* level)
+MAKE_AUTO_HOOK_MATCH(LevelCollectionViewController_HandleLevelCollectionTableViewDidSelectLevel, &LevelCollectionViewController::HandleLevelCollectionTableViewDidSelectLevel, void, LevelCollectionViewController* self, LevelCollectionTableView* tableView, BeatmapLevel* level)
 {
     Cinema::Events::SetSelectedLevel(level);
     LevelCollectionViewController_HandleLevelCollectionTableViewDidSelectLevel(self, tableView, level);

@@ -17,12 +17,6 @@ using namespace UnityEngine;
 
 namespace Cinema {
 
-    void CurvedSurface::Start()
-    {
-        gameObject->AddComponent<MeshRenderer*>();
-        gameObject->AddComponent<MeshFilter*>();
-    }
-
     void CurvedSurface::Initialise(float width, float height, float distance, std::optional<float> curvatureDegrees, std::optional<int> subsurfaces, std::optional<bool> curveYAxis)
    {
        if (curvatureDegrees.has_value())

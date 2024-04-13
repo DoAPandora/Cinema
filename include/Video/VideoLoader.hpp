@@ -33,11 +33,11 @@ namespace Cinema {
 
         GlobalNamespace::AudioClipAsyncLoader *get_AudioClipAsyncLoader();
 
-        GlobalNamespace::AsyncCache_2<StringW, GlobalNamespace::IBeatmapLevel *>* get_BeatmapLevelAsyncCache();
+        GlobalNamespace::AsyncCache_2<StringW, GlobalNamespace::BeatmapLevel *>* get_BeatmapLevelAsyncCache();
 
         void Init();
 
-        System::Collections::Generic::List_1<GlobalNamespace::IPreviewBeatmapLevel *>* GetOfficialMaps();
+        System::Collections::Generic::List_1<GlobalNamespace::BeatmapLevel *>* GetOfficialMaps();
 
         std::string GetConfigPath(GlobalNamespace::IPreviewBeatmapLevel *level);
 

@@ -200,7 +200,7 @@ namespace Cinema {
         }
     }
 
-    void VideoMenu::CheckEntitlementAndEnableSearch(GlobalNamespace::IPreviewBeatmapLevel *level)
+    void VideoMenu::CheckEntitlementAndEnableSearch(GlobalNamespace::BeatmapLevel *level)
     {
         //auto entitlement =
     }
@@ -318,9 +318,9 @@ namespace Cinema {
         BSML::Utilities::SetImage(videoThumbnail, *url);
     }
 
-    void VideoMenu::SetThumbnailFromCover(GlobalNamespace::IPreviewBeatmapLevel *level) {}
+    void VideoMenu::SetThumbnailFromCover(GlobalNamespace::BeatmapLevel *level) {}
 
-    void VideoMenu::SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel *level)
+    void VideoMenu::SetSelectedLevel(GlobalNamespace::BeatmapLevel *level)
     {
         if (currentLevel && currentLevel->get_levelID() == level->get_levelID())
         {
@@ -331,7 +331,7 @@ namespace Cinema {
         HandleDidSelectLevel(level);
     }
 
-    void VideoMenu::HandleDidSelectLevel(GlobalNamespace::IPreviewBeatmapLevel *level, bool isPlaylistSong)
+    void VideoMenu::HandleDidSelectLevel(GlobalNamespace::BeatmapLevel *level, bool isPlaylistSong)
     {
         extraSongData = std::nullopt;
         difficultyData = std::nullopt;

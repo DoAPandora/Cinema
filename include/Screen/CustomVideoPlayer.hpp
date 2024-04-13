@@ -10,13 +10,16 @@
 #include "UnityEngine/RenderTexture.hpp"
 #include "UnityEngine/Transform.hpp"
 
+#include "ScreenController.hpp"
+#include "Placement.hpp"
+
 #include "DelegateW.hpp"
 
 DECLARE_CLASS_CODEGEN(Cinema, CustomVideoPlayer, UnityEngine::MonoBehaviour,
 
     DECLARE_INSTANCE_FIELD(UnityEngine::Video::VideoPlayer*, player);
     DECLARE_INSTANCE_FIELD(UnityEngine::AudioSource*, videoPlayerAudioSource);
-
+    DECLARE_INSTANCE_FIELD(ScreenController*, screenController);
     DECLARE_INSTANCE_FIELD(UnityEngine::Renderer*, screenRenderer);
     DECLARE_INSTANCE_FIELD(UnityEngine::RenderTexture*, renderTexture);
 
@@ -24,6 +27,17 @@ DECLARE_CLASS_CODEGEN(Cinema, CustomVideoPlayer, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_FIELD(bool, muted);
     DECLARE_INSTANCE_FIELD(bool, bodyVisible);
     DECLARE_INSTANCE_FIELD(bool, waitingForFadeOut);
+
+public:
+    inline static ConstString MAIN_TEXTURE_NAME = "_MainTex";
+    inline static ConstString CINEMA_TEXTURE_NAME ="_CinemaVideoTexture";
+    inline static ConstString STATUS_PROPERTY_NAME = "_CinemaVideoIsPlaying";
+    inline static const float MAX_BRIGHTNESS = 0.92f;
+    UnityEngine::Color screenColorOn = UnityEngine::Color::get_white();
+    UnityEngine::Color screenColorOff = UnityEngine::Color::get_clear();
+    inline static int MainTex = UnityEngine::Shader::PropertyToID(MAIN_TEXTURE_NAME);
+    inline static int CinemaVideoTexture = UnityEngine::Shader::PropertyToID(CINEMA_TEXTURE_NAME);
+    inline static int CinemaStatusProperty = UnityEngine::Shader::PropertyToID(STATUS_PROPERTY_NAME);
 
     UnityEngine::Video::VideoPlayer::ErrorEventHandler* videoPlayerErrorReceived;
     UnityEngine::Video::VideoPlayer::EventHandler* videoPlayerPrepareComplete;
@@ -88,7 +102,7 @@ DECLARE_CLASS_CODEGEN(Cinema, CustomVideoPlayer, UnityEngine::MonoBehaviour,
     public:
 
     void SetDefaultMenuPlacement(std::optional<float> width = std::nullopt);
-    // void SetPlacement
+    void SetPlacement(Placement& placement);
 
     static UnityEngine::Shader* GetShader();
     void SetBloomIntensity(std::optional<float> bloomIntensity);
