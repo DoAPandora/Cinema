@@ -9,18 +9,18 @@ namespace ExtraSongData {
 
     struct DifficultyData {
 
-        std::vector<std::u16string> requirements;
-        std::vector<std::u16string> suggestions;
-        std::u16string beatmapCharacteristicName;
+        std::vector<std::string> requirements;
+        std::vector<std::string> suggestions;
+        std::string beatmapCharacteristicName;
         GlobalNamespace::BeatmapDifficulty difficulty;
 
         inline bool HasCinemaSuggestion() const {
-            auto iter = std::find(suggestions.begin(), suggestions.end(), u"Cinema");
+            auto iter = std::find(suggestions.begin(), suggestions.end(), "Cinema");
             return iter != suggestions.end();
         }
 
         inline bool HasCinemaRequirement() const {
-            auto iter = std::find(requirements.begin(), requirements.end(), u"Cinema");
+            auto iter = std::find(requirements.begin(), requirements.end(), "Cinema");
             return iter != requirements.end();
         }
 

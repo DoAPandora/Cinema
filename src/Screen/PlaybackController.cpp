@@ -187,7 +187,7 @@ namespace Cinema {
             return;
         }
 
-        auto level = data->previewBeatmapLevel;
+        auto level = data->beatmapLevel;
         auto config = VideoLoader::GetConfigForLevel(level);
         if(config != nullptr)
         {
@@ -316,7 +316,6 @@ namespace Cinema {
     }
 
 
-
     custom_types::Helpers::Coroutine PlaybackController::PlayVideoDelayedCoroutine(float delayStartTime)
     {
         co_yield reinterpret_cast<System::Collections::IEnumerator*>(WaitForSeconds::New_ctor(delayStartTime));
@@ -329,7 +328,7 @@ namespace Cinema {
         videoPlayer->Play();
     }
 
-    void PlaybackController::SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel* level, VideoConfigPtr config)
+    void PlaybackController::SetSelectedLevel(GlobalNamespace::BeatmapLevel* level, VideoConfigPtr config)
     {
         previewWaitingForPreviewPlayer = true;
         previewWaitingForVideoPlayer = true;
@@ -337,7 +336,7 @@ namespace Cinema {
         currentLevel = level;
         videoConfig = config;
 
-        DEBUG("Selected level: {}", level->get_levelID());
+        DEBUG("Selected level: {}", level->levelID);
 
         if(config == nullptr)
         {

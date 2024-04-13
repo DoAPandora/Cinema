@@ -12,7 +12,6 @@
 
 #include "GlobalNamespace/SongPreviewPlayer.hpp"
 #include "GlobalNamespace/AudioTimeSyncController.hpp"
-#include "GlobalNamespace/IPreviewBeatmapLevel.hpp"
 #include "GlobalNamespace/MainSettingsModelSO.hpp"
 #include "GlobalNamespace/ScenesTransitionSetupDataSO.hpp"
 
@@ -21,7 +20,7 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_FIELD(CustomVideoPlayer*, videoPlayer);
     DECLARE_INSTANCE_FIELD(GlobalNamespace::AudioTimeSyncController*, audioTimeSyncController);
     DECLARE_INSTANCE_FIELD(GlobalNamespace::SongPreviewPlayer*, songPreviewPlayer);
-    DECLARE_INSTANCE_FIELD(GlobalNamespace::IPreviewBeatmapLevel*, currentLevel);
+    DECLARE_INSTANCE_FIELD(GlobalNamespace::BeatmapLevel*, currentLevel);
     DECLARE_INSTANCE_FIELD(GlobalNamespace::MainSettingsModelSO*, mainSettingsModel);
     DECLARE_INSTANCE_FIELD(UnityEngine::AudioSource*, activeAudioSource);
     DECLARE_INSTANCE_FIELD(System::Collections::IEnumerator*, prepareVideoCoroutine);
@@ -85,7 +84,7 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
     void ResyncVideo(std::optional<float> referenceTime = std::nullopt, std::optional<float> playbackSpeed = std::nullopt);
     void OnConfigChanged(VideoConfigPtr config);
     void OnConfigChanged(VideoConfigPtr config, bool reloadVideo);
-    void SetSelectedLevel(GlobalNamespace::IPreviewBeatmapLevel* level, VideoConfigPtr config);
+    void SetSelectedLevel(GlobalNamespace::BeatmapLevel* level, VideoConfigPtr config);
     void DifficultySelected(ExtraSongDataArgs extraSongDataArgs);
     custom_types::Helpers::Coroutine PlayVideoAfterAudioSourceCoroutine(bool preview);
     custom_types::Helpers::Coroutine PlayVideoDelayedCoroutine(float delayStartTime);

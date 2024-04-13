@@ -113,7 +113,7 @@ namespace Cinema {
     void VideoMenu::ResetVideoMenu()
     {
         DEBUG("BSMLParserParams: {}", fmt::ptr(bsmlParserParams.get()));
-        bsmlParserParams->EmitEvent("hide-keyboard");
+        // bsmlParserParams->EmitEvent("hide-keyboard");
         noVideoBg->get_gameObject()->SetActive(true);
         videoDetails->get_gameObject()->SetActive(false);
         SetButtonState(false);
@@ -270,7 +270,7 @@ namespace Cinema {
             offsetControls->SetActive(false);
         }
 
-        bsmlParserParams->EmitEvent("update-customize-offset");
+        // bsmlParserParams->EmitEvent("update-customize-offset");
     }
 
     void VideoMenu::SetupLevelDetailView(Cinema::VideoConfigPtr videoConfig)
@@ -322,12 +322,12 @@ namespace Cinema {
 
     void VideoMenu::SetSelectedLevel(GlobalNamespace::BeatmapLevel *level)
     {
-        if (currentLevel && currentLevel->get_levelID() == level->get_levelID())
+        if (currentLevel && currentLevel->levelID == level->levelID)
         {
             return;
         }
 
-        DEBUG("Setting level to {}", level->get_levelID());
+        DEBUG("Setting level to {}", level->levelID);
         HandleDidSelectLevel(level);
     }
 
@@ -363,7 +363,7 @@ namespace Cinema {
         SetupVideoDetails();
     }
 
-    void VideoMenu::OnLevelSelected(GlobalNamespace::IPreviewBeatmapLevel *level)
+    void VideoMenu::OnLevelSelected(GlobalNamespace::BeatmapLevel *level)
     {
         HandleDidSelectLevel(level);
     }
@@ -400,7 +400,7 @@ namespace Cinema {
 
     void VideoMenu::ShowKeyboard()
     {
-        bsmlParserParams->EmitEvent("show-keyboard");
+        // bsmlParserParams->EmitEvent("show-keyboard");
     }
 
     void VideoMenu::OnRefineAction() {}

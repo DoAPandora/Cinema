@@ -1,74 +1,24 @@
 #include "main.hpp"
 #include "Util/Collections.hpp"
 
-#include "songloader/shared/API.hpp"
+#include "System/Collections/Generic/IEnumerator_1.hpp"
+#include "System/Collections/Generic/IEnumerable_1.hpp"
 
-#include "GlobalNamespace/IBeatmapLevel.hpp"
-#include "GlobalNamespace/DifficultyBeatmapSet.hpp"
+#include "songcore/shared/SongLoader/RuntimeSongLoader.hpp"
+
 #include "GlobalNamespace/BeatmapCharacteristicSO.hpp"
-#include "GlobalNamespace/IDifficultyBeatmapSet.hpp"
 
 #include "rapidjson-macros/shared/macros.hpp"
 
 #include <vector>
 #include <map>
-#include <locale>
+#include <ranges>
+
+using namespace SongCore::SongLoader;
 
 static std::map<std::string, ExtraSongData::ExtraSongData> extraSongDataCache;
 
 namespace Collections {
-
-    template <bool b, typename T>
-    std::vector<std::u16string> GetStringArray(const rapidjson::GenericObject<b, T>& obj, const char16_t* name)
-    {
-        if (!obj.HasMember(name))
-        {
-            return {};
-        }
-
-        std::vector<std::u16string> v;
-        auto array = obj[name].GetArray();
-        for( auto itr = array.begin(); itr != array.end(); itr++)
-        {
-            v.push_back(itr->GetString());
-        }
-        return v;
-    }
-
-    std::vector<ExtraSongData::DifficultyData> GetDifficultiesFromInfoDat(CustomJSONData::CustomLevelInfoSaveData* infoDat)
-    {
-        const auto& doc = *infoDat->doc;
-        std::vector<ExtraSongData::DifficultyData> difficulties;
-
-        auto difficultyBeatmapSets = doc[u"_difficultyBeatmapSets"].GetArray();
-        for(const auto & difficultyBeatmapSet : difficultyBeatmapSets)
-        {
-            auto beatmapSet = difficultyBeatmapSet.GetObj();
-            auto difficultyBeatmaps = beatmapSet[u"_difficultyBeatmaps"].GetArray();
-            auto characteristic = beatmapSet[u"_beatmapCharacteristicName"].GetString();
-
-            for(const auto & difficultyBeatmap : difficultyBeatmaps)
-            {
-                auto beatmap = difficultyBeatmap.GetObj();
-                std::vector<std::u16string> suggestions;
-                std::vector<std::u16string> requirements;
-
-                if (beatmap.HasMember(u"_customData"))
-                {
-                    auto customData = beatmap[u"_customData"].GetObj();
-                    suggestions = GetStringArray(customData, u"_suggestions");
-                    requirements = GetStringArray(customData, u"_requirements");
-                }
-
-                auto difficultyRank = beatmap[u"_difficultyRank"].GetInt();
-                difficultyRank = (difficultyRank - 1) / 2;
-
-                difficulties.push_back(ExtraSongData::DifficultyData(requirements, suggestions, characteristic, difficultyRank));
-            }
-        }
-
-        return difficulties;
-    }
 
     std::optional<ExtraSongData::ExtraSongData> RetrieveExtraSongData(std::string hash) {
 
@@ -80,24 +30,34 @@ namespace Collections {
         if (extraSongDataCache.contains(hash))
             return extraSongDataCache.at(hash);
 
-        auto customLevels = RuntimeSongLoader::API::GetCustomLevelsPack()->GetCustomPreviewBeatmapLevels();
-        if(!customLevels)
-        {
-            return std::nullopt;
-        }
-        if (customLevels.size() <= 0)
+        auto customLevels = RuntimeSongLoader::get_instance()->AllLevels;
+        if(customLevels.size() <= 0)
         {
             return std::nullopt;
         }
 
-        auto beatmap = customLevels.front_or_default([&hash](const auto& level) { return level->levelID.ends_with(hash);});
-        if (!beatmap)
+        auto beatmapIter = std::ranges::find_if(customLevels, [&](CustomBeatmapLevel* level) { return level->levelID.ends_with(hash); });
+        if (beatmapIter != customLevels.end())
         {
             return std::nullopt;
         }
 
-        auto infoDat = reinterpret_cast<CustomJSONData::CustomLevelInfoSaveData*>(beatmap->standardLevelInfoSaveData);
-        auto difficulties = GetDifficultiesFromInfoDat(infoDat);
+        CustomBeatmapLevel* level = *beatmapIter;
+        std::vector<ExtraSongData::DifficultyData> difficulties;
+
+        auto enumerator_1 = level->GetBeatmapKeys()->GetEnumerator();
+        auto enumerator = enumerator_1->i___System__Collections__IEnumerator();
+        while(enumerator->MoveNext()) {
+            auto key = enumerator_1->Current;
+            auto& difficultyData = level->standardLevelInfoSaveData->TryGetCharacteristic(key.beatmapCharacteristic->serializedName)->get().TryGetDifficulty(key.difficulty)->get();
+            
+            difficulties.emplace_back(
+                difficultyData.requirements,
+                difficultyData.suggestions,
+                difficultyData.characteristicName,
+                difficultyData.difficulty
+            );
+        }
 
         auto extraSongData = ExtraSongData::ExtraSongData(difficulties);
         extraSongDataCache.insert({hash, extraSongData});
@@ -105,14 +65,18 @@ namespace Collections {
         return extraSongData;
     }
 
-    std::optional<ExtraSongData::DifficultyData> RetrieveDifficultyData(GlobalNamespace::IDifficultyBeatmap* beatmap)
+    std::optional<ExtraSongData::DifficultyData> RetrieveDifficultyData(GlobalNamespace::BeatmapKey beatmapKey)
     {
-        auto songData = RetrieveExtraSongData(beatmap->get_level()->i___GlobalNamespace__IPreviewBeatmapLevel()->get_levelID());
-        auto result = std::find_if(songData->difficulties.begin(), songData->difficulties.end(), [&beatmap](const auto& diff)
+        auto songData = RetrieveExtraSongData(beatmapKey.levelId);
+        if(!songData)
         {
-            return diff.difficulty == beatmap->get_difficulty() &&
-            (diff.beatmapCharacteristicName == beatmap->get_parentDifficultyBeatmapSet()->get_beatmapCharacteristic()->serializedName ||
-            diff.beatmapCharacteristicName == beatmap->get_parentDifficultyBeatmapSet()->get_beatmapCharacteristic()->characteristicNameLocalizationKey);
+            return std::nullopt;
+        }
+        auto result = std::ranges::find_if(songData->difficulties, [&beatmapKey](ExtraSongData::DifficultyData diff)
+        {
+            return diff.difficulty == beatmapKey.difficulty &&
+            (diff.beatmapCharacteristicName == beatmapKey.beatmapCharacteristic->serializedName ||
+            diff.beatmapCharacteristicName == beatmapKey.beatmapCharacteristic->characteristicNameLocalizationKey);
         });
 
         if(result != songData->difficulties.end())

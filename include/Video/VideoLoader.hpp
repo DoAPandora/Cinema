@@ -1,11 +1,10 @@
 #pragma once
 
-#include "GlobalNamespace/IPreviewBeatmapLevel.hpp"
+#include "GlobalNamespace/BeatmapLevel.hpp"
 #include "GlobalNamespace/AudioClipAsyncLoader.hpp"
 #include "GlobalNamespace/BeatmapLevelsModel.hpp"
 #include "GlobalNamespace/IAdditionalContentModel.hpp"
 #include "GlobalNamespace/AsyncCache_2.hpp"
-#include "GlobalNamespace/IBeatmapLevel.hpp"
 #include "GlobalNamespace/EntitlementsStatus.hpp"
 
 #include "System/Collections/Generic/List_1.hpp"
@@ -39,21 +38,21 @@ namespace Cinema {
 
         System::Collections::Generic::List_1<GlobalNamespace::BeatmapLevel *>* GetOfficialMaps();
 
-        std::string GetConfigPath(GlobalNamespace::IPreviewBeatmapLevel *level);
+        std::string GetConfigPath(GlobalNamespace::BeatmapLevel *level);
 
         std::string GetConfigPath(const std::string& levelPath);
 
-        void AddConfigToCache(Cinema::VideoConfig &videoConfig, GlobalNamespace::IPreviewBeatmapLevel *level);
+        void AddConfigToCache(Cinema::VideoConfig &videoConfig, GlobalNamespace::BeatmapLevel *level);
 
-        void RemoveConfigFromCache(GlobalNamespace::IPreviewBeatmapLevel *level);
+        void RemoveConfigFromCache(GlobalNamespace::BeatmapLevel *level);
 
-        VideoConfigPtr GetConfigFromCache(GlobalNamespace::IPreviewBeatmapLevel *level);
+        VideoConfigPtr GetConfigFromCache(GlobalNamespace::BeatmapLevel *level);
 
-        VideoConfigPtr GetConfigFromBundledConfigs(GlobalNamespace::IPreviewBeatmapLevel *level);
+        VideoConfigPtr GetConfigFromBundledConfigs(GlobalNamespace::BeatmapLevel *level);
 
         void StopFileSystemWatcher();
 
-        void SetupFileSystemWatcher(GlobalNamespace::IPreviewBeatmapLevel *level);
+        void SetupFileSystemWatcher(GlobalNamespace::BeatmapLevel *level);
 
         void SetupFileSystemWatcher(std::string path);
 
@@ -63,17 +62,17 @@ namespace Cinema {
 
         void OnConfigChangedMainThread();
 
-        bool IsDlcSong(GlobalNamespace::IPreviewBeatmapLevel *level);
+        bool IsDlcSong(GlobalNamespace::BeatmapLevel *level);
 
-        void GetAudioClipForLevel(GlobalNamespace::IPreviewBeatmapLevel *level, const std::function<void(UnityW<UnityEngine::AudioClip>)> &callback);
+        void GetAudioClipForLevel(GlobalNamespace::BeatmapLevel *level, const std::function<void(UnityW<UnityEngine::AudioClip>)> &callback);
 
-        void LoadAudioClipAsync(GlobalNamespace::IPreviewBeatmapLevel *level, const std::function<void(UnityW<UnityEngine::AudioClip>)> &callback);
+        void LoadAudioClipAsync(GlobalNamespace::BeatmapLevel *level, const std::function<void(UnityW<UnityEngine::AudioClip>)> &callback);
 
-        void GetEntitlementForLevel(GlobalNamespace::IPreviewBeatmapLevel *level, const std::function<void(GlobalNamespace::EntitlementStatus)> &callback);
+        void GetEntitlementForLevel(GlobalNamespace::BeatmapLevel *level, const std::function<void(GlobalNamespace::EntitlementStatus)> &callback);
 
-        VideoConfigPtr GetConfigForLevel(GlobalNamespace::IPreviewBeatmapLevel *level);
+        VideoConfigPtr GetConfigForLevel(GlobalNamespace::BeatmapLevel *level);
 
-        std::string GetLevelPath(GlobalNamespace::IPreviewBeatmapLevel *level);
+        std::string GetLevelPath(GlobalNamespace::BeatmapLevel *level);
 
         void SaveVideoConfig(VideoConfigPtr);
 
@@ -81,7 +80,7 @@ namespace Cinema {
 
         void DeleteVideo(VideoConfigPtr videoConfig);
 
-        bool DeleteConfig(VideoConfigPtr videoConfig, GlobalNamespace::IPreviewBeatmapLevel *level);
+        bool DeleteConfig(VideoConfigPtr videoConfig, GlobalNamespace::BeatmapLevel *level);
 
         VideoConfigPtr LoadConfig(std::string path);
 

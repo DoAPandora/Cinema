@@ -1,12 +1,13 @@
 #include "main.hpp"
 
 #include "GlobalNamespace/StandardLevelDetailView.hpp"
-#include "GlobalNamespace/IBeatmapLevel.hpp"
-#include "GlobalNamespace/CustomBeatmapLevel.hpp"
+#include "GlobalNamespace/BeatmapLevel.hpp"
 
 #include "Util/Collections.hpp"
 #include "Util/Events.hpp"
 #include "Screen/PlaybackController.hpp"
+
+#include "songcore/shared/SongLoader/CustomBeatmapLevel.hpp"
 
 using namespace GlobalNamespace;
 
@@ -19,8 +20,8 @@ MAKE_AUTO_HOOK_MATCH(StandardLevelDetailView_RefreshContent, &StandardLevelDetai
         return;
     }
 
-    auto cast = il2cpp_utils::try_cast<CustomBeatmapLevel>(self->_level);
-    auto level = cast.has_value() ? cast.value() : nullptr;
+    auto cast = il2cpp_utils::try_cast<SongCore::SongLoader::CustomBeatmapLevel>(self->_beatmapLevel);
+    auto level = cast.value_or(nullptr);
     if (!level)
     {
         return;
@@ -32,7 +33,7 @@ MAKE_AUTO_HOOK_MATCH(StandardLevelDetailView_RefreshContent, &StandardLevelDetai
         return;
     }
 
-    auto difficultyData = Collections::RetrieveDifficultyData(self->selectedDifficultyBeatmap);
+    auto difficultyData = Collections::RetrieveDifficultyData(self->beatmapKey);
     if (!difficultyData.has_value())
     {
         return;

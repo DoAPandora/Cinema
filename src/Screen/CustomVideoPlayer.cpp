@@ -24,6 +24,13 @@ DEFINE_TYPE(Cinema, CustomVideoPlayer);
 
 #define RESOLVE_ICALL(name, ret, ...) reinterpret_cast<function_ptr_t<ret, UnityEngine::Video::VideoPlayer*, ## __VA_ARGS__>>(il2cpp_functions::resolve_icall("UnityEngine.Video.VideoPlayer::" #name));
 
+template <typename T>
+requires(std::is_convertible_v<T, System::MulticastDelegate*>)
+T operator+= (T l, T r) {
+    return reinterpret_cast<T>(System::Delegate::Combine(l, r));
+}
+
+
 namespace Cinema {
 
     void CustomVideoPlayer::Awake()
@@ -81,7 +88,7 @@ namespace Cinema {
                 std::bind(&CustomVideoPlayer::VideoPlayerFinished, this, std::placeholders::_1)
             )
         );
-        player->loopPointReached = (VideoPlayer::EventHandler*)System::Delegate::Combine(player->loopPointReached, videoPlayerFinished);
+        // player->loopPointReached += videoPlayerFinished;
 
         videoPlayerAudioSource = get_gameObject()->AddComponent<AudioSource*>();
 
