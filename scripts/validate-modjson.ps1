@@ -1,8 +1,10 @@
 $mod = "./mod.json"
 
+Write-Output "Creating mod.json from mod.template.json"
+
 if (-not (Test-Path -Path $mod)) {
     if (Test-Path -Path ".\mod.template.json") {
-        & qpm qmod build
+        & qpm qmod manifest
         if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
         }
@@ -12,8 +14,6 @@ if (-not (Test-Path -Path $mod)) {
         exit 1
     }
 }
-
-Write-Output "Creating qmod from mod.json"
 
 $psVersion = $PSVersionTable.PSVersion.Major
 if ($psVersion -ge 6) {

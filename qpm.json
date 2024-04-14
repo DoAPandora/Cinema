@@ -28,8 +28,8 @@
         "pwsh ./scripts/start-logging.ps1"
       ],
       "qmod": [
-        "pwsh ./scripts/build.ps1",
-        "qpm qmod build",
+        "pwsh ./scripts/build.ps1 --release",
+        "qpm qmod manifest",
         "pwsh ./scripts/createqmod.ps1"
       ],
       "restart": [

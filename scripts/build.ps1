@@ -3,7 +3,10 @@ Param(
     [Switch] $clean,
 
     [Parameter(Mandatory=$false)]
-    [Switch] $help
+    [Switch] $help,
+
+    [Parameter(Mandatory=$false)]
+    [Switch] $release
 )
 
 if ($help -eq $true) {
@@ -27,5 +30,10 @@ if (($clean.IsPresent) -or (-not (Test-Path -Path "build"))) {
     new-item -Path build -ItemType Directory
 } 
 
-& cmake -G "Ninja" -DCMAKE_BUILD_TYPE="RelWithDebInfo" -B build
+$buildType = "Debug"
+if($release -eq $true) {
+    $buildType = "RelWithDebInfo"
+}
+
+& cmake -G "Ninja" -DCMAKE_BUILD_TYPE="$buildType" -B build
 & cmake --build ./build

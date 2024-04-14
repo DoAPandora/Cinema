@@ -22,8 +22,16 @@ set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # compile options used
-add_compile_options(-frtti -fexceptions -fdeclspec -fvisibility=hidden -fPIE -fPIC)
-add_compile_options(-O3)
+add_compile_options(-frtti -fexceptions -fdeclspec -fvisibility=hidden -fPIE -fPIC -fms-extensions)
+
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    add_compile_options(-O0)
+else()
+    add_compile_options(-O3)
+endif()
+
+message("Building with build type: ${CMAKE_BUILD_TYPE}")
+
 # compile definitions used
 add_compile_definitions(VERSION=\"${MOD_VERSION}\")
 add_compile_definitions(MOD_ID=\"${MOD_ID}\")
