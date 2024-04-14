@@ -175,7 +175,7 @@ namespace Cinema {
             }
             case DownloadState::NotDownloaded:
             case DownloadState::Cancelled: {
-                deleteVideoButtonText->SetTextInternal("Download");
+                deleteVideoButtonText->text = "Download";
                 deleteVideoButton->set_interactable(false);
                 auto underlineColor = UnityEngine::Color::get_clear();
                 if (state) {
@@ -405,7 +405,32 @@ namespace Cinema {
 
     void VideoMenu::OnRefineAction() {}
 
-    void VideoMenu::OnDeleteVideoAction() {}
+    void VideoMenu::OnDeleteVideoAction() 
+    {
+        if(!currentVideo)
+        {
+            WARN("Current video was null on delete action");
+            return;
+        }
+
+        PlaybackController::get_instance()->StopPreview(true);
+
+        switch (currentVideo->downloadState)
+        {
+            case DownloadState::Preparing:
+            case DownloadState::Downloading:
+            case DownloadState::DownloadingAudio:
+            case DownloadState::DownloadingVideo: {
+                // cancel download
+                break;
+            }
+            case DownloadState::NotDownloaded:
+            case DownloadState::Cancelled: {
+                currentVideo->downloadProgress = 0;
+                
+            }
+        }
+    }
 
     void VideoMenu::OnDeleteConfigAction() {}
 
