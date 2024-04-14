@@ -81,9 +81,6 @@ CINEMA_EXPORT void late_load() noexcept
     BSML::Init();
 
     SongCore::API::Capabilities::RegisterCapability("Cinema");
-    Cinema::PlaybackController::Create();
-    Cinema::VideoMenu::get_instance()->Init();
-    Cinema::VideoMenu::get_instance()->AddTab();
 }
 
 #include "bsml/shared/BSMLDataCache.hpp"

@@ -88,7 +88,7 @@ namespace Cinema {
                 std::bind(&CustomVideoPlayer::VideoPlayerFinished, this, std::placeholders::_1)
             )
         );
-        // player->loopPointReached += videoPlayerFinished;
+        player->loopPointReached = (VideoPlayer::EventHandler*)System::Delegate::Combine(player->loopPointReached, videoPlayerFinished);
 
         videoPlayerAudioSource = get_gameObject()->AddComponent<AudioSource*>();
 
