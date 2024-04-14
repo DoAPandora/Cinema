@@ -99,9 +99,8 @@ namespace Cinema::VideoLoader {
         DEBUG("Loading bundled configs");
         auto configs = LoadBundledConfigs();
         for (const auto &config: configs) {
-            VideoConfigPtr ptr(new VideoConfig);
-            *ptr = config.config;
-            bundledConfigs.insert_or_assign(config.levelID, ptr);
+            VideoConfig videoConfig = config.config;
+            bundledConfigs.insert_or_assign(config.levelID, std::make_shared<VideoConfig>(videoConfig));
         }
     }
 
@@ -364,10 +363,10 @@ namespace Cinema::VideoLoader {
             return nullptr;
         }
 
-        VideoConfigPtr videoConfig(new VideoConfig);
+        VideoConfig videoConfig;
         try
         {
-            ReadFromFile(configPath, *videoConfig);
+            ReadFromFile(configPath, videoConfig);
         }
         catch (const std::exception& e)
         {
@@ -375,17 +374,10 @@ namespace Cinema::VideoLoader {
             return nullptr;
         }
 
-        if(videoConfig != nullptr)
-        {
-            videoConfig->levelDir = std::filesystem::path(configPath).parent_path().string();
-            videoConfig->UpdateDownloadState();
-        }
-        else
-        {
-            WARN("Deserializing video config at {} failed", configPath);
-        }
+        videoConfig.levelDir = std::filesystem::path(configPath).parent_path().string();
+        videoConfig.UpdateDownloadState();
 
-        return videoConfig;
+        return std::make_shared<VideoConfig>(videoConfig);
     }
 
     std::vector<BundledConfig> LoadBundledConfigs()
