@@ -55,12 +55,12 @@
     },
     {
       "id": "bs-events",
-      "versionRange": "^0.0.5",
+      "versionRange": "^1.0.0",
       "additionalData": {}
     },
     {
       "id": "pythonlib",
-      "versionRange": "^0.3.2",
+      "versionRange": "^0.4.0",
       "additionalData": {}
     },
     {
@@ -75,7 +75,7 @@
     },
     {
       "id": "bsml",
-      "versionRange": "<=0.4.24",
+      "versionRange": "<=0.4.25",
       "additionalData": {}
     },
     {
