@@ -15,8 +15,6 @@
 
 #include "assets.hpp"
 
-#include "assets.hpp"
-
 using namespace UnityEngine;
 using namespace UnityEngine::Video;
 
@@ -38,16 +36,22 @@ namespace Cinema {
         screenColorOn.a = 0;
 
         DEBUG("Creating CustomVideoPlayer");
+
+#ifdef USE_CURVED_SCREEN
         CreateScreen();
         screenRenderer = screenController->GetRenderer();
         screenRenderer->material = Material::New_ctor(GetShader());
         screenRenderer->material->color = screenColorOff;
         screenRenderer->material->enableInstancing = true;
-
+        player = gameObject->AddComponent<VideoPlayer*>();
+#else
         player = CreateVideoPlayer(transform);
+#endif
+
         auto set_source = RESOLVE_ICALL(set_source, void, Video::VideoSource);
         set_source(player, Video::VideoSource::Url);
 
+#ifdef USE_CURVED_SCREEN
         auto set_renderMode = RESOLVE_ICALL(set_renderMode, void, Video::VideoRenderMode);
         set_renderMode(player, Video::VideoRenderMode::RenderTexture);
         renderTexture = screenController->CreateRenderTexture();
@@ -55,7 +59,7 @@ namespace Cinema {
 
         auto set_targetTexture = RESOLVE_ICALL(set_targetTexture, void, RenderTexture*);
         set_targetTexture(player, renderTexture);
-
+#endif
         auto set_playOnAwake = RESOLVE_ICALL(set_playOnAwake, void, bool);
         set_playOnAwake(player, false);
 
@@ -101,7 +105,9 @@ namespace Cinema {
         Mute();
 //        screenController->SetScreensActive(false);
 
+#ifdef USE_CURVED_SCREEN
         screenController->EnableColorBlending(true);
+#endif
         SetDefaultMenuPlacement();
     }
 
@@ -114,13 +120,16 @@ namespace Cinema {
 
     void CustomVideoPlayer::SetPlacement(Placement& placement)
     {
+// will add this properly soon ?
+#ifdef USE_CURVED_SCREEN
         screenController->SetPlacement(placement);
+#endif    
     }
 
     // Flat plane video player
     Video::VideoPlayer* CustomVideoPlayer::CreateVideoPlayer(UnityEngine::Transform* parent)
     {
-         INFO("Creating VideoPlayer");
+         INFO("Creating Flat Plane VideoPlayer");
          GameObject* screenGo = GameObject::CreatePrimitive(PrimitiveType::Plane);
          screenGo->get_transform()->set_parent(parent);
          GameObject::DontDestroyOnLoad(screenGo);
@@ -205,10 +214,14 @@ namespace Cinema {
 
     void CustomVideoPlayer::CreateScreen()
     {
+#ifdef USE_CURVED_SCREEN
         screenController = ScreenController::New_ctor();
         screenController->CreateScreen(transform);
         screenController->SetScreensActive(true);
         SetDefaultMenuPlacement();
+#else
+
+#endif
     }
 
     void CustomVideoPlayer::Play()
@@ -264,12 +277,18 @@ namespace Cinema {
 
     Color CustomVideoPlayer::get_ScreenColor()
     {
+#ifdef USE_CURVED_SCREEN
         return screenRenderer->get_material()->get_color();
+#else
+        return Color::get_clear();
+#endif
     }
 
     void CustomVideoPlayer::set_ScreenColor(UnityEngine::Color value)
     {
+#ifdef USE_CURVED_SCREEN
         screenRenderer->get_material()->set_color(value);
+#endif
     }
 
     float CustomVideoPlayer::get_PlaybackSpeed()
