@@ -37,7 +37,7 @@ namespace Collections {
         }
 
         auto beatmapIter = std::ranges::find_if(customLevels, [&](CustomBeatmapLevel* level) { return level->levelID.ends_with(hash); });
-        if (beatmapIter != customLevels.end())
+        if (beatmapIter == customLevels.end())
         {
             return std::nullopt;
         }
@@ -50,7 +50,7 @@ namespace Collections {
         while(enumerator->MoveNext()) {
             auto key = enumerator_1->Current;
             auto& difficultyData = level->standardLevelInfoSaveData->TryGetCharacteristic(key.beatmapCharacteristic->serializedName)->get().TryGetDifficulty(key.difficulty)->get();
-            
+
             difficulties.emplace_back(
                 difficultyData.requirements,
                 difficultyData.suggestions,
