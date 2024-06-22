@@ -49,9 +49,11 @@ MAKE_AUTO_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &Gl
 
 CINEMA_EXPORT void setup(CModInfo *info) noexcept
 {
+    INFO("Beginning setup");
+
     *info = modInfo.to_c();
 
-    INFO("Beginning setup");
+    Paper::Logger::RegisterFileContextId(Logger.tag);
 
     getModConfig().Init(modInfo);
     Cinema::VideoLoader::Init();
