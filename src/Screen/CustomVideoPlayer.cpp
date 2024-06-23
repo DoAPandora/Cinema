@@ -2,16 +2,16 @@
 
 #include "Screen/CustomVideoPlayer.hpp"
 
-#include "UnityEngine/GameObject.hpp"
-#include "UnityEngine/PrimitiveType.hpp"
-#include "UnityEngine/Video/VideoRenderMode.hpp"
-#include "UnityEngine/Video/VideoAudioOutputMode.hpp"
-#include "UnityEngine/Video/VideoSource.hpp"
-#include "UnityEngine/Resources.hpp"
-#include "UnityEngine/Material.hpp"
-#include "UnityEngine/Quaternion.hpp"
 #include "UnityEngine/AssetBundle.hpp"
+#include "UnityEngine/GameObject.hpp"
+#include "UnityEngine/Material.hpp"
+#include "UnityEngine/PrimitiveType.hpp"
+#include "UnityEngine/Quaternion.hpp"
+#include "UnityEngine/Resources.hpp"
 #include "UnityEngine/TextureWrapMode.hpp"
+#include "UnityEngine/Video/VideoAudioOutputMode.hpp"
+#include "UnityEngine/Video/VideoRenderMode.hpp"
+#include "UnityEngine/Video/VideoSource.hpp"
 
 #include "assets.hpp"
 
@@ -20,16 +20,18 @@ using namespace UnityEngine::Video;
 
 DEFINE_TYPE(Cinema, CustomVideoPlayer);
 
-#define RESOLVE_ICALL(name, ret, ...) reinterpret_cast<function_ptr_t<ret, UnityEngine::Video::VideoPlayer*, ## __VA_ARGS__>>(il2cpp_functions::resolve_icall("UnityEngine.Video.VideoPlayer::" #name));
+#define RESOLVE_ICALL(name, ret, ...) reinterpret_cast<function_ptr_t<ret, UnityEngine::Video::VideoPlayer*, ##__VA_ARGS__>>(il2cpp_functions::resolve_icall("UnityEngine.Video.VideoPlayer::" #name));
 
 template <typename T>
 requires(std::is_convertible_v<T, System::MulticastDelegate*>)
-T operator+= (T l, T r) {
+    T
+    operator+=(T l, T r)
+{
     return reinterpret_cast<T>(System::Delegate::Combine(l, r));
 }
 
-
-namespace Cinema {
+namespace Cinema
+{
 
     void CustomVideoPlayer::Awake()
     {
@@ -68,30 +70,22 @@ namespace Cinema {
 
         videoPlayerErrorReceived = custom_types::MakeDelegate<Video::VideoPlayer::ErrorEventHandler*>(
             std::function<void(Video::VideoPlayer*, StringW)>(
-                std::bind(&CustomVideoPlayer::VideoPlayerErrorReceived, this, std::placeholders::_1, std::placeholders::_2)
-            )
-        );
+                std::bind(&CustomVideoPlayer::VideoPlayerErrorReceived, this, std::placeholders::_1, std::placeholders::_2)));
         player->errorReceived = (Video::VideoPlayer::ErrorEventHandler*)System::Delegate::Combine(player->errorReceived, videoPlayerErrorReceived);
-        
+
         videoPlayerPrepareComplete = custom_types::MakeDelegate<VideoPlayer::EventHandler*>(
             std::function<void(VideoPlayer*)>(
-                std::bind(&CustomVideoPlayer::VideoPlayerPrepareComplete, this, std::placeholders::_1)
-            )
-        );
+                std::bind(&CustomVideoPlayer::VideoPlayerPrepareComplete, this, std::placeholders::_1)));
         player->prepareCompleted = (VideoPlayer::EventHandler*)System::Delegate::Combine(player->prepareCompleted, videoPlayerPrepareComplete);
 
         videoPlayerStarted = custom_types::MakeDelegate<VideoPlayer::EventHandler*>(
             std::function<void(VideoPlayer*)>(
-                std::bind(&CustomVideoPlayer::VideoPlayerStarted, this, std::placeholders::_1)
-            )
-        );
+                std::bind(&CustomVideoPlayer::VideoPlayerStarted, this, std::placeholders::_1)));
         player->started = (VideoPlayer::EventHandler*)System::Delegate::Combine(player->started, videoPlayerStarted);
-        
+
         videoPlayerFinished = custom_types::MakeDelegate<VideoPlayer::EventHandler*>(
             std::function<void(VideoPlayer*)>(
-                std::bind(&CustomVideoPlayer::VideoPlayerFinished, this, std::placeholders::_1)
-            )
-        );
+                std::bind(&CustomVideoPlayer::VideoPlayerFinished, this, std::placeholders::_1)));
         player->loopPointReached = (VideoPlayer::EventHandler*)System::Delegate::Combine(player->loopPointReached, videoPlayerFinished);
 
         videoPlayerAudioSource = get_gameObject()->AddComponent<AudioSource*>();
@@ -103,7 +97,7 @@ namespace Cinema {
         SetTargetAudioSource(player, 0, videoPlayerAudioSource);
 
         Mute();
-//        screenController->SetScreensActive(false);
+        //        screenController->SetScreensActive(false);
 
 #ifdef USE_CURVED_SCREEN
         screenController->EnableColorBlending(true);
@@ -123,39 +117,38 @@ namespace Cinema {
 // will add this properly soon ?
 #ifdef USE_CURVED_SCREEN
         screenController->SetPlacement(placement);
-#endif    
+#endif
     }
 
     // Flat plane video player
     Video::VideoPlayer* CustomVideoPlayer::CreateVideoPlayer(UnityEngine::Transform* parent)
     {
-         INFO("Creating Flat Plane VideoPlayer");
-         GameObject* screenGo = GameObject::CreatePrimitive(PrimitiveType::Plane);
-         screenGo->get_transform()->set_parent(parent);
-         GameObject::DontDestroyOnLoad(screenGo);
+        INFO("Creating Flat Plane VideoPlayer");
+        GameObject* screenGo = GameObject::CreatePrimitive(PrimitiveType::Plane);
+        screenGo->get_transform()->set_parent(parent);
+        GameObject::DontDestroyOnLoad(screenGo);
 
-         auto material = Resources::FindObjectsOfTypeAll<Material*>().back_or_default([](Material* x) {
-             return x->get_name() == "PyroVideo (Instance)";
-         });
-        
-         if(material)
-             screenGo->GetComponent<Renderer*>()->set_material(material);
-         else
-             screenGo->GetComponent<Renderer*>()->set_material(Material::New_ctor(Shader::Find("Unlit/Texture")));
-         screenGo->get_transform()->set_position(Vector3{0.0f, 12.4f, 67.8f});
-         screenGo->get_transform()->set_rotation(Quaternion::Euler(90.0f, 270.0f, 90.0f));
-         screenGo->get_transform()->set_localScale(Vector3(5.11, 1, 3));
+        auto material = Resources::FindObjectsOfTypeAll<Material*>().back_or_default([](Material* x)
+                                                                                     { return x->get_name() == "PyroVideo (Instance)"; });
 
-         auto videoPlayer = screenGo->AddComponent<Video::VideoPlayer*>();
+        if(material)
+            screenGo->GetComponent<Renderer*>()->set_material(material);
+        else
+            screenGo->GetComponent<Renderer*>()->set_material(Material::New_ctor(Shader::Find("Unlit/Texture")));
+        screenGo->get_transform()->set_position(Vector3{0.0f, 12.4f, 67.8f});
+        screenGo->get_transform()->set_rotation(Quaternion::Euler(90.0f, 270.0f, 90.0f));
+        screenGo->get_transform()->set_localScale(Vector3(5.11, 1, 3));
 
-         auto cinemaScreen = screenGo->GetComponent<Renderer*>();
-         if(cinemaScreen)
-         {
-             static auto set_targetMaterialRenderer = RESOLVE_ICALL(set_targetMaterialRenderer, void, Renderer*);
-             set_targetMaterialRenderer(videoPlayer, cinemaScreen);
-         }
+        auto videoPlayer = screenGo->AddComponent<Video::VideoPlayer*>();
 
-         return videoPlayer;
+        auto cinemaScreen = screenGo->GetComponent<Renderer*>();
+        if(cinemaScreen)
+        {
+            static auto set_targetMaterialRenderer = RESOLVE_ICALL(set_targetMaterialRenderer, void, Renderer*);
+            set_targetMaterialRenderer(videoPlayer, cinemaScreen);
+        }
+
+        return videoPlayer;
     }
 
     void CustomVideoPlayer::OnDestroy()
@@ -183,7 +176,7 @@ namespace Cinema {
 
     void CustomVideoPlayer::OnMenuSceneLoaded() {}
 
-    void CustomVideoPlayer::FirstFrameReady(UnityEngine::Video::VideoPlayer *, int64_t frame) {}
+    void CustomVideoPlayer::FirstFrameReady(UnityEngine::Video::VideoPlayer*, int64_t frame) {}
 
     void CustomVideoPlayer::SetBrightness(float brightness) {}
 
@@ -247,24 +240,24 @@ namespace Cinema {
 
     void CustomVideoPlayer::UpdateScreenContent() {}
 
-    void CustomVideoPlayer::SetTexture(UnityEngine::Texture *texture) {}
+    void CustomVideoPlayer::SetTexture(UnityEngine::Texture* texture) {}
 
-    void CustomVideoPlayer::SetCoverTexture(UnityEngine::Texture *texture) {}
+    void CustomVideoPlayer::SetCoverTexture(UnityEngine::Texture* texture) {}
 
-    void CustomVideoPlayer::SetStaticTexture(UnityEngine::Texture *texture) {}
+    void CustomVideoPlayer::SetStaticTexture(UnityEngine::Texture* texture) {}
 
     void CustomVideoPlayer::ClearTexture() {}
 
-    void CustomVideoPlayer::VideoPlayerPrepareComplete(UnityEngine::Video::VideoPlayer *source)
+    void CustomVideoPlayer::VideoPlayerPrepareComplete(UnityEngine::Video::VideoPlayer* source)
     {}
 
-    void CustomVideoPlayer::VideoPlayerStarted(UnityEngine::Video::VideoPlayer *source)
+    void CustomVideoPlayer::VideoPlayerStarted(UnityEngine::Video::VideoPlayer* source)
     {}
 
-    void CustomVideoPlayer::VideoPlayerFinished(UnityEngine::Video::VideoPlayer *source)
+    void CustomVideoPlayer::VideoPlayerFinished(UnityEngine::Video::VideoPlayer* source)
     {}
 
-    void CustomVideoPlayer::VideoPlayerErrorReceived(UnityEngine::Video::VideoPlayer *source, StringW message)
+    void CustomVideoPlayer::VideoPlayerErrorReceived(UnityEngine::Video::VideoPlayer* source, StringW message)
     {}
 
     float CustomVideoPlayer::GetVideoAspectRatio() {}
@@ -273,7 +266,7 @@ namespace Cinema {
 
     void CustomVideoPlayer::Unmute() {}
 
-    void CustomVideoPlayer::SetSoftParent(UnityEngine::Transform *parent) {}
+    void CustomVideoPlayer::SetSoftParent(UnityEngine::Transform* parent) {}
 
     Color CustomVideoPlayer::get_ScreenColor()
     {
@@ -354,4 +347,4 @@ namespace Cinema {
         static auto func = RESOLVE_ICALL(set_sendFrameReadyEvents, void, bool);
         func(player, value);
     }
-}
+} // namespace Cinema

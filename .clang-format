@@ -1,0 +1,24 @@
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterStruct: true
+  AfterControlStatement: true
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: true
+  BeforeElse: true
+  BeforeLambdaBody: true
+  BeforeWhile: true
+  IndentBraces: false
+  SplitEmptyFunction: false
+ColumnLimit: 0
+NamespaceIndentation: All
+IndentWidth: 4
+IndentCaseBlocks: true
+PointerAlignment: Left
+SpaceBeforeParens: Never
+AccessModifierOffset: -4
+BinPackParameters: true
+AllowShortFunctionsOnASingleLine: Empty
+Cpp11BracedListStyle: true

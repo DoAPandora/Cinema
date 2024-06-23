@@ -1,24 +1,25 @@
-#include "main.hpp"
 #include "Screen/ScreenController.hpp"
 #include "Screen/CurvedSurface.hpp"
 #include "Util/SoftParent.hpp"
+#include "main.hpp"
 
-#include "UnityEngine/Renderer.hpp"
 #include "UnityEngine/LayerMask.hpp"
 #include "UnityEngine/Material.hpp"
-#include "UnityEngine/Resources.hpp"
-#include "UnityEngine/RenderTextureFormat.hpp"
+#include "UnityEngine/MeshFilter.hpp"
+#include "UnityEngine/MeshRenderer.hpp"
 #include "UnityEngine/Quaternion.hpp"
+#include "UnityEngine/RenderTextureFormat.hpp"
+#include "UnityEngine/Renderer.hpp"
+#include "UnityEngine/Resources.hpp"
 #include "UnityEngine/Vector3.hpp"
 #include "UnityEngine_Rendering_BlendMode.hpp"
-#include "UnityEngine/MeshRenderer.hpp"
-#include "UnityEngine/MeshFilter.hpp"
 
 using namespace UnityEngine;
 
 DEFINE_TYPE(Cinema, ScreenController);
 
-namespace Cinema {
+namespace Cinema
+{
 
     void ScreenController::ctor()
     {
@@ -73,7 +74,8 @@ namespace Cinema {
 
     void ScreenController::AssignBodyMaterial(Renderer* bodyRenderer)
     {
-        UnityW<Shader> bodyShader = Resources::FindObjectsOfTypeAll<Shader*>().back_or_default([this](Shader* x){ return x->name == BODY_SHADER_NAME; });
+        UnityW<Shader> bodyShader = Resources::FindObjectsOfTypeAll<Shader*>().back_or_default([this](Shader* x)
+                                                                                               { return x->name == BODY_SHADER_NAME; });
         if(bodyShader)
         {
             bodyRenderer->material = Material::New_ctor(bodyShader);
@@ -110,7 +112,7 @@ namespace Cinema {
         return renderTexture;
     }
 
-    void ScreenController::SetPlacement(Cinema::Placement &placement)
+    void ScreenController::SetPlacement(Cinema::Placement& placement)
     {
         SetPlacement(placement.position, placement.rotation, placement.width, placement.height, placement.curvature, placement.subsurfaces, placement.curveYAxis);
     }
@@ -186,7 +188,6 @@ namespace Cinema {
         {
             Renderer* screenRenderer = screen->GetComponent<Renderer*>();
 
-
             std::optional<VideoConfig::ColorCorrection> colorCorrection = config->colorCorrection;
             std::optional<VideoConfig::Vigenette> vigenette = config->vigenette;
 
@@ -206,7 +207,7 @@ namespace Cinema {
         }
     }
 
-    void ScreenController::SetVigenette(std::optional<VideoConfig::Vigenette> vigenette, UnityEngine::MaterialPropertyBlock *materialPropertyBlock)
+    void ScreenController::SetVigenette(std::optional<VideoConfig::Vigenette> vigenette, UnityEngine::MaterialPropertyBlock* materialPropertyBlock)
     {
         for(GameObject* screen : screens)
         {
@@ -221,7 +222,6 @@ namespace Cinema {
             auto elliptical = vigenette == std::nullopt;
             SetShaderFloat(VignetteRadius, vigenette->radius, 0, 1, 1);
             SetShaderFloat(VignetteSoftness, vigenette->softness, 0, 1, elliptical ? 0.02f : 0.005f);
-
         }
     }
 
@@ -237,25 +237,25 @@ namespace Cinema {
         SetBlendMode(enable ? BlendMode::SoftAdditive : BlendMode::PerfectVisibility, screenRenderer->material);
     }
 
-    void ScreenController::SetBlendMode(Cinema::ScreenController::BlendMode blendMode, UnityEngine::Material *material)
+    void ScreenController::SetBlendMode(Cinema::ScreenController::BlendMode blendMode, UnityEngine::Material* material)
     {
-        switch (blendMode)
+        switch(blendMode)
         {
-            case BlendMode::SoftAdditive:
+        case BlendMode::SoftAdditive:
             {
-                material->SetInt(SrcColor, (int) Rendering::BlendMode::OneMinusDstColor);
-                material->SetInt(DestColor, (int) Rendering::BlendMode::One);
-                material->SetInt(SrcAlpha, (int) Rendering::BlendMode::OneMinusDstColor);
-                material->SetInt(DestAlpha, (int) Rendering::BlendMode::One);
+                material->SetInt(SrcColor, (int)Rendering::BlendMode::OneMinusDstColor);
+                material->SetInt(DestColor, (int)Rendering::BlendMode::One);
+                material->SetInt(SrcAlpha, (int)Rendering::BlendMode::OneMinusDstColor);
+                material->SetInt(DestAlpha, (int)Rendering::BlendMode::One);
                 break;
             }
-            case BlendMode::PerfectVisibility:
+        case BlendMode::PerfectVisibility:
             {
-                material->SetInt(SrcColor, (int) Rendering::BlendMode::One);
-                material->SetInt(DestColor, (int) Rendering::BlendMode::Zero);
-                material->SetInt(SrcAlpha, (int) Rendering::BlendMode::Zero);
-                material->SetInt(DestAlpha, (int) Rendering::BlendMode::One);
+                material->SetInt(SrcColor, (int)Rendering::BlendMode::One);
+                material->SetInt(DestColor, (int)Rendering::BlendMode::Zero);
+                material->SetInt(SrcAlpha, (int)Rendering::BlendMode::Zero);
+                material->SetInt(DestAlpha, (int)Rendering::BlendMode::One);
             }
         }
     }
-}
+} // namespace Cinema

@@ -24,6 +24,9 @@
         "copy": [
           "pwsh ./scripts/copy.ps1"
         ],
+        "format": [
+          "find ./src -name *.cpp -exec clang-format -i {} ;"
+        ],
         "logcat": [
           "adb logcat -c",
           "pwsh ./scripts/start-logging.ps1"

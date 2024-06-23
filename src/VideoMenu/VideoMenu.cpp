@@ -1,9 +1,9 @@
-#include "main.hpp"
 #include "VideoMenu/VideoMenu.hpp"
-#include "Util/Events.hpp"
-#include "assets.hpp"
-#include "Video/VideoLoader.hpp"
 #include "Screen/PlaybackController.hpp"
+#include "Util/Events.hpp"
+#include "Video/VideoLoader.hpp"
+#include "assets.hpp"
+#include "main.hpp"
 
 #include "bsml/shared/BSML.hpp"
 #include "bsml/shared/Helpers/utilities.hpp"
@@ -11,11 +11,12 @@
 DEFINE_TYPE(Cinema, VideoMenu);
 DEFINE_TYPE(Cinema, VideoMenuStatus);
 
-namespace Cinema {
+namespace Cinema
+{
 
     UnityW<VideoMenu> VideoMenu::get_instance()
     {
-        if (!instance)
+        if(!instance)
             instance = UnityEngine::GameObject::New_ctor("CinemaVideoMenu")->AddComponent<VideoMenu*>();
         return instance;
     }
@@ -27,7 +28,7 @@ namespace Cinema {
 
     void VideoMenu::set_CustomizeOffset(bool value)
     {
-        if (currentVideo == nullptr || !value)
+        if(currentVideo == nullptr || !value)
         {
             return;
         }
@@ -40,7 +41,6 @@ namespace Cinema {
         offsetControls->SetActive(true);
     }
 
-
     void VideoMenu::Init()
     {
         Events::levelSelected -= {&VideoMenu::OnLevelSelected, this};
@@ -48,7 +48,7 @@ namespace Cinema {
         Events::difficultySelected -= {&VideoMenu::OnDifficultySelected, this};
         Events::difficultySelected += {&VideoMenu::OnDifficultySelected, this};
 
-        if (!rootObject)
+        if(!rootObject)
         {
             return;
         }
@@ -62,7 +62,7 @@ namespace Cinema {
 
         searchKeyboard->clearOnOpen = false;
 
-        if (videoMenuInitialized)
+        if(videoMenuInitialized)
         {
             return;
         }
@@ -71,12 +71,11 @@ namespace Cinema {
         DEBUG("DisablingUI");
         videoDetails->get_gameObject()->SetActive(false);
         videoSearchResults->get_gameObject()->SetActive(false);
-
     }
 
     void VideoMenu::CreateStatusListener()
     {
-        if (menuStatus)
+        if(menuStatus)
         {
             menuStatus->didEnable -= {&VideoMenu::StatusViewerDidEnable, this};
             menuStatus->didDisable -= {&VideoMenu::StatusViewerDidDisable, this};
@@ -93,15 +92,14 @@ namespace Cinema {
     {
         DEBUG("Adding tab");
         BSML::Register::RegisterGameplaySetupTab("Cinema", [this](UnityEngine::GameObject* go, bool firstActivation)
-        {
+                                                 {
             if (firstActivation)
             {
                 auto parser = BSML::parse_and_construct(IncludedAssets::VideoMenu_bsml, go->get_transform(), this);
                 bsmlParserParams = parser->parserParams;
                 Init();
                 StatusViewerDidEnable();
-            }
-        });
+            } });
     }
 
     void VideoMenu::RemoveTab()
@@ -118,13 +116,13 @@ namespace Cinema {
         videoDetails->get_gameObject()->SetActive(false);
         SetButtonState(false);
 
-        if (!getModConfig().enabled.GetValue())
+        if(!getModConfig().enabled.GetValue())
         {
-             noVideoText->SetTextInternal("Cinema is disabled.\\r\\nYou can re-enable it on the left side of the main menu.");
+            noVideoText->SetTextInternal("Cinema is disabled.\\r\\nYou can re-enable it on the left side of the main menu.");
             return;
         }
 
-        if (!currentLevel)
+        if(!currentLevel)
         {
             noVideoText->SetTextInternal("No level Selected");
             return;
@@ -145,14 +143,14 @@ namespace Cinema {
         deleteConfigButton->set_interactable(state);
         deleteVideoButton->set_interactable(state);
         searchButton->get_gameObject()->SetActive(currentLevel != nullptr);
-//        previewButtonText->SetTextInternal(PlaybackController::get_instance)
+        //        previewButtonText->SetTextInternal(PlaybackController::get_instance)
 
-        if (currentLevel)
+        if(currentLevel)
         {
             CheckEntitlementAndEnableSearch(currentLevel);
         }
 
-        if (currentVideo == nullptr)
+        if(currentVideo == nullptr)
         {
             return;
         }
@@ -160,39 +158,53 @@ namespace Cinema {
         auto officialConfig = *currentVideo->configByMapper;
         deleteConfigButton->get_gameObject()->SetActive(!officialConfig);
 
-        switch (currentVideo->downloadState) {
-            case DownloadState::Converting:
-            case DownloadState::Preparing:
-            case DownloadState::Downloading:
-            case DownloadState::DownloadingVideo:
-            case DownloadState::DownloadingAudio: {
+        switch(currentVideo->downloadState)
+        {
+        case DownloadState::Converting:
+        case DownloadState::Preparing:
+        case DownloadState::Downloading:
+        case DownloadState::DownloadingVideo:
+        case DownloadState::DownloadingAudio:
+            {
                 deleteVideoButtonText->SetTextInternal("Cancel");
                 previewButton->set_interactable(false);
                 deleteVideoButton->get_transform()->Find(
-                        "Underline")->get_gameObject()->GetComponent<UnityEngine::UI::Image *>()->set_color(
+                                                      "Underline")
+                    ->get_gameObject()
+                    ->GetComponent<UnityEngine::UI::Image*>()
+                    ->set_color(
                         UnityEngine::Color::get_gray());
                 break;
             }
-            case DownloadState::NotDownloaded:
-            case DownloadState::Cancelled: {
+        case DownloadState::NotDownloaded:
+        case DownloadState::Cancelled:
+            {
                 deleteVideoButtonText->text = "Download";
                 deleteVideoButton->set_interactable(false);
                 auto underlineColor = UnityEngine::Color::get_clear();
-                if (state) {
+                if(state)
+                {
                     underlineColor = UnityEngine::Color::get_green();
                     deleteVideoButton->set_interactable(true);
                 }
 
                 deleteVideoButton->get_transform()->Find(
-                        "Underline")->get_gameObject()->GetComponent<UnityEngine::UI::Image *>()->set_color(
+                                                      "Underline")
+                    ->get_gameObject()
+                    ->GetComponent<UnityEngine::UI::Image*>()
+                    ->set_color(
                         underlineColor);
                 previewButton->set_interactable(false);
                 break;
             }
-            default: {
+        default:
+            {
                 deleteVideoButtonText->SetTextInternal("Delete Video");
                 deleteVideoButton->get_transform()->Find(
-                        "Underline")->get_gameObject()->GetComponent<UnityEngine::UI::Image *>()->set_color(
+                                                      "Underline")
+                    ->get_gameObject()
+                    ->GetComponent<UnityEngine::UI::Image*>()
+                    ->set_color(
                         UnityEngine::Color::get_gray());
                 previewButton->set_interactable(state);
                 break;
@@ -200,14 +212,14 @@ namespace Cinema {
         }
     }
 
-    void VideoMenu::CheckEntitlementAndEnableSearch(GlobalNamespace::BeatmapLevel *level)
+    void VideoMenu::CheckEntitlementAndEnableSearch(GlobalNamespace::BeatmapLevel* level)
     {
-        //auto entitlement =
+        // auto entitlement =
     }
 
     void VideoMenu::SetupVideoDetails()
     {
-        if (!videoSearchResults)
+        if(!videoSearchResults)
         {
             WARN("Video search results view rect is null, skipping UI setup");
             return;
@@ -215,7 +227,7 @@ namespace Cinema {
 
         videoSearchResults->get_gameObject()->SetActive(false);
 
-        if (currentVideo == nullptr)
+        if(currentVideo == nullptr)
         {
             DEBUG("Current video is null");
             ResetVideoMenu();
@@ -231,10 +243,10 @@ namespace Cinema {
             return;
         }
 
-        if (currentVideo->videoID == std::nullopt && currentVideo->videoUrl == std::nullopt)
+        if(currentVideo->videoID == std::nullopt && currentVideo->videoUrl == std::nullopt)
         {
             ResetVideoMenu();
-            if (!currentVideo->forceEnvironmentModifications)
+            if(!currentVideo->forceEnvironmentModifications)
             {
                 return;
             }
@@ -259,7 +271,7 @@ namespace Cinema {
         SetThumbnail(currentVideo->videoID.has_value() ? std::make_optional(fmt::format("https://i.ytimg.com/vi/{}/hqdefault.jpg", *currentVideo->videoID)) : std::nullopt);
 
         UpdateStatusText(currentVideo);
-        if (CustomizeOffset)
+        if(CustomizeOffset)
         {
             customizeOffsetToggle->SetActive(false);
             offsetControls->SetActive(true);
@@ -275,26 +287,26 @@ namespace Cinema {
 
     void VideoMenu::SetupLevelDetailView(Cinema::VideoConfigPtr videoConfig)
     {
-        if (videoConfig != currentVideo)
+        if(videoConfig != currentVideo)
         {
             return;
         }
 
-        if ((currentVideo->videoID == std::nullopt && currentVideo->videoUrl == std::nullopt))
+        if((currentVideo->videoID == std::nullopt && currentVideo->videoUrl == std::nullopt))
         {
             return;
         }
 
-        switch (videoConfig->downloadState) {
-            case DownloadState::Downloaded:
-                if (videoConfig->IsWIPLevel && !difficultyData->HasCinema() && !extraSongData->HasCinemaInAnyDifficulty())
-                {
-
-                }
-                else if (!videoConfig->errorMessage.empty())
-                {}
-                else
-                {}
+        switch(videoConfig->downloadState)
+        {
+        case DownloadState::Downloaded:
+            if(videoConfig->IsWIPLevel && !difficultyData->HasCinema() && !extraSongData->HasCinemaInAnyDifficulty())
+            {
+            }
+            else if(!videoConfig->errorMessage.empty())
+            {}
+            else
+            {}
         }
     }
 
@@ -302,14 +314,14 @@ namespace Cinema {
 
     void VideoMenu::SetThumbnail(std::optional<std::string> url)
     {
-        if (url != std::nullopt && url == thumbnailURL)
+        if(url != std::nullopt && url == thumbnailURL)
         {
             return;
         }
 
         thumbnailURL = url;
 
-        if (url == std::nullopt)
+        if(url == std::nullopt)
         {
             SetThumbnailFromCover(currentLevel);
             return;
@@ -318,11 +330,11 @@ namespace Cinema {
         BSML::Utilities::SetImage(videoThumbnail, *url);
     }
 
-    void VideoMenu::SetThumbnailFromCover(GlobalNamespace::BeatmapLevel *level) {}
+    void VideoMenu::SetThumbnailFromCover(GlobalNamespace::BeatmapLevel* level) {}
 
-    void VideoMenu::SetSelectedLevel(GlobalNamespace::BeatmapLevel *level)
+    void VideoMenu::SetSelectedLevel(GlobalNamespace::BeatmapLevel* level)
     {
-        if (currentLevel && currentLevel->levelID == level->levelID)
+        if(currentLevel && currentLevel->levelID == level->levelID)
         {
             return;
         }
@@ -331,26 +343,26 @@ namespace Cinema {
         HandleDidSelectLevel(level);
     }
 
-    void VideoMenu::HandleDidSelectLevel(GlobalNamespace::BeatmapLevel *level, bool isPlaylistSong)
+    void VideoMenu::HandleDidSelectLevel(GlobalNamespace::BeatmapLevel* level, bool isPlaylistSong)
     {
         extraSongData = std::nullopt;
         difficultyData = std::nullopt;
 
-        if (!getModConfig().enabled.GetValue() || !level)
+        if(!getModConfig().enabled.GetValue() || !level)
         {
             return;
         }
 
-//        PlaybackController::get_instance().
+        //        PlaybackController::get_instance().
 
-        if (currentVideo != nullptr && currentVideo->needsToSave)
+        if(currentVideo != nullptr && currentVideo->needsToSave)
         {
             VideoLoader::SaveVideoConfig(currentVideo);
         }
 
         currentLevelIsPlaylistSong = isPlaylistSong;
         currentLevel = level;
-        if (!currentLevel)
+        if(!currentLevel)
         {
             currentVideo = nullptr;
             PlaybackController::get_instance()->SetSelectedLevel(nullptr, nullptr);
@@ -363,7 +375,7 @@ namespace Cinema {
         SetupVideoDetails();
     }
 
-    void VideoMenu::OnLevelSelected(GlobalNamespace::BeatmapLevel *level)
+    void VideoMenu::OnLevelSelected(GlobalNamespace::BeatmapLevel* level)
     {
         HandleDidSelectLevel(level);
     }
@@ -405,7 +417,7 @@ namespace Cinema {
 
     void VideoMenu::OnRefineAction() {}
 
-    void VideoMenu::OnDeleteVideoAction() 
+    void VideoMenu::OnDeleteVideoAction()
     {
         if(!currentVideo)
         {
@@ -415,19 +427,20 @@ namespace Cinema {
 
         PlaybackController::get_instance()->StopPreview(true);
 
-        switch (currentVideo->downloadState)
+        switch(currentVideo->downloadState)
         {
-            case DownloadState::Preparing:
-            case DownloadState::Downloading:
-            case DownloadState::DownloadingAudio:
-            case DownloadState::DownloadingVideo: {
+        case DownloadState::Preparing:
+        case DownloadState::Downloading:
+        case DownloadState::DownloadingAudio:
+        case DownloadState::DownloadingVideo:
+            {
                 // cancel download
                 break;
             }
-            case DownloadState::NotDownloaded:
-            case DownloadState::Cancelled: {
+        case DownloadState::NotDownloaded:
+        case DownloadState::Cancelled:
+            {
                 currentVideo->downloadProgress = 0;
-                
             }
         }
     }
@@ -444,7 +457,7 @@ namespace Cinema {
 
     custom_types::Helpers::Coroutine VideoMenu::SearchLoadingCoroutine() {}
 
-    void VideoMenu::OnSelectCell(HMUI::TableView *view, int idx) {}
+    void VideoMenu::OnSelectCell(HMUI::TableView* view, int idx) {}
 
     void VideoMenu::OnDownloadAction() {}
 
@@ -462,8 +475,6 @@ namespace Cinema {
 
     void VideoMenu::IncreaseOffsetLow() {}
 
-
-
     void VideoMenuStatus::OnEnable()
     {
         didEnable.invoke();
@@ -473,4 +484,4 @@ namespace Cinema {
     {
         didDisable.invoke();
     }
-}
+} // namespace Cinema

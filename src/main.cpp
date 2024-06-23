@@ -1,6 +1,6 @@
 #include "main.hpp"
-#include "VideoMenu/VideoMenu.hpp"
 #include "Video/VideoLoader.hpp"
+#include "VideoMenu/VideoMenu.hpp"
 
 #include "bsml/shared/BSML.hpp"
 
@@ -18,9 +18,9 @@
 
 modloader::ModInfo modInfo{MOD_ID, VERSION, 0};
 
-Cinema::Placement Cinema::Placement::MenuPlacement { UnityEngine::Vector3(0, 4, 16), UnityEngine::Vector3(0, 0, 0), 8.0f};
+Cinema::Placement Cinema::Placement::MenuPlacement{UnityEngine::Vector3(0, 4, 16), UnityEngine::Vector3(0, 0, 0), 8.0f};
 
-MAKE_AUTO_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &GlobalNamespace::DefaultScenesTransitionsFromInit::TransitionToNextScene, void, GlobalNamespace::DefaultScenesTransitionsFromInit *self, bool goStraightToMenu, bool goStraightToEditor, bool goToRecordingToolScene)
+MAKE_AUTO_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &GlobalNamespace::DefaultScenesTransitionsFromInit::TransitionToNextScene, void, GlobalNamespace::DefaultScenesTransitionsFromInit* self, bool goStraightToMenu, bool goStraightToEditor, bool goToRecordingToolScene)
 {
     DefaultScenesTransitionsFromInit_TransitionToNextScene(self, goStraightToMenu, goStraightToEditor, goToRecordingToolScene);
     DEBUG("Creating PlaybackController");
@@ -41,7 +41,7 @@ MAKE_AUTO_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &Gl
 //     body->Generate();
 // }
 
-CINEMA_EXPORT void setup(CModInfo *info) noexcept
+CINEMA_EXPORT void setup(CModInfo* info) noexcept
 {
     INFO("Beginning setup");
 
@@ -69,7 +69,6 @@ CINEMA_EXPORT void late_load() noexcept
     Hooks::InstallHooks(Logger);
 
     INFO("Installed all hooks!");
-
 
     std::string ytdlp = FileUtils::getScriptsPath() + "/yt_dlp";
     if(!direxists(ytdlp))

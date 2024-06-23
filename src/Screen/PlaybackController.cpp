@@ -1,20 +1,20 @@
-#include "main.hpp"
 #include "Screen/PlaybackController.hpp"
 #include "Hooks/LevelData.hpp"
-#include "Video/VideoLoader.hpp"
 #include "Util/Events.hpp"
+#include "Video/VideoLoader.hpp"
+#include "main.hpp"
 
 #include "bs-events/shared/BSEvents.hpp"
 
 #include "UnityEngine/GameObject.hpp"
-#include "UnityEngine/WaitForSeconds.hpp"
-#include "UnityEngine/SceneManagement/SceneManager.hpp"
 #include "UnityEngine/Resources.hpp"
+#include "UnityEngine/SceneManagement/SceneManager.hpp"
+#include "UnityEngine/WaitForSeconds.hpp"
 
-#include "GlobalNamespace/GameplayCoreSceneSetupData.hpp"
 #include "GlobalNamespace/EnvironmentInfoSO.hpp"
-#include "GlobalNamespace/SceneInfo.hpp"
+#include "GlobalNamespace/GameplayCoreSceneSetupData.hpp"
 #include "GlobalNamespace/GameplayModifiers.hpp"
+#include "GlobalNamespace/SceneInfo.hpp"
 
 #include "BeatSaber/GameSettings/Audio.hpp"
 #include "BeatSaber/GameSettings/MainSettings.hpp"
@@ -26,9 +26,13 @@ DEFINE_TYPE(Cinema, PlaybackController);
 using namespace UnityEngine;
 using namespace Video;
 
-namespace Cinema {
-    
-    PlaybackController* PlaybackController::get_instance() { return instance; }
+namespace Cinema
+{
+
+    PlaybackController* PlaybackController::get_instance()
+    {
+        return instance;
+    }
 
     void PlaybackController::Destroy() {}
 
@@ -52,20 +56,16 @@ namespace Cinema {
         INFO("Created PlaybackController");
         GameObject::DontDestroyOnLoad(gameObject);
         videoPlayer = gameObject->AddComponent<CustomVideoPlayer*>();
-//         videoPlayer->set_sendFrameReadyEvents(true);
-
-
+        //         videoPlayer->set_sendFrameReadyEvents(true);
 
         onPrepareComplete = custom_types::MakeDelegate<VideoPlayer::EventHandler*>(
             std::function<void(VideoPlayer*)>(
-                std::bind(&PlaybackController::OnPrepareComplete, this, std::placeholders::_1)
-            )
-        );
+                std::bind(&PlaybackController::OnPrepareComplete, this, std::placeholders::_1)));
         videoPlayer->player->prepareCompleted = (VideoPlayer::EventHandler*)System::Delegate::Combine(videoPlayer->player->prepareCompleted, onPrepareComplete);
 
-//         videoPlayer->player->prepareCompleted += onPrepareComplete;
-// //        fr = {&PlaybackController::FrameReady, this};
-// //        videoPlayer->player->frameReady += frameReady;
+        //         videoPlayer->player->prepareCompleted += onPrepareComplete;
+        // //        fr = {&PlaybackController::FrameReady, this};
+        // //        videoPlayer->player->frameReady += frameReady;
 
         BSEvents::songPaused += {&PlaybackController::PauseVideo, this};
         BSEvents::songUnpaused += {&PlaybackController::ResumeVideo, this};
@@ -116,13 +116,13 @@ namespace Cinema {
             time == referenceTime == 0 ? activeAudioSource->get_time() : referenceTime;
 
         float speed = *playbackSpeed == 0 ? *videoConfig->playbackSpeed : *playbackSpeed;
-        
+
         return time * speed + (float)videoConfig->offset / 1000;
     }
 
-    void PlaybackController::PlayerStartedAfterResync(UnityEngine::Video::VideoPlayer *, int64_t frame) {}
+    void PlaybackController::PlayerStartedAfterResync(UnityEngine::Video::VideoPlayer*, int64_t frame) {}
 
-    void PlaybackController::FrameReady(UnityEngine::Video::VideoPlayer *, int64_t frame) {}
+    void PlaybackController::FrameReady(UnityEngine::Video::VideoPlayer*, int64_t frame) {}
 
     void PlaybackController::Update() {}
 
@@ -156,9 +156,9 @@ namespace Cinema {
 
     void PlaybackController::OnConfigChanged(VideoConfigPtr config, bool reloadVideo) {}
 
-    void PlaybackController::ConfigChangedPrepareHandler(UnityEngine::Video::VideoPlayer *sender) {}
+    void PlaybackController::ConfigChangedPrepareHandler(UnityEngine::Video::VideoPlayer* sender) {}
 
-    void PlaybackController::ConfigChangedFrameReadyHandler(UnityEngine::Video::VideoPlayer *sender, int64_t frameIdx) {}
+    void PlaybackController::ConfigChangedFrameReadyHandler(UnityEngine::Video::VideoPlayer* sender, int64_t frameIdx) {}
 
     void PlaybackController::ShowSongCover() {}
 
@@ -170,7 +170,7 @@ namespace Cinema {
 
         StringW sceneName = data->environmentInfo->sceneInfo->sceneName;
         auto scene = SceneManagement::SceneManager::GetSceneByName(sceneName);
-		/* Crashes on next scene transition */
+        /* Crashes on next scene transition */
         // if(scene.IsValid())
         //     SceneManagement::SceneManager::MoveGameObjectToScene(get_gameObject(), scene);
         INFO("Moving to game scene");
@@ -225,7 +225,7 @@ namespace Cinema {
         {
             songSpeed = data->gameplayModifiers->get_songSpeedMul();
             if(totalOffset + startTime < 0)
-                totalOffset /= songSpeed * * videoConfig->playbackSpeed;
+                totalOffset /= songSpeed * *videoConfig->playbackSpeed;
         }
 
         videoPlayer->get_gameObject()->SetActive(true);
@@ -282,7 +282,7 @@ namespace Cinema {
             std::chrono::duration<float> timeTaken = std::chrono::system_clock::now() - audioSourceStartTime;
             DEBUG("Prepare took {} seconds", timeTaken.count());
             float offset = timeTaken.count() + offsetAfterPrepare;
-            videoPlayer->time =offset;
+            videoPlayer->time = offset;
         }
 
         offsetAfterPrepare = 0;
@@ -293,7 +293,7 @@ namespace Cinema {
 
     void PlaybackController::SceneTransitionInitCalled() {}
 
-    void PlaybackController::UpdateSongPreviewPlayer(UnityEngine::AudioSource *activeAudioSource, float startTime, float timeRemaining, bool isDefault) {}
+    void PlaybackController::UpdateSongPreviewPlayer(UnityEngine::AudioSource* activeAudioSource, float startTime, float timeRemaining, bool isDefault) {}
 
     void PlaybackController::StartSongPreview() {}
 
@@ -310,7 +310,8 @@ namespace Cinema {
                 co_yield nullptr;
             }
 
-            audioTimeSyncController = Resources::FindObjectsOfTypeAll<GlobalNamespace::AudioTimeSyncController*>().front_or_default([](GlobalNamespace::AudioTimeSyncController* x) { return x->get_transform()->get_parent()->get_parent()->get_name()->Contains("StandardGameplay"); });
+            audioTimeSyncController = Resources::FindObjectsOfTypeAll<GlobalNamespace::AudioTimeSyncController*>().front_or_default([](GlobalNamespace::AudioTimeSyncController* x)
+                                                                                                                                    { return x->get_transform()->get_parent()->get_parent()->get_name()->Contains("StandardGameplay"); });
             activeAudioSource = audioTimeSyncController->_audioSource;
 
             if(activeAudioSource)
@@ -320,17 +321,16 @@ namespace Cinema {
                     co_yield nullptr;
                 startTime = activeAudioSource->get_time();
             }
-            
+
             PlayVideo(startTime);
         }
     }
-
 
     custom_types::Helpers::Coroutine PlaybackController::PlayVideoDelayedCoroutine(float delayStartTime)
     {
         co_yield reinterpret_cast<System::Collections::IEnumerator*>(WaitForSeconds::New_ctor(delayStartTime));
 
-        if (activeAudioSource && activeAudioSource->get_time() > 0)
+        if(activeAudioSource && activeAudioSource->get_time() > 0)
         {
             lastKnownAudioSourceTime = activeAudioSource->get_time();
         }
@@ -342,7 +342,7 @@ namespace Cinema {
     {
         previewWaitingForPreviewPlayer = true;
         previewWaitingForVideoPlayer = true;
-        
+
         currentLevel = level;
         videoConfig = config;
 
@@ -350,7 +350,7 @@ namespace Cinema {
 
         if(config == nullptr)
         {
-            //f adeout
+            // f adeout
             StopAllCoroutines();
             return;
         }
@@ -382,4 +382,4 @@ namespace Cinema {
         videoPlayer->Prepare();
         co_return;
     }
-}
+} // namespace Cinema

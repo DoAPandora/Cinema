@@ -2,7 +2,7 @@
 
 DEFINE_TYPE(Cinema, SoftParent);
 
-namespace Cinema 
+namespace Cinema
 {
     void SoftParent::Update()
     {
@@ -10,7 +10,7 @@ namespace Cinema
         {
             return;
         }
-        
+
         transform->SetPositionAndRotation(parent->position, parent->rotation);
         UnityEngine::Vector3 side = UnityEngine::Vector3::op_Multiply(parent->right, posOffset.x);
         UnityEngine::Vector3 forward = UnityEngine::Vector3::op_Multiply(parent->forward, posOffset.z);
@@ -31,4 +31,4 @@ namespace Cinema
         posOffset = UnityEngine::Vector3::op_Subtraction(parent->position, transform->position);
         rotOffset = UnityEngine::Quaternion::op_Multiply(parent->rotation, UnityEngine::Quaternion::Inverse(transform->rotation));
     }
-}
+} // namespace Cinema

@@ -1,7 +1,8 @@
-#include "main.hpp"
 #include "Util/Events.hpp"
+#include "main.hpp"
 
-namespace Cinema::Events {
+namespace Cinema::Events
+{
 
     UnorderedEventCallback<bool> cinemaActivated;
     UnorderedEventCallback<GlobalNamespace::BeatmapLevel*> levelSelected;
@@ -10,16 +11,18 @@ namespace Cinema::Events {
     template <typename T>
     void InvokeSafe(const UnorderedEventCallback<T>& event, const T& arg, std::string eventName)
     {
-        try {
+        try
+        {
             event.invoke(arg);
-        } catch (std::exception& e) {
+        } catch(std::exception& e)
+        {
             ERROR("Exception thrown in {}: {}", eventName, e.what());
         }
     }
 
     void InvokeSceneTransitionEvents(std::optional<VideoConfig> videoConfig)
     {
-        if (!getModConfig().enabled.GetValue() || videoConfig == std::nullopt)
+        if(!getModConfig().enabled.GetValue() || videoConfig == std::nullopt)
         {
             cinemaActivated.invoke(false);
             return;
@@ -38,4 +41,4 @@ namespace Cinema::Events {
     {
         InvokeSafe(difficultySelected, {songData, selectedDifficultyData}, "DifficultySelected");
     }
-}
+} // namespace Cinema::Events

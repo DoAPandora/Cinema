@@ -1,9 +1,10 @@
-#include "main.hpp"
 #include "Video/VideoConfig.hpp"
-#include "Video/VideoLoader.hpp"
 #include "Util/Util.hpp"
+#include "Video/VideoLoader.hpp"
+#include "main.hpp"
 
-namespace Cinema {
+namespace Cinema
+{
 
     bool VideoConfig::get_IsWIPLevel() const
     {
@@ -30,7 +31,7 @@ namespace Cinema {
 
     std::optional<std::string> VideoConfig::get_VideoPath()
     {
-        if (levelDir != std::nullopt && IsWIPLevel)
+        if(levelDir != std::nullopt && IsWIPLevel)
         {
             std::filesystem::path levelPath(*levelDir);
             auto path = levelPath.parent_path();
@@ -42,14 +43,13 @@ namespace Cinema {
             return folder / *videoFile;
         }
 
-        if (levelDir != std::nullopt)
+        if(levelDir != std::nullopt)
         {
             try
             {
                 videoFile = GetVideoFileName(*levelDir);
                 return std::filesystem::path(*levelDir) / *videoFile;
-            }
-            catch (const std::exception& e)
+            } catch(const std::exception& e)
             {
                 ERROR("Failed to combine video path for {}: {}", *videoFile, e.what());
                 return std::nullopt;
@@ -69,13 +69,16 @@ namespace Cinema {
         return std::nullopt;
     }
 
-    bool VideoConfig::get_isPlayable() const { return true; }
+    bool VideoConfig::get_isPlayable() const
+    {
+        return true;
+    }
 
     std::string VideoConfig::GetVideoFileName(std::string levelPath) const
     {
         std::string fileName = videoFile.value_or(Cinema::Util::ReplaceIllegalFilesystemChar(title.value_or(videoID.value_or("video"))));
         // shorten
-        if (!fileName.ends_with(".mp4"))
+        if(!fileName.ends_with(".mp4"))
         {
             fileName.append(".mp4");
         }
@@ -96,4 +99,4 @@ namespace Cinema {
     {
         return (downloadState = (VideoPath != std::nullopt && (videoID != std::nullopt || videoUrl != std::nullopt) && std::filesystem::exists(*VideoPath) ? DownloadState::Downloaded : DownloadState::NotDownloaded));
     }
-}
+} // namespace Cinema

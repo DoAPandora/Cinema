@@ -7,10 +7,12 @@
  */
 #define INVALID_FILENAME_CHARS "\"\\*\\:\\<\\>\\?\\\\|"
 
-namespace Cinema::Util {
+namespace Cinema::Util
+{
 
-    std::string ReplaceIllegalFilesystemChar(const std::string& s) {
+    std::string ReplaceIllegalFilesystemChar(const std::string& s)
+    {
         std::regex searchRegex("[" INVALID_FILENAME_CHARS "]");
         return std::regex_replace(s, searchRegex, "_");
     }
-}
+} // namespace Cinema::Util

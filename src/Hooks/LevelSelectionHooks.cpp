@@ -1,9 +1,9 @@
-#include "main.hpp"
 #include "Util/Events.hpp"
+#include "main.hpp"
 
 #include "GlobalNamespace/LevelCollectionViewController.hpp"
-#include "GlobalNamespace/MainMenuViewController.hpp"
 #include "GlobalNamespace/LobbySetupViewController.hpp"
+#include "GlobalNamespace/MainMenuViewController.hpp"
 
 using namespace GlobalNamespace;
 
