@@ -15,8 +15,11 @@
     },
     "workspace": {
       "scripts": {
+        "a2l": [
+          "pwsh ./scripts/addr2line.ps1 $0"
+        ],
         "build": [
-          "pwsh ./scripts/build.ps1"
+          "pwsh ./scripts/build.ps1 --release"
         ],
         "clean": [
           "pwsh ./scripts/build.ps1 -clean"
@@ -24,17 +27,11 @@
         "copy": [
           "pwsh ./scripts/copy.ps1"
         ],
+        "debug": [
+          "pwsh ./scripts/build.ps1"
+        ],
         "format": [
           "find ./src -name *.cpp -exec clang-format -i {} ;"
-        ],
-        "logcat": [
-          "adb logcat -c",
-          "pwsh ./scripts/start-logging.ps1"
-        ],
-        "qmod": [
-          "pwsh ./scripts/build.ps1 --release",
-          "qpm qmod manifest",
-          "pwsh ./scripts/createqmod.ps1"
         ],
         "restart": [
           "pwsh ./scripts/restart-game.ps1"
@@ -43,12 +40,16 @@
           "pwsh ./scripts/ndk-stack.ps1"
         ],
         "tomb": [
-          "pwsh ./scripts/pull-tombstone.ps1"
+          "pwsh ./scripts/pull-tombstone.ps1",
+          "code RecentCrash.log"
         ]
       },
-      "qmodIncludeDirs": [],
+      "qmodIncludeDirs": [
+        "./build",
+        "./extern/libs"
+      ],
       "qmodIncludeFiles": [],
-      "qmodOutput": null
+      "qmodOutput": "Cinema"
     },
     "dependencies": [
       {
@@ -149,13 +150,13 @@
     {
       "dependency": {
         "id": "pythonlib",
-        "versionRange": "=0.4.0",
+        "versionRange": "=0.4.1",
         "additionalData": {
           "overrideSoName": "libpythonlib.so",
           "cmake": true
         }
       },
-      "version": "0.4.0"
+      "version": "0.4.1"
     },
     {
       "dependency": {
