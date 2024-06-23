@@ -37,10 +37,10 @@ public:
 
 DECLARE_CLASS_CODEGEN(Cinema, VideoMenu, UnityEngine::MonoBehaviour,
 
-    DECLARE_INSTANCE_FIELD(UnityEngine::GameObject*, rootObject);
+    DECLARE_INSTANCE_FIELD(UnityW<UnityEngine::GameObject>, rootObject);
     DECLARE_INSTANCE_FIELD(UnityEngine::RectTransform*, noVideoBg);
     DECLARE_INSTANCE_FIELD(UnityEngine::RectTransform*, videoDetails);
-    DECLARE_INSTANCE_FIELD(UnityEngine::RectTransform*, videoSearchResults);
+    DECLARE_INSTANCE_FIELD(UnityW<UnityEngine::RectTransform>, videoSearchResults);
     DECLARE_INSTANCE_FIELD(BSML::CustomListTableData*, videoList);
     DECLARE_INSTANCE_FIELD(TMPro::TextMeshProUGUI*, searchResultsLoading);
     DECLARE_INSTANCE_FIELD(BSML::ModalKeyboard*, searchKeyboard);
@@ -65,18 +65,18 @@ DECLARE_CLASS_CODEGEN(Cinema, VideoMenu, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_FIELD(UnityEngine::Coroutine*, updateSearchResultsCoroutine);
 
     //Menu status + detail view controller
-    DECLARE_INSTANCE_FIELD(VideoMenuStatus*, menuStatus);
+    DECLARE_INSTANCE_FIELD(UnityW<VideoMenuStatus>, menuStatus);
     DECLARE_INSTANCE_FIELD(bool, videoMenuInitialized);
     DECLARE_INSTANCE_FIELD(GlobalNamespace::BeatmapLevel*, currentLevel);
     DECLARE_INSTANCE_FIELD(bool, currentLevelIsPlaylistSong); // is this even needed on quest ?
     DECLARE_INSTANCE_FIELD(bool, videoMenuActive);
     DECLARE_INSTANCE_FIELD(int, selectedCell);
 
-    static inline VideoMenu* instance;
+    static inline UnityW<VideoMenu> instance;
 
 public:
 
-    static VideoMenu* get_instance();
+    static UnityW<VideoMenu> get_instance();
 
     std::optional<ExtraSongData::ExtraSongData> extraSongData;
     std::optional<ExtraSongData::DifficultyData> difficultyData;

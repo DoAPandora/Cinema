@@ -8,7 +8,6 @@
 
 #include "GlobalNamespace/BeatmapCharacteristicSO.hpp"
 
-#include "rapidjson-macros/shared/macros.hpp"
 
 #include <vector>
 #include <map>
@@ -49,7 +48,13 @@ namespace Collections {
         auto enumerator = enumerator_1->i___System__Collections__IEnumerator();
         while(enumerator->MoveNext()) {
             auto key = enumerator_1->Current;
-            auto& difficultyData = level->standardLevelInfoSaveData->TryGetCharacteristic(key.beatmapCharacteristic->serializedName)->get().TryGetDifficulty(key.difficulty)->get();
+            auto saveData = level->CustomSaveDataInfo;
+            if(!saveData)
+            {
+                continue;
+            }
+
+            auto& difficultyData = saveData.value().get().TryGetCharacteristic(key.beatmapCharacteristic->serializedName)->get().TryGetDifficulty(key.difficulty)->get();
 
             difficulties.emplace_back(
                 difficultyData.requirements,

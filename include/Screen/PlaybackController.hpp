@@ -12,8 +12,9 @@
 
 #include "GlobalNamespace/SongPreviewPlayer.hpp"
 #include "GlobalNamespace/AudioTimeSyncController.hpp"
-#include "GlobalNamespace/MainSettingsModelSO.hpp"
 #include "GlobalNamespace/ScenesTransitionSetupDataSO.hpp"
+
+#include "BeatSaber/GameSettings/MainSettingsHandler.hpp"
 
 DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
 
@@ -21,7 +22,7 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_FIELD(GlobalNamespace::AudioTimeSyncController*, audioTimeSyncController);
     DECLARE_INSTANCE_FIELD(GlobalNamespace::SongPreviewPlayer*, songPreviewPlayer);
     DECLARE_INSTANCE_FIELD(GlobalNamespace::BeatmapLevel*, currentLevel);
-    DECLARE_INSTANCE_FIELD(GlobalNamespace::MainSettingsModelSO*, mainSettingsModel);
+    DECLARE_INSTANCE_FIELD(BeatSaber::GameSettings::MainSettingsHandler*, mainSettingsHandler);
     DECLARE_INSTANCE_FIELD(UnityEngine::AudioSource*, activeAudioSource);
     DECLARE_INSTANCE_FIELD(System::Collections::IEnumerator*, prepareVideoCoroutine);
 

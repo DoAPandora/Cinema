@@ -1,7 +1,6 @@
 #include "main.hpp"
 #include "VideoMenu/VideoMenu.hpp"
 #include "Video/VideoLoader.hpp"
-#include "Util/Util.hpp"
 
 #include "bsml/shared/BSML.hpp"
 
@@ -16,11 +15,6 @@
 #include "pythonlib/shared/Utils/FileUtils.hpp"
 
 #include "bs-events/shared/BSEvents.hpp"
-
-#include "Screen/CurvedSurface.hpp"
-
-#include "UnityEngine/MeshFilter.hpp"
-#include "UnityEngine/MeshRenderer.hpp"
 
 modloader::ModInfo modInfo{MOD_ID, VERSION, 0};
 
@@ -75,6 +69,7 @@ CINEMA_EXPORT void late_load() noexcept
     Hooks::InstallHooks(Logger);
 
     INFO("Installed all hooks!");
+
 
     std::string ytdlp = FileUtils::getScriptsPath() + "/yt_dlp";
     if(!direxists(ytdlp))

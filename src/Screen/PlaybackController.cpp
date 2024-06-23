@@ -16,6 +16,11 @@
 #include "GlobalNamespace/SceneInfo.hpp"
 #include "GlobalNamespace/GameplayModifiers.hpp"
 
+#include "BeatSaber/GameSettings/Audio.hpp"
+#include "BeatSaber/GameSettings/MainSettings.hpp"
+
+#include "bsml/shared/Helpers/getters.hpp"
+
 DEFINE_TYPE(Cinema, PlaybackController);
 
 using namespace UnityEngine;
@@ -136,8 +141,13 @@ namespace Cinema {
 
     void PlaybackController::OnMenuSceneLoadedFresh(GlobalNamespace::ScenesTransitionSetupDataSO* transitionSetupData)
     {
-        INFO("MenuSceneLoadedFresh");
         OnMenuSceneLoaded();
+
+        mainSettingsHandler = BSML::Helpers::GetDiContainer()->Resolve<BeatSaber::GameSettings::MainSettingsHandler*>();
+        if(mainSettingsHandler)
+        {
+            this->videoPlayer->volumeScale = mainSettingsHandler->get_instance()->audioSettings->volume;
+        }
     }
 
     void PlaybackController::SceneChanged() {}

@@ -11,7 +11,9 @@
 #include "GlobalNamespace/IBeatmapLevelData.hpp"
 #include "GlobalNamespace/MainFlowCoordinator.hpp"
 #include "GlobalNamespace/IAdditionalContentEntitlementModel.hpp"
+#include "GlobalNamespace/AudioClipAsyncLoaderExtensions.hpp"
 #include "GlobalNamespace/IPreviewMediaData.hpp"
+#include "GlobalNamespace/BeatmapLevelLoader.hpp"
 
 #include "songcore/shared/SongLoader/CustomBeatmapLevel.hpp"
 
@@ -28,6 +30,13 @@
 
 using namespace GlobalNamespace;
 
+using BGLib::DotnetExtension::Collections::LRUCache_2;
+
+template <typename T>
+using Task = System::Threading::Tasks::Task_1<T>;
+
+using System::Collections::Generic::List_1;
+
 std::map<std::string, Cinema::VideoConfigPtr> mapsWithVideo;
 std::map<std::string, Cinema::VideoConfigPtr> cachedConfigs;
 std::map<std::string, Cinema::VideoConfigPtr> bundledConfigs;
@@ -36,8 +45,7 @@ GlobalNamespace::BeatmapLevelsModel* beatmapLevelsModel;
 IAdditionalContentModel* additionalContentModel;
 AudioClipAsyncLoader* audioClipAsyncLoader;
 IAdditionalContentEntitlementModel* additionalContentEntitlementModel;
-
-using System::Collections::Generic::List_1;
+LRUCache_2<StringW, IBeatmapLevelData*>* beatmapLevelDataCache;
 
 namespace Cinema::VideoLoader {
 
@@ -55,7 +63,6 @@ namespace Cinema::VideoLoader {
         }
         return beatmapLevelsModel;
     }
-    __declspec(property(get=get_BeatmapLevelsModel)) GlobalNamespace::BeatmapLevelsModel *BeatmapLevelsModel;
 
     GlobalNamespace::IAdditionalContentModel *get_AdditionalContentModel() {
         if (!additionalContentModel) {
@@ -66,7 +73,6 @@ namespace Cinema::VideoLoader {
         }
         return additionalContentModel;
     }
-    __declspec(property(get=get_AdditionalContentModel)) GlobalNamespace::IAdditionalContentModel *AdditionalContentModel;
 
     GlobalNamespace::AudioClipAsyncLoader *get_AudioClipAsyncLoader() {
         if (!audioClipAsyncLoader) {
@@ -77,7 +83,6 @@ namespace Cinema::VideoLoader {
         }
         return audioClipAsyncLoader;
     }
-    __declspec(property(get=get_AudioClipAsyncLoader)) GlobalNamespace::AudioClipAsyncLoader *AudioClipAsyncLoader;
 
     IAdditionalContentEntitlementModel* get_AdditionalContentEntitlementModel() {
         if (!additionalContentEntitlementModel) {
@@ -88,12 +93,16 @@ namespace Cinema::VideoLoader {
         }
         return additionalContentEntitlementModel;
     }
-    __declspec(property(get=get_AdditionalContentEntitlementModel)) IAdditionalContentEntitlementModel* AdditionalContentEntitlmentModel;
 
-    AsyncCache_2<StringW, BeatmapLevel *> *get_BeatmapLevelAsyncCache() {
-        return nullptr;
+    LRUCache_2<StringW, IBeatmapLevelData*> *get_BeatmapLevelDataCache() {
+        auto levelLoader = get_DiContainer()->Resolve<BeatmapLevelLoader*>();
+        if(levelLoader)
+        {
+            beatmapLevelDataCache = levelLoader->_loadedBeatmapLevelDataCache;
+        }
+
+        return beatmapLevelDataCache;
     }
-    __declspec(property(get=get_BeatmapLevelAsyncCache)) GlobalNamespace::AsyncCache_2<StringW, GlobalNamespace::BeatmapLevel *>* BeatmapLevelAsyncCache;
 
     void Init() {
         DEBUG("Loading bundled configs");
@@ -107,7 +116,7 @@ namespace Cinema::VideoLoader {
     List_1<BeatmapLevel *> *GetOfficialMaps() {
         auto officialMaps = List_1<BeatmapLevel*>::New_ctor();
 
-        if (!BeatmapLevelsModel)
+        if (!get_BeatmapLevelsModel())
         {
             return officialMaps;
         }
@@ -188,48 +197,39 @@ namespace Cinema::VideoLoader {
         return il2cpp_utils::try_cast<BeatmapLevelSO>(level).has_value();
     }
 
-    void GetAudioClipForLevel(GlobalNamespace::BeatmapLevel *level, const std::function<void(UnityEngine::AudioClip *)> &callback) {
-        // if (!IsDlcSong(level) || !BeatmapLevelsModel) {
+    System::Threading::Tasks::Task_1<UnityW<UnityEngine::AudioClip>>* GetAudioClipForLevel(GlobalNamespace::BeatmapLevel *level) {
+        // if (!IsDlcSong(level) || !get_BeatmapLevelAsyncCache()) 
+        // {
         //     return LoadAudioClipAsync(level, callback);
         // }
 
-        DelegateHelper::ContinueWith(BeatmapLevelAsyncCache->get_Item(level->levelID),
-            std::function([level, callback](BeatmapLevel *levelData) {
-                if (levelData) {
-                    DEBUG("Getting audio clip from async cache");
-                    
-                DelegateHelper::ContinueWith(levelData->previewMediaData->GetPreviewAudioClip(System::Threading::CancellationToken::get_None()), 
-                    std::function([callback](UnityW<UnityEngine::AudioClip> audioClip) {
-                        if(audioClip) {
-                            callback(audioClip);
-                        }
-                    }
-                ));
+        IBeatmapLevelData* levelData;
+        if(get_BeatmapLevelDataCache()->TryGetFromCache(level->levelID, levelData))
+        {
+            return AudioClipAsyncLoaderExtensions::LoadSong(get_AudioClipAsyncLoader(), levelData);
         }
 
-        LoadAudioClipAsync(level, callback);
-        }));
+        return LoadAudioClipAsync(level);
     }
 
-    void LoadAudioClipAsync(BeatmapLevel *level, const std::function<void(UnityW<UnityEngine::AudioClip>)> &callback) {
-        // auto loaderTask = AudioClipAsyncLoader->
-        // if (!loaderTask) {
-        //     ERROR("AudioClipAsyncLoader.LoadPreview() Failed");
-        //     return;
-        // }
-
-        // DelegateHelper::ContinueWith(loaderTask, callback);
-    }
-
-    void GetEntitlementForLevel(BeatmapLevel *level, const std::function<void(GlobalNamespace::EntitlementStatus)> &callback) {
-        if (AdditionalContentEntitlmentModel) {
-            return DelegateHelper::ContinueWith(AdditionalContentEntitlmentModel->GetLevelEntitlementStatusAsync(level->levelID, System::Threading::CancellationToken::get_None()),
-                std::function([callback](EntitlementStatus status){
-                    callback(status);
-                })
-            );
+    Task<UnityW<UnityEngine::AudioClip>>* LoadAudioClipAsync(BeatmapLevel *level) {
+        auto loadTask = AudioClipAsyncLoaderExtensions::LoadPreview(get_AudioClipAsyncLoader(), level);
+        
+        if(!loadTask)
+        {
+            ERROR("VideoLoader::LoadAudioClipAsync() failed");
+            return Task<UnityW<UnityEngine::AudioClip>>::FromResult(UnityW<UnityEngine::AudioClip>(nullptr));
         }
-        callback(EntitlementStatus::Owned);
+
+        return loadTask;
+    }
+
+    Task<EntitlementStatus>* GetEntitlementForLevel(BeatmapLevel *level) {
+        if (auto contentModel = get_AdditionalContentEntitlementModel()) {
+            return contentModel->GetLevelEntitlementStatusAsync(level->levelID, System::Threading::CancellationToken::get_None());
+        }
+        
+        return Task<EntitlementStatus>::FromResult(EntitlementStatus::Owned);
     }
 
     VideoConfigPtr GetConfigForLevel(BeatmapLevel *level) {

@@ -4,9 +4,10 @@
 #include "GlobalNamespace/AudioClipAsyncLoader.hpp"
 #include "GlobalNamespace/BeatmapLevelsModel.hpp"
 #include "GlobalNamespace/IAdditionalContentModel.hpp"
-#include "GlobalNamespace/AsyncCache_2.hpp"
-#include "GlobalNamespace/EntitlementsStatus.hpp"
 
+#include "BGLib/DotnetExtension/Collections/LRUCache_2.hpp"
+
+#include "System/Threading/Tasks/Task_1.hpp"
 #include "System/Collections/Generic/List_1.hpp"
 
 #include "UnityEngine/AudioClip.hpp"
@@ -32,7 +33,7 @@ namespace Cinema {
 
         GlobalNamespace::AudioClipAsyncLoader *get_AudioClipAsyncLoader();
 
-        GlobalNamespace::AsyncCache_2<StringW, GlobalNamespace::BeatmapLevel *>* get_BeatmapLevelAsyncCache();
+        BGLib::DotnetExtension::Collections::LRUCache_2<StringW, GlobalNamespace::IBeatmapLevelData*>* get_BeatmapLevelDataCache();
 
         void Init();
 
@@ -64,11 +65,11 @@ namespace Cinema {
 
         bool IsDlcSong(GlobalNamespace::BeatmapLevel *level);
 
-        void GetAudioClipForLevel(GlobalNamespace::BeatmapLevel *level, const std::function<void(UnityW<UnityEngine::AudioClip>)> &callback);
+        System::Threading::Tasks::Task_1<UnityW<UnityEngine::AudioClip>>* GetAudioClipForLevel(GlobalNamespace::BeatmapLevel *level);
 
-        void LoadAudioClipAsync(GlobalNamespace::BeatmapLevel *level, const std::function<void(UnityW<UnityEngine::AudioClip>)> &callback);
+        System::Threading::Tasks::Task_1<UnityW<UnityEngine::AudioClip>>* LoadAudioClipAsync(GlobalNamespace::BeatmapLevel *level);
 
-        void GetEntitlementForLevel(GlobalNamespace::BeatmapLevel *level, const std::function<void(GlobalNamespace::EntitlementStatus)> &callback);
+        System::Threading::Tasks::Task_1< ::GlobalNamespace::EntitlementStatus>* GetEntitlementForLevel(GlobalNamespace::BeatmapLevel *level);
 
         VideoConfigPtr GetConfigForLevel(GlobalNamespace::BeatmapLevel *level);
 

@@ -13,9 +13,9 @@ DEFINE_TYPE(Cinema, VideoMenuStatus);
 
 namespace Cinema {
 
-    VideoMenu* VideoMenu::get_instance()
+    UnityW<VideoMenu> VideoMenu::get_instance()
     {
-        if (!instance || !instance->m_CachedPtr)
+        if (!instance)
             instance = UnityEngine::GameObject::New_ctor("CinemaVideoMenu")->AddComponent<VideoMenu*>();
         return instance;
     }
@@ -48,7 +48,7 @@ namespace Cinema {
         Events::difficultySelected -= {&VideoMenu::OnDifficultySelected, this};
         Events::difficultySelected += {&VideoMenu::OnDifficultySelected, this};
 
-        if (!rootObject || !rootObject->m_CachedPtr)
+        if (!rootObject)
         {
             return;
         }
@@ -76,7 +76,7 @@ namespace Cinema {
 
     void VideoMenu::CreateStatusListener()
     {
-        if (menuStatus && menuStatus->m_CachedPtr)
+        if (menuStatus)
         {
             menuStatus->didEnable -= {&VideoMenu::StatusViewerDidEnable, this};
             menuStatus->didDisable -= {&VideoMenu::StatusViewerDidDisable, this};
@@ -207,7 +207,7 @@ namespace Cinema {
 
     void VideoMenu::SetupVideoDetails()
     {
-        if (!videoSearchResults || !videoSearchResults->m_CachedPtr)
+        if (!videoSearchResults)
         {
             WARN("Video search results view rect is null, skipping UI setup");
             return;
