@@ -131,7 +131,7 @@ namespace Cinema
         noVideoText->SetTextInternal("No video configured");
     }
 
-    void VideoMenu::OnDownloadProgress(Cinema::VideoConfigPtr videoConfig)
+    void VideoMenu::OnDownloadProgress(std::shared_ptr<VideoConfig> videoConfig)
     {
         UpdateStatusText(videoConfig);
         SetupLevelDetailView(videoConfig);
@@ -285,7 +285,7 @@ namespace Cinema
         // bsmlParserParams->EmitEvent("update-customize-offset");
     }
 
-    void VideoMenu::SetupLevelDetailView(Cinema::VideoConfigPtr videoConfig)
+    void VideoMenu::SetupLevelDetailView(std::shared_ptr<VideoConfig> videoConfig)
     {
         if(videoConfig != currentVideo)
         {
@@ -310,7 +310,7 @@ namespace Cinema
         }
     }
 
-    void VideoMenu::UpdateStatusText(Cinema::VideoConfigPtr videoConfig) {}
+    void VideoMenu::UpdateStatusText(std::shared_ptr<VideoConfig> videoConfig) {}
 
     void VideoMenu::SetThumbnail(std::optional<std::string> url)
     {
@@ -390,7 +390,7 @@ namespace Cinema
         }
     }
 
-    void VideoMenu::OnConfigChanged(VideoConfigPtr config) {}
+    void VideoMenu::OnConfigChanged(std::shared_ptr<VideoConfig> config) {}
 
     void VideoMenu::StatusViewerDidEnable()
     {
@@ -408,7 +408,7 @@ namespace Cinema
 
     void VideoMenu::SearchAction() {}
 
-    void VideoMenu::OnDownloadFinished(Cinema::VideoConfigPtr video) {}
+    void VideoMenu::OnDownloadFinished(std::shared_ptr<VideoConfig> video) {}
 
     void VideoMenu::ShowKeyboard()
     {

@@ -182,7 +182,7 @@ namespace Cinema
         softParent->AssignParent(parent);
     }
 
-    void ScreenController::SetShaderParameters(VideoConfigPtr config)
+    void ScreenController::SetShaderParameters(std::shared_ptr<VideoConfig> config)
     {
         for(GameObject* screen : screens)
         {

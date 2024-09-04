@@ -70,7 +70,7 @@ public:
     void SetPlacement(UnityEngine::Vector3 position, UnityEngine::Vector3 rotation, float width, float height, std::optional<float> curvatureDegrees = std::nullopt, std::optional<int> subsurfaces = std::nullopt, std::optional<bool> curveYAxis = false);
     void InitializeSurfaces(float width, float height, float distance, std::optional<float> curvatureDegrees, std::optional<int> subsurfaces, std::optional<bool> curveYAxis);
     void SetBloomIntensity(std::optional<float> bloomIntensity);
-    void SetShaderParameters(VideoConfigPtr config);
+    void SetShaderParameters(std::shared_ptr<VideoConfig> config);
     void SetVigenette(std::optional<VideoConfig::Vigenette> vigenette = std::nullopt, UnityEngine::MaterialPropertyBlock* materialPropertyBlock = nullptr);
     void SetShaderFloat(int nameID, std::optional<float> value, float min, float max, float defaultValue);
     void SetBlendMode(BlendMode blendMode, UnityEngine::Material* material);

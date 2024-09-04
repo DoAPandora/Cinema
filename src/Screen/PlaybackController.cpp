@@ -152,9 +152,9 @@ namespace Cinema
 
     void PlaybackController::SceneChanged() {}
 
-    void PlaybackController::OnConfigChanged(VideoConfigPtr config) {}
+    void PlaybackController::OnConfigChanged(std::shared_ptr<VideoConfig> config) {}
 
-    void PlaybackController::OnConfigChanged(VideoConfigPtr config, bool reloadVideo) {}
+    void PlaybackController::OnConfigChanged(std::shared_ptr<VideoConfig> config, bool reloadVideo) {}
 
     void PlaybackController::ConfigChangedPrepareHandler(UnityEngine::Video::VideoPlayer* sender) {}
 
@@ -338,7 +338,7 @@ namespace Cinema
         videoPlayer->Play();
     }
 
-    void PlaybackController::SetSelectedLevel(GlobalNamespace::BeatmapLevel* level, VideoConfigPtr config)
+    void PlaybackController::SetSelectedLevel(GlobalNamespace::BeatmapLevel* level, std::shared_ptr<VideoConfig> config)
     {
         previewWaitingForPreviewPlayer = true;
         previewWaitingForVideoPlayer = true;
@@ -361,7 +361,7 @@ namespace Cinema
         {}
     }
 
-    void PlaybackController::PrepareVideo(VideoConfigPtr video)
+    void PlaybackController::PrepareVideo(std::shared_ptr<VideoConfig> video)
     {
         DEBUG("Preparing video");
         previewWaitingForVideoPlayer = true;
@@ -374,7 +374,7 @@ namespace Cinema
         StartCoroutine(prepareVideoCoroutine);
     }
 
-    custom_types::Helpers::Coroutine PlaybackController::PrepareVideoCoroutine(VideoConfigPtr video)
+    custom_types::Helpers::Coroutine PlaybackController::PrepareVideoCoroutine(std::shared_ptr<VideoConfig> video)
     {
         videoConfig = video;
 

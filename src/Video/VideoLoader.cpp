@@ -37,9 +37,9 @@ using Task = System::Threading::Tasks::Task_1<T>;
 
 using System::Collections::Generic::List_1;
 
-std::map<std::string, Cinema::VideoConfigPtr> mapsWithVideo;
-std::map<std::string, Cinema::VideoConfigPtr> cachedConfigs;
-std::map<std::string, Cinema::VideoConfigPtr> bundledConfigs;
+std::map<std::string, std::shared_ptr<Cinema::VideoConfig>> mapsWithVideo;
+std::map<std::string, std::shared_ptr<Cinema::VideoConfig>> cachedConfigs;
+std::map<std::string, std::shared_ptr<Cinema::VideoConfig>> bundledConfigs;
 
 GlobalNamespace::BeatmapLevelsModel* beatmapLevelsModel;
 IAdditionalContentModel* additionalContentModel;
@@ -169,7 +169,7 @@ namespace Cinema::VideoLoader
         return p / CONFIG_FILENAME;
     }
 
-    void AddConfigToCache(VideoConfigPtr config, BeatmapLevel* level)
+    void AddConfigToCache(std::shared_ptr<VideoConfig> config, BeatmapLevel* level)
     {
         if(config == nullptr)
         {
@@ -191,7 +191,7 @@ namespace Cinema::VideoLoader
         }
     }
 
-    VideoConfigPtr GetConfigFromCache(BeatmapLevel* level)
+    std::shared_ptr<VideoConfig> GetConfigFromCache(BeatmapLevel* level)
     {
         auto key = static_cast<std::string>(level->levelID);
         if(cachedConfigs.contains(key))
@@ -202,7 +202,7 @@ namespace Cinema::VideoLoader
         return nullptr;
     }
 
-    VideoConfigPtr GetConfigFromBundledConfigs(BeatmapLevel* level)
+    std::shared_ptr<VideoConfig> GetConfigFromBundledConfigs(BeatmapLevel* level)
     {
         auto cast = il2cpp_utils::try_cast<SongCore::SongLoader::CustomBeatmapLevel>(level);
         auto levelID = cast.has_value() ? static_cast<std::string>(level->levelID)
@@ -265,7 +265,7 @@ namespace Cinema::VideoLoader
         return Task<EntitlementStatus>::FromResult(EntitlementStatus::Owned);
     }
 
-    VideoConfigPtr GetConfigForLevel(BeatmapLevel* level)
+    std::shared_ptr<VideoConfig> GetConfigForLevel(BeatmapLevel* level)
     {
         auto cachedConfig = GetConfigFromCache(level);
         if(cachedConfig != nullptr)
@@ -277,7 +277,7 @@ namespace Cinema::VideoLoader
             }
         }
 
-        VideoConfigPtr videoConfig;
+        std::shared_ptr<VideoConfig> videoConfig;
         auto levelPath = GetLevelPath(level);
         if(std::filesystem::exists(levelPath))
         {
@@ -313,7 +313,7 @@ namespace Cinema::VideoLoader
         return p / OST_DIRECTORY_NAME / Cinema::Util::ReplaceIllegalFilesystemChar(songName);
     }
 
-    void SaveVideoConfig(VideoConfigPtr videoConfig)
+    void SaveVideoConfig(std::shared_ptr<VideoConfig> videoConfig)
     {
         if(videoConfig->levelDir == std::nullopt || videoConfig->ConfigPath == std::nullopt ||
            !std::filesystem::exists(*videoConfig->levelDir))
@@ -326,7 +326,7 @@ namespace Cinema::VideoLoader
         SaveVideoConfigToPath(videoConfig, configPath);
     }
 
-    void SaveVideoConfigToPath(VideoConfigPtr config, std::string path)
+    void SaveVideoConfigToPath(std::shared_ptr<VideoConfig> config, std::string path)
     {
         INFO("Saving video config to {}", path);
 
@@ -349,7 +349,7 @@ namespace Cinema::VideoLoader
         }
     }
 
-    void DeleteVideo(VideoConfigPtr videoConfig)
+    void DeleteVideo(std::shared_ptr<VideoConfig> videoConfig)
     {
         if(videoConfig->VideoPath == std::nullopt)
         {
@@ -373,7 +373,7 @@ namespace Cinema::VideoLoader
         }
     }
 
-    bool DeleteConfig(VideoConfigPtr videoConfig, GlobalNamespace::BeatmapLevel* level)
+    bool DeleteConfig(std::shared_ptr<VideoConfig> videoConfig, GlobalNamespace::BeatmapLevel* level)
     {
         if(videoConfig->levelDir == std::nullopt)
         {
@@ -404,7 +404,7 @@ namespace Cinema::VideoLoader
         return true;
     }
 
-    VideoConfigPtr LoadConfig(std::string configPath)
+    std::shared_ptr<VideoConfig> LoadConfig(std::string configPath)
     {
         if(!std::filesystem::exists(configPath))
         {

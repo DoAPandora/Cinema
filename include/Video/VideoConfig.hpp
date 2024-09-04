@@ -16,9 +16,6 @@ class EnvironmentObject;
 
 namespace Cinema {
 
-    class VideoConfig;
-    using VideoConfigPtr = std::shared_ptr<VideoConfig>;
-
     enum class DownloadState {
         NotDownloaded,
         Preparing,
