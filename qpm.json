@@ -14,20 +14,20 @@
   },
   "workspace": {
     "scripts": {
-      "build": [
-        "pwsh ./scripts/build.ps1 --release"
-      ],
-      "debug": [
-        "pwsh ./scripts/build.ps1"
-      ],
       "a2l": [
         "pwsh ./scripts/addr2line.ps1 $0"
+      ],
+      "build": [
+        "pwsh ./scripts/build.ps1 --release"
       ],
       "clean": [
         "pwsh ./scripts/build.ps1 -clean"
       ],
       "copy": [
         "pwsh ./scripts/copy.ps1"
+      ],
+      "debug": [
+        "pwsh ./scripts/build.ps1"
       ],
       "format": [
         "find ./src -name *.cpp -exec clang-format -i {} ;"
@@ -43,7 +43,10 @@
         "code RecentCrash.log"
       ]
     },
-    "qmodIncludeDirs": ["./build", "./extern/libs"],
+    "qmodIncludeDirs": [
+      "./build",
+      "./extern/libs"
+    ],
     "qmodIncludeFiles": [],
     "qmodOutput": "Cinema"
   },
@@ -101,6 +104,13 @@
       "id": "songcore",
       "versionRange": "^1.1.13",
       "additionalData": {}
+    },
+    {
+      "id": "scotland2",
+      "versionRange": "^0.1.4",
+      "additionalData": {
+        "includeQmod": false
+      }
     }
   ]
 }
