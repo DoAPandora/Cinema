@@ -6,6 +6,7 @@
 #include "Util/ExtraSongData.hpp"
 #include "Util/EventArgs.hpp"
 #include "Video/VideoConfig.hpp"
+#include "Download/DownloadController.hpp"
 
 #include "GlobalNamespace/BeatmapLevel.hpp"
 
@@ -73,6 +74,7 @@ DECLARE_CLASS_CODEGEN(Cinema, VideoMenu, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_FIELD(int, selectedCell);
 
     static inline UnityW<VideoMenu> instance;
+    DownloadController downloadController;
 
 public:
 
@@ -135,7 +137,7 @@ public:
     void OnDifficultySelected(ExtraSongDataArgs extraSongDataArgs);
     void OnConfigChanged(std::shared_ptr<VideoConfig> config);// might not be needed
 //    custom_types::Helpers::Coroutine UpdateSearchResults()
-    void OnDownloadFinished(std::shared_ptr<VideoConfig> video);
+    void OnDownloadFinished(std::shared_ptr<VideoConfig> video, bool success);
     // search progress
     custom_types::Helpers::Coroutine SearchLoadingCoroutine();
 

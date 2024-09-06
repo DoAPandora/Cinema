@@ -1,6 +1,7 @@
 #include "VideoMenu/VideoMenu.hpp"
 #include "Screen/PlaybackController.hpp"
 #include "Util/Events.hpp"
+#include "Video/VideoConfig.hpp"
 #include "Video/VideoLoader.hpp"
 #include "assets.hpp"
 #include "main.hpp"
@@ -282,6 +283,8 @@ namespace Cinema
             offsetControls->SetActive(false);
         }
 
+        UpdateStatusText(currentVideo);
+
         // bsmlParserParams->EmitEvent("update-customize-offset");
     }
 
@@ -310,7 +313,44 @@ namespace Cinema
         }
     }
 
-    void VideoMenu::UpdateStatusText(std::shared_ptr<VideoConfig> videoConfig) {}
+    void VideoMenu::UpdateStatusText(std::shared_ptr<VideoConfig> videoConfig) 
+    {
+        if(videoConfig != currentVideo || !videoMenuActive)
+        {
+            return;
+        }
+
+        using UnityEngine::Color;
+        switch (videoConfig->downloadState)
+        {
+            case DownloadState::Downloaded:
+                videoStatus->text = "Downloaded";
+                videoStatus->color = Color::get_green();
+                previewButton->interactable = true;
+                break;
+            case DownloadState::Preparing:
+                videoStatus->text = "Preparing...";
+                videoStatus->color = Color::get_yellow();
+                previewButton->interactable = false;
+                break;
+            case DownloadState::Downloading:
+                videoStatus->text = fmt::format("Downloading {:.1f}%", videoConfig->downloadProgress);
+                videoStatus->color = Color::get_yellow();
+                previewButton->interactable = false;
+                break;
+            case DownloadState::NotDownloaded:
+                videoStatus->text = "Not downloaded";
+                videoStatus->color = Color::get_red();
+                previewButton->interactable = false;
+                break;
+            case DownloadState::Cancelled:
+                videoStatus->text = "Cancelled";
+                videoStatus->color = Color::get_red();
+                previewButton->interactable = false;
+                break;
+
+        }
+    }
 
     void VideoMenu::SetThumbnail(std::optional<std::string> url)
     {
@@ -352,7 +392,6 @@ namespace Cinema
         {
             return;
         }
-
         //        PlaybackController::get_instance().
 
         if(currentVideo != nullptr && currentVideo->needsToSave)
@@ -408,7 +447,10 @@ namespace Cinema
 
     void VideoMenu::SearchAction() {}
 
-    void VideoMenu::OnDownloadFinished(std::shared_ptr<VideoConfig> video) {}
+    void VideoMenu::OnDownloadFinished(std::shared_ptr<VideoConfig> video, bool success)
+    {
+        INFO("Finished downloading video {} {}", video->videoID, success);
+    }
 
     void VideoMenu::ShowKeyboard()
     {
@@ -434,15 +476,27 @@ namespace Cinema
         case DownloadState::DownloadingAudio:
         case DownloadState::DownloadingVideo:
             {
-                // cancel download
+                downloadController.CancelDownload(currentVideo);
                 break;
             }
         case DownloadState::NotDownloaded:
         case DownloadState::Cancelled:
             {
                 currentVideo->downloadProgress = 0;
+                downloadController.StartDownload(currentVideo, std::bind(&VideoMenu::OnDownloadFinished, this, std::placeholders::_1, std::placeholders::_2));
+                currentVideo->needsToSave = true;
+                VideoLoader::AddConfigToCache(currentVideo, currentLevel);
+                break;
+            }
+        default:
+            {
+                VideoLoader::DeleteVideo(currentVideo);
+                PlaybackController::get_instance()->videoPlayer->FadeOut(0.2f);
+                SetupLevelDetailView(currentVideo);
             }
         }
+
+        UpdateStatusText(currentVideo);
     }
 
     void VideoMenu::OnDeleteConfigAction() {}
