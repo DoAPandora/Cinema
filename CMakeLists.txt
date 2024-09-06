@@ -22,7 +22,7 @@ set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # compile options used
-add_compile_options(-frtti -fexceptions -fdeclspec -fvisibility=hidden -fPIE -fPIC)
+add_compile_options(-frtti -fexceptions -fdeclspec -fvisibility=hidden -fPIE -fPIC -fms-extensions -fexperimental-library)
 
 if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     add_compile_options(-O0)

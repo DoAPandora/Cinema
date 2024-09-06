@@ -13,15 +13,20 @@ static constexpr std::string_view BASE_DOWNLOAD_COMMAND("--no-cache-dir -o %(id)
 
 namespace Cinema
 {
-    void DownloadController::DownloadVideoThread(std::shared_ptr<VideoConfig> video, const std::function<void(std::shared_ptr<VideoConfig>)> statusUpdate, const std::function<void(std::shared_ptr<VideoConfig>, bool)> onFinished, System::Threading::CancellationToken cancellationToken)
+    void DownloadController::DownloadVideoThread(std::stop_token stopToken, std::shared_ptr<VideoConfig> video, const std::function<void(std::shared_ptr<VideoConfig>)> statusUpdate, const std::function<void(std::shared_ptr<VideoConfig>, bool)> onFinished)
     {
         INFO("Downloading video {}", video->videoID);
-        std::function<void(int, char*)> eventHandler = [video, &statusUpdate](int type, char* data)
+        std::function<void(int, char*)> eventHandler = [&](int type, char* data)
         {
             switch(type)
             {
             case 0:
                 {
+                    if(stopToken.stop_requested()) 
+                    {
+                        // dont send progress updates if cancelled
+                        return;
+                    }
                     std::string_view dataString(data);
                     if(dataString.find("[download]") != std::string::npos && dataString.find('%') != std::string::npos)
                     {
@@ -58,18 +63,17 @@ namespace Cinema
         {
             std::lock_guard lock(currentDownloadsMutex);
             // remove current download from the downloads list
-            std::erase_if(currentDownloads, [video](const std::pair<std::shared_ptr<VideoConfig>, System::Threading::CancellationTokenSource*>& downloadInfo)
+            std::erase_if(currentDownloads, [&](const std::pair<std::shared_ptr<VideoConfig>, std::stop_source>& downloadInfo)
                 { return downloadInfo.first == video; });
         }
 
-        std::string id = video->videoID.value();
-        const auto path = DOWNLOAD_FOLDER / (id + ".mp4");
-        if(cancellationToken.IsCancellationRequested)
+        std::filesystem::path outputfile = videoOutputDir / (video->videoID.value() + ".mp4");
+        if(stopToken.stop_requested())
         {
             DEBUG("Video {} download was cancelled!", video->videoID);
-            if(std::filesystem::exists(path))
+            if(std::filesystem::exists(outputfile))
             {
-                std::filesystem::remove(path);
+                std::filesystem::remove(outputfile);
             }
             video->downloadState = DownloadState::Cancelled;
             onFinished(video, false);
@@ -80,9 +84,9 @@ namespace Cinema
         {
             DEBUG("Video {} download errored!", video->videoID);
             video->downloadState = DownloadState::NotDownloaded;
-            if(std::filesystem::exists(path))
+            if(std::filesystem::exists(outputfile))
             {
-                std::filesystem::remove(path);
+                std::filesystem::remove(outputfile);
             }
             onFinished(video, false);
             return;
@@ -97,7 +101,7 @@ namespace Cinema
     void DownloadController::CancelDownload(std::shared_ptr<VideoConfig> video)
     {
         std::lock_guard lock(currentDownloadsMutex);
-        auto downloadInfo = std::find_if(currentDownloads.begin(), currentDownloads.end(), [video](const std::pair<std::shared_ptr<VideoConfig>, System::Threading::CancellationTokenSource*>& downloadInfo)
+        auto downloadInfo = std::find_if(currentDownloads.begin(), currentDownloads.end(), [video](const std::pair<std::shared_ptr<VideoConfig>, std::stop_source>& downloadInfo)
             { return downloadInfo.first == video; });
         if(downloadInfo == currentDownloads.end())
         {
@@ -105,6 +109,8 @@ namespace Cinema
             return;
         }
 
-        downloadInfo->second->Cancel();
+        DEBUG("Cancelled download of video {}", video->videoID);
+        downloadInfo->second.request_stop();
+        currentDownloads.erase(downloadInfo);
     }
 }

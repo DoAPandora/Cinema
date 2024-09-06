@@ -491,7 +491,7 @@ namespace Cinema
         case DownloadState::Cancelled:
             {
                 currentVideo->downloadProgress = 0;
-                downloadController.StartDownload(currentVideo, std::bind(&VideoMenu::OnDownloadProgress, this, std::placeholders::_1), std::bind(&VideoMenu::OnDownloadFinished, this, std::placeholders::_1, std::placeholders::_2));
+                downloadController.StartDownload(currentVideo, std::bind_front(&VideoMenu::OnDownloadProgress, this), std::bind_front(&VideoMenu::OnDownloadFinished, this));
                 currentVideo->needsToSave = true;
                 VideoLoader::AddConfigToCache(currentVideo, currentLevel);
                 break;
