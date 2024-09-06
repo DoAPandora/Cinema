@@ -8,6 +8,7 @@
 
 #include "bsml/shared/BSML.hpp"
 #include "bsml/shared/Helpers/utilities.hpp"
+#include "bsml/shared/BSML/MainThreadScheduler.hpp"
 
 DEFINE_TYPE(Cinema, VideoMenu);
 DEFINE_TYPE(Cinema, VideoMenuStatus);
@@ -134,8 +135,11 @@ namespace Cinema
 
     void VideoMenu::OnDownloadProgress(std::shared_ptr<VideoConfig> videoConfig)
     {
-        UpdateStatusText(videoConfig);
-        SetupLevelDetailView(videoConfig);
+        BSML::MainThreadScheduler::Schedule([this, videoConfig]()
+        {
+            UpdateStatusText(videoConfig);
+            SetupLevelDetailView(videoConfig);
+        });
     }
 
     void VideoMenu::SetButtonState(bool state)
@@ -450,6 +454,10 @@ namespace Cinema
     void VideoMenu::OnDownloadFinished(std::shared_ptr<VideoConfig> video, bool success)
     {
         INFO("Finished downloading video {} {}", video->videoID, success);
+        BSML::MainThreadScheduler::Schedule([this, video]()
+        {
+            UpdateStatusText(video);
+        });
     }
 
     void VideoMenu::ShowKeyboard()
@@ -483,7 +491,7 @@ namespace Cinema
         case DownloadState::Cancelled:
             {
                 currentVideo->downloadProgress = 0;
-                downloadController.StartDownload(currentVideo, std::bind(&VideoMenu::OnDownloadFinished, this, std::placeholders::_1, std::placeholders::_2));
+                downloadController.StartDownload(currentVideo, std::bind(&VideoMenu::OnDownloadProgress, this, std::placeholders::_1), std::bind(&VideoMenu::OnDownloadFinished, this, std::placeholders::_1, std::placeholders::_2));
                 currentVideo->needsToSave = true;
                 VideoLoader::AddConfigToCache(currentVideo, currentLevel);
                 break;

@@ -13,27 +13,26 @@ static constexpr std::string_view BASE_DOWNLOAD_COMMAND("--no-cache-dir -o %(id)
 
 namespace Cinema
 {
-    void DownloadController::DownloadVideoThread(std::shared_ptr<VideoConfig> video, const std::function<void(std::shared_ptr<VideoConfig>, bool)> onFinished, System::Threading::CancellationToken cancellationToken)
+    void DownloadController::DownloadVideoThread(std::shared_ptr<VideoConfig> video, const std::function<void(std::shared_ptr<VideoConfig>)> statusUpdate, const std::function<void(std::shared_ptr<VideoConfig>, bool)> onFinished, System::Threading::CancellationToken cancellationToken)
     {
         INFO("Downloading video {}", video->videoID);
-        std::function<void(int, char*)> eventHandler = [video](int type, char* data)
+        std::function<void(int, char*)> eventHandler = [video, &statusUpdate](int type, char* data)
         {
             switch(type)
             {
             case 0:
                 {
                     std::string_view dataString(data);
-                    video->downloadState = DownloadState::Downloading;
-                    if(dataString.find("[download]", 0) != -1)
+                    if(dataString.find("[download]") != std::string::npos && dataString.find('%') != std::string::npos)
                     {
-                        auto pos = dataString.find("%", 0);
-                        if(pos != -1 && pos > 5)
-                        {
-                            auto percentange = dataString.substr(pos - 5, 5);
-                            if(percentange.find("]", 0) == 0)
-                                percentange = percentange.substr(1);
-                            video->downloadProgress = std::stof(percentange.data());
-                        }
+                        video->downloadState = DownloadState::Downloading;
+                        
+                        auto percentange = dataString.substr(11, 5);
+                        if(percentange.ends_with('%'))
+                            percentange = percentange.substr(0, percentange.size() -1 );
+
+                        video->downloadProgress = std::stof(percentange.data());
+                        statusUpdate(video);
                     }
                 }
                 break;
@@ -91,6 +90,7 @@ namespace Cinema
 
         std::filesystem::rename(videoOutputDir / (video->videoID.value() + ".mp4"), videoOutputDir / video->GetVideoFileName(video->levelDir.value()));
 
+        video->UpdateDownloadState();
         onFinished(video, true);
     }
 
