@@ -74,7 +74,7 @@ namespace Cinema
         BSEvents::gameSceneActive += {&PlaybackController::GameSceneActive, this};
         BSEvents::gameSceneLoaded += {&PlaybackController::GameSceneLoaded, this};
 
-        OnMenuSceneLoadedFresh(nullptr);
+        // OnMenuSceneLoadedFresh(nullptr);
     }
 
     void PlaybackController::OnDestroy() {}
@@ -363,6 +363,10 @@ namespace Cinema
 
     void PlaybackController::PrepareVideo(std::shared_ptr<VideoConfig> video)
     {
+        if(!video)
+        {
+            return ERROR("VideoConfig was null!");
+        }
         DEBUG("Preparing video");
         previewWaitingForVideoPlayer = true;
 
@@ -378,8 +382,28 @@ namespace Cinema
     {
         videoConfig = video;
 
-        videoPlayer->Url = video->VideoPath.value();
+        videoPlayer->Pause();
+        if(videoConfig->downloadState != DownloadState::Downloaded)
+        {
+            DEBUG("Video is not downloaded!");
+            videoPlayer->FadeOut();
+            co_return;
+        }
+
+        videoPlayer->LoopVideo(video->loop.value_or(false));
+
+        if(!video->get_VideoPath())
+        {
+            ERROR("Video path was null!");
+            co_return;
+        }
+
+        std::string videoPath = video->get_VideoPath().value();
+        INFO("Loading video {}", videoPath);
+
+        videoPlayer->Url = videoPath;
         videoPlayer->Prepare();
+        
         co_return;
     }
 } // namespace Cinema
