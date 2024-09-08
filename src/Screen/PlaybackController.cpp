@@ -350,7 +350,7 @@ namespace Cinema
 
         if(config == nullptr)
         {
-            // f adeout
+            videoPlayer->FadeOut();
             StopAllCoroutines();
             return;
         }
@@ -358,7 +358,9 @@ namespace Cinema
         DEBUG("Preparing video");
         PrepareVideo(config);
         if(level && VideoLoader::IsDlcSong(level))
-        {}
+        {
+            videoPlayer->FadeOut();
+        }
     }
 
     void PlaybackController::PrepareVideo(std::shared_ptr<VideoConfig> video)

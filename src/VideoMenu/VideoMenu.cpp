@@ -396,7 +396,8 @@ namespace Cinema
         {
             return;
         }
-        //        PlaybackController::get_instance().
+
+        PlaybackController::get_instance()->StopPreview(true);
 
         if(currentVideo != nullptr && currentVideo->needsToSave)
         {
