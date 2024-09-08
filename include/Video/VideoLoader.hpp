@@ -43,7 +43,7 @@ namespace Cinema {
 
         std::string GetConfigPath(const std::string& levelPath);
 
-        void AddConfigToCache(Cinema::VideoConfig &videoConfig, GlobalNamespace::BeatmapLevel *level);
+        void AddConfigToCache(std::shared_ptr<Cinema::VideoConfig> videoConfig, GlobalNamespace::BeatmapLevel *level);
 
         void RemoveConfigFromCache(GlobalNamespace::BeatmapLevel *level);
 
