@@ -16,7 +16,7 @@
     "workspace": {
       "scripts": {
         "a2l": [
-          "pwsh ./scripts/addr2line.ps1 $0"
+          "pwsh ./scripts/addr2line.ps1 libcinema.so $0"
         ],
         "build": [
           "pwsh ./scripts/build.ps1 --release"
@@ -33,6 +33,9 @@
         "format": [
           "find ./src -name *.cpp -exec clang-format -i {} ;"
         ],
+        "push": [
+          "adb push ./build/libcinema.so /sdcard/moddata/com.beatgames.beatsaber/modloader/mods"
+        ],
         "restart": [
           "pwsh ./scripts/restart-game.ps1"
         ],
@@ -44,6 +47,7 @@
           "code RecentCrash.log"
         ]
       },
+      "ndk": "^27.1.12297006",
       "qmodIncludeDirs": [
         "./build",
         "./extern/libs"

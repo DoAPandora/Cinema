@@ -14,8 +14,11 @@
   },
   "workspace": {
     "scripts": {
+      "push": [
+        "adb push ./build/libcinema.so /sdcard/moddata/com.beatgames.beatsaber/modloader/mods"
+      ],
       "a2l": [
-        "pwsh ./scripts/addr2line.ps1 $0"
+        "pwsh ./scripts/addr2line.ps1 libcinema.so $0"
       ],
       "build": [
         "pwsh ./scripts/build.ps1 --release"
@@ -39,10 +42,11 @@
         "pwsh ./scripts/ndk-stack.ps1"
       ],
       "tomb": [
-        "pwsh ./scripts/pull-tombstone.ps1",
-        "code RecentCrash.log"
+        "pwsh ./scripts/pull-tombstone.ps1 -analyze",
+        "code RecentCrash.log_processed.log"
       ]
     },
+    "ndk": "^27.1.12297006",
     "qmodIncludeDirs": [
       "./build",
       "./extern/libs"
