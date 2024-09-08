@@ -4,14 +4,19 @@
 
 #include "paper/shared/logger.hpp"
 
-template <>
-struct fmt::formatter<std::optional<std::string>> : formatter<string_view>
+template <typename T>
+struct fmt::formatter<std::optional<T>> : formatter<string_view>
 {
     // parse is inherited from formatter<string_view>.
     template <typename FormatContext>
-    auto format(std::optional<std::string> s, FormatContext& ctx)
+    auto format(std::optional<T> s, FormatContext& ctx)
     {
-        return formatter<string_view>::format(s.value_or("NULL"), ctx);
+        if(s.has_value())
+        {
+            return formatter<T>().format(s.value(), ctx);
+        }
+
+        return formatter<string_view>::format("std::nullopt", ctx);
     }
 };
 
