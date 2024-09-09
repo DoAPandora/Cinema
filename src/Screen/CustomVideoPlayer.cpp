@@ -70,22 +70,22 @@ namespace Cinema
 
         videoPlayerErrorReceived = custom_types::MakeDelegate<Video::VideoPlayer::ErrorEventHandler*>(
             std::function<void(Video::VideoPlayer*, StringW)>(
-                std::bind(&CustomVideoPlayer::VideoPlayerErrorReceived, this, std::placeholders::_1, std::placeholders::_2)));
+                std::bind_front(&CustomVideoPlayer::VideoPlayerErrorReceived, this)));
         player->errorReceived = (Video::VideoPlayer::ErrorEventHandler*)System::Delegate::Combine(player->errorReceived, videoPlayerErrorReceived);
 
         videoPlayerPrepareComplete = custom_types::MakeDelegate<VideoPlayer::EventHandler*>(
             std::function<void(VideoPlayer*)>(
-                std::bind(&CustomVideoPlayer::VideoPlayerPrepareComplete, this, std::placeholders::_1)));
+                std::bind_front(&CustomVideoPlayer::VideoPlayerPrepareComplete, this)));
         player->prepareCompleted = (VideoPlayer::EventHandler*)System::Delegate::Combine(player->prepareCompleted, videoPlayerPrepareComplete);
 
         videoPlayerStarted = custom_types::MakeDelegate<VideoPlayer::EventHandler*>(
             std::function<void(VideoPlayer*)>(
-                std::bind(&CustomVideoPlayer::VideoPlayerStarted, this, std::placeholders::_1)));
+                std::bind_front(&CustomVideoPlayer::VideoPlayerStarted, this)));
         player->started = (VideoPlayer::EventHandler*)System::Delegate::Combine(player->started, videoPlayerStarted);
 
         videoPlayerFinished = custom_types::MakeDelegate<VideoPlayer::EventHandler*>(
             std::function<void(VideoPlayer*)>(
-                std::bind(&CustomVideoPlayer::VideoPlayerFinished, this, std::placeholders::_1)));
+                std::bind_front(&CustomVideoPlayer::VideoPlayerFinished, this)));
         player->loopPointReached = (VideoPlayer::EventHandler*)System::Delegate::Combine(player->loopPointReached, videoPlayerFinished);
 
         videoPlayerAudioSource = get_gameObject()->AddComponent<AudioSource*>();
@@ -189,7 +189,13 @@ namespace Cinema
         FadeIn(0);
     }
 
-    void CustomVideoPlayer::FadeIn(float duration) {}
+    void CustomVideoPlayer::FadeIn(float duration)
+    {
+#ifndef USE_CURVED_SCREEN
+        gameObject->active = true;
+        DEBUG("FadeIn is not implemented!");
+#endif
+    }
 
     void CustomVideoPlayer::Hide()
     {
@@ -198,7 +204,12 @@ namespace Cinema
 
     void CustomVideoPlayer::FadeOut(float duration)
     {
-        waitingForFadeOut = true;
+        // waitingForFadeOut = true;
+#ifndef USE_CURVED_SCREEN
+        gameObject->active = false;
+        Stop();
+        DEBUG("FadeOut is not implemented!");
+#endif
     }
 
     void CustomVideoPlayer::ShowScreenBody() {}
@@ -228,7 +239,11 @@ namespace Cinema
         func(player);
     }
 
-    void CustomVideoPlayer::Stop() {}
+    void CustomVideoPlayer::Stop()
+    {
+        player->Stop();
+        SetStaticTexture(nullptr);
+    }
 
     void CustomVideoPlayer::Prepare()
     {

@@ -60,7 +60,7 @@ namespace Cinema
 
         onPrepareComplete = custom_types::MakeDelegate<VideoPlayer::EventHandler*>(
             std::function<void(VideoPlayer*)>(
-                std::bind(&PlaybackController::OnPrepareComplete, this, std::placeholders::_1)));
+                std::bind_front(&PlaybackController::OnPrepareComplete, this)));
         videoPlayer->player->prepareCompleted = (VideoPlayer::EventHandler*)System::Delegate::Combine(videoPlayer->player->prepareCompleted, onPrepareComplete);
 
         //         videoPlayer->player->prepareCompleted += onPrepareComplete;
