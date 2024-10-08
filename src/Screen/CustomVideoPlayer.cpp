@@ -38,26 +38,21 @@ namespace Cinema
 
         DEBUG("Creating CustomVideoPlayer");
 
-#ifdef USE_CURVED_SCREEN
         CreateScreen();
         screenRenderer = screenController->GetRenderer();
         screenRenderer->material = Material::New_ctor(GetShader());
         // screenRenderer->material->color = screenColorOff;
         screenRenderer->material->enableInstancing = true;
         player = gameObject->AddComponent<VideoPlayer*>();
-#else
         player = CreateVideoPlayer(transform);
-#endif
 
         player->source = Video::VideoSource::Url;
 
-#ifdef USE_CURVED_SCREEN
         player->renderMode = Video::VideoRenderMode::RenderTexture;
         renderTexture = screenController->CreateRenderTexture();
         renderTexture->wrapMode = TextureWrapMode::Mirror;
 
         player->targetTexture = renderTexture;
-#endif
         player->playOnAwake = false;
         player->waitForFirstFrame = true;
 
@@ -90,9 +85,7 @@ namespace Cinema
         Mute();
         //        screenController->SetScreensActive(false);
 
-#ifdef USE_CURVED_SCREEN
         screenController->EnableColorBlending(true);
-#endif
         SetDefaultMenuPlacement();
     }
 
@@ -105,10 +98,7 @@ namespace Cinema
 
     void CustomVideoPlayer::SetPlacement(Placement& placement)
     {
-// will add this properly soon ?
-#ifdef USE_CURVED_SCREEN
         screenController->SetPlacement(placement);
-#endif
     }
 
     // Flat plane video player
@@ -182,10 +172,8 @@ namespace Cinema
 
     void CustomVideoPlayer::FadeIn(float duration)
     {
-#ifndef USE_CURVED_SCREEN
         gameObject->active = true;
         DEBUG("FadeIn is not implemented!");
-#endif
     }
 
     void CustomVideoPlayer::Hide()
@@ -196,11 +184,9 @@ namespace Cinema
     void CustomVideoPlayer::FadeOut(float duration)
     {
         // waitingForFadeOut = true;
-#ifndef USE_CURVED_SCREEN
         gameObject->active = false;
         Stop();
         DEBUG("FadeOut is not implemented!");
-#endif
     }
 
     void CustomVideoPlayer::ShowScreenBody() {}
@@ -209,14 +195,10 @@ namespace Cinema
 
     void CustomVideoPlayer::CreateScreen()
     {
-#ifdef USE_CURVED_SCREEN
         screenController = ScreenController::New_ctor();
         screenController->CreateScreen(transform);
         screenController->SetScreensActive(true);
         SetDefaultMenuPlacement();
-#else
-
-#endif
     }
 
     void CustomVideoPlayer::Play()
@@ -274,18 +256,13 @@ namespace Cinema
 
     Color CustomVideoPlayer::get_ScreenColor()
     {
-#ifdef USE_CURVED_SCREEN
         return screenRenderer->get_material()->get_color();
-#else
         return Color::get_clear();
-#endif
     }
 
     void CustomVideoPlayer::set_ScreenColor(UnityEngine::Color value)
     {
-#ifdef USE_CURVED_SCREEN
         screenRenderer->get_material()->set_color(value);
-#endif
     }
 
     float CustomVideoPlayer::get_PlaybackSpeed()
