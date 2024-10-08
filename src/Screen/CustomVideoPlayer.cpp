@@ -20,7 +20,6 @@ using namespace UnityEngine::Video;
 
 DEFINE_TYPE(Cinema, CustomVideoPlayer);
 
-#define RESOLVE_ICALL(name, ret, ...) reinterpret_cast<function_ptr_t<ret, UnityEngine::Video::VideoPlayer*, ##__VA_ARGS__>>(il2cpp_functions::resolve_icall("UnityEngine.Video.VideoPlayer::" #name));
 
 template <typename T>
 requires(std::is_convertible_v<T, System::MulticastDelegate*>)
@@ -43,30 +42,24 @@ namespace Cinema
         CreateScreen();
         screenRenderer = screenController->GetRenderer();
         screenRenderer->material = Material::New_ctor(GetShader());
-        screenRenderer->material->color = screenColorOff;
+        // screenRenderer->material->color = screenColorOff;
         screenRenderer->material->enableInstancing = true;
         player = gameObject->AddComponent<VideoPlayer*>();
 #else
         player = CreateVideoPlayer(transform);
 #endif
 
-        auto set_source = RESOLVE_ICALL(set_source, void, Video::VideoSource);
-        set_source(player, Video::VideoSource::Url);
+        player->source = Video::VideoSource::Url;
 
 #ifdef USE_CURVED_SCREEN
-        auto set_renderMode = RESOLVE_ICALL(set_renderMode, void, Video::VideoRenderMode);
-        set_renderMode(player, Video::VideoRenderMode::RenderTexture);
+        player->renderMode = Video::VideoRenderMode::RenderTexture;
         renderTexture = screenController->CreateRenderTexture();
         renderTexture->wrapMode = TextureWrapMode::Mirror;
 
-        auto set_targetTexture = RESOLVE_ICALL(set_targetTexture, void, RenderTexture*);
-        set_targetTexture(player, renderTexture);
+        player->targetTexture = renderTexture;
 #endif
-        auto set_playOnAwake = RESOLVE_ICALL(set_playOnAwake, void, bool);
-        set_playOnAwake(player, false);
-
-        auto set_waitForFirstFrame = RESOLVE_ICALL(set_waitForFirstFrame, void, bool);
-        set_waitForFirstFrame(player, true);
+        player->playOnAwake = false;
+        player->waitForFirstFrame = true;
 
         videoPlayerErrorReceived = custom_types::MakeDelegate<Video::VideoPlayer::ErrorEventHandler*>(
             std::function<void(Video::VideoPlayer*, StringW)>(
@@ -90,11 +83,9 @@ namespace Cinema
 
         videoPlayerAudioSource = get_gameObject()->AddComponent<AudioSource*>();
 
-        auto set_audioOutputMode = RESOLVE_ICALL(set_audioOutputMode, void, Video::VideoAudioOutputMode);
-        set_audioOutputMode(player, Video::VideoAudioOutputMode::AudioSource);
+        player->audioOutputMode = VideoAudioOutputMode::AudioSource;
 
-        auto SetTargetAudioSource = RESOLVE_ICALL(SetTargetAudioSource, void, uint16_t, AudioSource*);
-        SetTargetAudioSource(player, 0, videoPlayerAudioSource);
+        player->SetTargetAudioSource(0, videoPlayerAudioSource);
 
         Mute();
         //        screenController->SetScreensActive(false);
@@ -144,8 +135,8 @@ namespace Cinema
         auto cinemaScreen = screenGo->GetComponent<Renderer*>();
         if(cinemaScreen)
         {
-            static auto set_targetMaterialRenderer = RESOLVE_ICALL(set_targetMaterialRenderer, void, Renderer*);
-            set_targetMaterialRenderer(videoPlayer, cinemaScreen);
+            // static auto set_targetMaterialRenderer = RESOLVE_ICALL(set_targetMaterialRenderer, void, Renderer*);
+            // set_targetMaterialRenderer(videoPlayer, cinemaScreen);
         }
 
         return videoPlayer;
@@ -235,8 +226,7 @@ namespace Cinema
 
     void CustomVideoPlayer::Pause()
     {
-        static auto func = RESOLVE_ICALL(Pause, void);
-        func(player);
+        player->Pause();
     }
 
     void CustomVideoPlayer::Stop()
@@ -247,8 +237,7 @@ namespace Cinema
 
     void CustomVideoPlayer::Prepare()
     {
-        static auto func = RESOLVE_ICALL(Prepare, void);
-        func(player);
+        player->Prepare();
     }
 
     void CustomVideoPlayer::Update() {}
@@ -301,13 +290,12 @@ namespace Cinema
 
     float CustomVideoPlayer::get_PlaybackSpeed()
     {
-        static auto func = RESOLVE_ICALL(get_playbackSpeed, float);
-        return func(player);
+        return player->playbackSpeed;
     }
 
     void CustomVideoPlayer::set_PlaybackSpeed(float value)
     {
-        player->set_playbackSpeed(value);
+        player->playbackSpeed = value;
     }
 
     float CustomVideoPlayer::get_VideoDuration()
@@ -316,26 +304,22 @@ namespace Cinema
 
     void CustomVideoPlayer::set_Volume(float value)
     {
-        static auto func = reinterpret_cast<function_ptr_t<void, AudioSource*, float>>(il2cpp_functions::resolve_icall("UnityEngine.AudioSource::set_volume"));
-        func(videoPlayerAudioSource, value);
+        videoPlayerAudioSource->volume = value;
     }
 
     void CustomVideoPlayer::set_PanStereo(float value)
     {
-        static auto func = reinterpret_cast<function_ptr_t<void, AudioSource*, float>>(il2cpp_functions::resolve_icall("UnityEngine.AudioSource::set_panStereo"));
-        func(videoPlayerAudioSource, value);
+        videoPlayerAudioSource->panStereo = value;
     }
 
     StringW CustomVideoPlayer::get_Url()
     {
-        static auto func = RESOLVE_ICALL(get_url, StringW);
-        return func(player);
+        return player->url;
     }
 
     void CustomVideoPlayer::set_Url(StringW value)
     {
-        static auto func = RESOLVE_ICALL(set_url, void, StringW);
-        func(player, value);
+        player->url = value;
     }
 
     bool CustomVideoPlayer::get_IsPlaying()
@@ -347,19 +331,16 @@ namespace Cinema
 
     bool CustomVideoPlayer::get_IsPrepared()
     {
-        static auto func = RESOLVE_ICALL(get_isPrepared, bool);
-        return func(player);
+        return player->isPrepared;
     }
 
     void CustomVideoPlayer::set_time(double value)
     {
-        static auto func = RESOLVE_ICALL(set_time, void, double);
-        func(player, value);
+        player->time = value;
     }
 
     void CustomVideoPlayer::set_sendFrameReadyEvents(bool value)
     {
-        static auto func = RESOLVE_ICALL(set_sendFrameReadyEvents, void, bool);
-        func(player, value);
+        player->sendFrameReadyEvents = value;
     }
 } // namespace Cinema
