@@ -44,7 +44,6 @@ namespace Cinema
         // screenRenderer->material->color = screenColorOff;
         screenRenderer->material->enableInstancing = true;
         player = gameObject->AddComponent<VideoPlayer*>();
-        player = CreateVideoPlayer(transform);
 
         player->source = Video::VideoSource::Url;
 
@@ -99,37 +98,6 @@ namespace Cinema
     void CustomVideoPlayer::SetPlacement(Placement& placement)
     {
         screenController->SetPlacement(placement);
-    }
-
-    // Flat plane video player
-    Video::VideoPlayer* CustomVideoPlayer::CreateVideoPlayer(UnityEngine::Transform* parent)
-    {
-        INFO("Creating Flat Plane VideoPlayer");
-        GameObject* screenGo = GameObject::CreatePrimitive(PrimitiveType::Plane);
-        screenGo->get_transform()->set_parent(parent);
-        GameObject::DontDestroyOnLoad(screenGo);
-
-        auto material = Resources::FindObjectsOfTypeAll<Material*>().back_or_default([](Material* x)
-                                                                                     { return x->get_name() == "PyroVideo (Instance)"; });
-
-        if(material)
-            screenGo->GetComponent<Renderer*>()->set_material(material);
-        else
-            screenGo->GetComponent<Renderer*>()->set_material(Material::New_ctor(Shader::Find("Unlit/Texture")));
-        screenGo->get_transform()->set_position(Vector3{0.0f, 12.4f, 67.8f});
-        screenGo->get_transform()->set_rotation(Quaternion::Euler(90.0f, 270.0f, 90.0f));
-        screenGo->get_transform()->set_localScale(Vector3(5.11, 1, 3));
-
-        auto videoPlayer = screenGo->AddComponent<Video::VideoPlayer*>();
-
-        auto cinemaScreen = screenGo->GetComponent<Renderer*>();
-        if(cinemaScreen)
-        {
-            // static auto set_targetMaterialRenderer = RESOLVE_ICALL(set_targetMaterialRenderer, void, Renderer*);
-            // set_targetMaterialRenderer(videoPlayer, cinemaScreen);
-        }
-
-        return videoPlayer;
     }
 
     void CustomVideoPlayer::OnDestroy()
@@ -222,11 +190,20 @@ namespace Cinema
         player->Prepare();
     }
 
-    void CustomVideoPlayer::Update() {}
+    void CustomVideoPlayer::Update()
+    {
+        if(player->isPlaying /*|| (player->IsPrepared && player->IsPaused)*/)
+        {
+            SetTexture(player->texture);
+        }
+    }
 
     void CustomVideoPlayer::UpdateScreenContent() {}
 
-    void CustomVideoPlayer::SetTexture(UnityEngine::Texture* texture) {}
+    void CustomVideoPlayer::SetTexture(UnityEngine::Texture* texture)
+    {
+        Shader::SetGlobalTexture(CinemaVideoTexture, texture);
+    }
 
     void CustomVideoPlayer::SetCoverTexture(UnityEngine::Texture* texture) {}
 
