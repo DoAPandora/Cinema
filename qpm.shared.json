@@ -43,8 +43,8 @@
           "pwsh ./scripts/ndk-stack.ps1"
         ],
         "tomb": [
-          "pwsh ./scripts/pull-tombstone.ps1",
-          "code RecentCrash.log"
+          "pwsh ./scripts/pull-tombstone.ps1 -analyze",
+          "code RecentCrash.log_processed.log"
         ]
       },
       "ndk": "^27.1.12297006",
