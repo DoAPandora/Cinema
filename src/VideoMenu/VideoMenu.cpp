@@ -160,7 +160,7 @@ namespace Cinema
             return;
         }
 
-        auto officialConfig = *currentVideo->configByMapper;
+        auto officialConfig = currentVideo->configByMapper.value();
         deleteConfigButton->get_gameObject()->SetActive(!officialConfig);
 
         switch(currentVideo->downloadState)
@@ -248,7 +248,7 @@ namespace Cinema
             return;
         }
 
-        if(currentVideo->videoID == std::nullopt && currentVideo->videoUrl == std::nullopt)
+        if(!currentVideo->videoID.has_value() && !currentVideo->videoUrl.has_value())
         {
             ResetVideoMenu();
             if(!currentVideo->forceEnvironmentModifications)
@@ -273,7 +273,7 @@ namespace Cinema
         videoDuration->SetTextInternal("Duration: " + std::to_string(currentVideo->duration));
 
         videoOffset->SetTextInternal(fmt::format("{:10L} ms", currentVideo->offset));
-        SetThumbnail(currentVideo->videoID.has_value() ? std::make_optional(fmt::format("https://i.ytimg.com/vi/{}/hqdefault.jpg", *currentVideo->videoID)) : std::nullopt);
+        SetThumbnail(currentVideo->videoID.has_value() ? std::make_optional(fmt::format("https://i.ytimg.com/vi/{}/hqdefault.jpg", currentVideo->videoID.value())) : std::nullopt);
 
         UpdateStatusText(currentVideo);
         if(CustomizeOffset)
@@ -299,7 +299,7 @@ namespace Cinema
             return;
         }
 
-        if((currentVideo->videoID == std::nullopt && currentVideo->videoUrl == std::nullopt))
+        if((!currentVideo->videoID.has_value() && !currentVideo->videoUrl.has_value()))
         {
             return;
         }
@@ -358,20 +358,20 @@ namespace Cinema
 
     void VideoMenu::SetThumbnail(std::optional<std::string> url)
     {
-        if(url != std::nullopt && url == thumbnailURL)
+        if(url.has_value() && url == thumbnailURL)
         {
             return;
         }
 
         thumbnailURL = url;
 
-        if(url == std::nullopt)
+        if(!url.has_value())
         {
             SetThumbnailFromCover(currentLevel);
             return;
         }
 
-        BSML::Utilities::SetImage(videoThumbnail, *url);
+        // BSML::Utilities::SetImage(videoThumbnail, url.value());
     }
 
     void VideoMenu::SetThumbnailFromCover(GlobalNamespace::BeatmapLevel* level) {}

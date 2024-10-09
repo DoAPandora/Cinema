@@ -22,7 +22,7 @@ namespace Cinema::Events
 
     void InvokeSceneTransitionEvents(std::optional<VideoConfig> videoConfig)
     {
-        if(!getModConfig().enabled.GetValue() || videoConfig == std::nullopt)
+        if(!getModConfig().enabled.GetValue() || !videoConfig.has_value())
         {
             cinemaActivated.invoke(false);
             return;

@@ -117,7 +117,7 @@ namespace Cinema
         else
             time == referenceTime == 0 ? activeAudioSource->get_time() : referenceTime;
 
-        float speed = *playbackSpeed == 0 ? *videoConfig->playbackSpeed : *playbackSpeed;
+        float speed = playbackSpeed.value() == 0 ? videoConfig->playbackSpeed.value() : playbackSpeed.value();
 
         return time * speed + (float)videoConfig->offset / 1000;
     }
@@ -178,9 +178,7 @@ namespace Cinema
         {
             StringW sceneName = LevelData::levelData.gameplayCoreSceneSetupData->environmentInfo->sceneInfo->sceneName;
             auto scene = SceneManagement::SceneManager::GetSceneByName(sceneName);
-            /* Crashes on next scene transition */
             SceneManagement::SceneManager::MoveGameObjectToScene(get_gameObject(), scene);
-
         }
 
         INFO("Moving to game scene");
@@ -190,6 +188,7 @@ namespace Cinema
     {
         DEBUG("GameSceneLoaded");
         StopAllCoroutines();
+
 
         activeScene = Util::IsMultiplayer() ? Scene::MultiplayerGameplay : Scene::SoloGameplay;
 
@@ -229,6 +228,7 @@ namespace Cinema
 
         videoPlayer->SetPlacement(Placement::CreatePlacementForConfig(videoConfig, activeScene, videoPlayer->GetVideoAspectRatio()));
 
+
         if(videoConfig->get_TransparencyEnabled())
         {
             videoPlayer->Show();
@@ -253,18 +253,19 @@ namespace Cinema
         {
             songSpeed = data.gameplayCoreSceneSetupData->gameplayModifiers->get_songSpeedMul();
             if(totalOffset + startTime < 0)
-                totalOffset /= songSpeed * *videoConfig->playbackSpeed;
+                totalOffset /= songSpeed * videoConfig->playbackSpeed.value_or(1);
         }
 
         videoPlayer->get_gameObject()->SetActive(true);
-        videoPlayer->PlaybackSpeed = songSpeed * *videoConfig->playbackSpeed;
+        videoPlayer->PlaybackSpeed = songSpeed * videoConfig->playbackSpeed.value_or(1);
         totalOffset += startTime;
 
-        if(songSpeed * *videoConfig->playbackSpeed < 1 && totalOffset > 0)
+        if(songSpeed * videoConfig->playbackSpeed.value_or(1) < 1 && totalOffset > 0)
         {
             WARN("Disabling video player to prevent crashing");
-            videoPlayer->Pause();
-            videoPlayer->get_gameObject()->SetActive(false);
+            videoPlayer->Hide();
+            StopPlayback();
+            return;
         }
 
         totalOffset += 0.0667f;
@@ -295,11 +296,15 @@ namespace Cinema
             videoPlayer->Play();
             if(!videoPlayer->IsPrepared)
             {
+                DEBUG("Video player not yet prepared");
                 offsetAfterPrepare = totalOffset;
                 audioSourceStartTime = std::chrono::system_clock::now();
             }
             else
-                videoPlayer->set_time(totalOffset);
+            {
+                // videoPlayer->set_time(totalOffset);
+                DEBUG("Video player was prepared");
+            }
         }
     }
 
@@ -340,6 +345,7 @@ namespace Cinema
 
             audioTimeSyncController = Resources::FindObjectsOfTypeAll<GlobalNamespace::AudioTimeSyncController*>().front_or_default([](GlobalNamespace::AudioTimeSyncController* x)
                                                                                                                                     { return x->get_transform()->get_parent()->get_parent()->get_name()->Contains("StandardGameplay"); });
+            DEBUG("Found audio source");
             activeAudioSource = audioTimeSyncController->_audioSource;
 
             if(activeAudioSource)
@@ -393,18 +399,14 @@ namespace Cinema
 
     void PlaybackController::PrepareVideo(std::shared_ptr<VideoConfig> video)
     {
-        if(!video)
-        {
-            return ERROR("VideoConfig was null!");
-        }
-        DEBUG("Preparing video");
         previewWaitingForVideoPlayer = true;
 
         if(prepareVideoCoroutine)
             StopCoroutine(prepareVideoCoroutine);
 
+        videoPlayer->ClearTexture();
+
         prepareVideoCoroutine = custom_types::Helpers::CoroutineHelper::New(PrepareVideoCoroutine(video));
-        videoPlayer->get_gameObject()->SetActive(true);
         StartCoroutine(prepareVideoCoroutine);
     }
 

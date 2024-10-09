@@ -152,7 +152,6 @@ namespace Cinema
     void CustomVideoPlayer::FadeOut(float duration)
     {
         // waitingForFadeOut = true;
-        gameObject->active = false;
         Stop();
         DEBUG("FadeOut is not implemented!");
     }
@@ -223,7 +222,18 @@ namespace Cinema
     void CustomVideoPlayer::VideoPlayerErrorReceived(UnityEngine::Video::VideoPlayer* source, StringW message)
     {}
 
-    float CustomVideoPlayer::GetVideoAspectRatio() {}
+    float CustomVideoPlayer::GetVideoAspectRatio()
+    {
+        auto texture = player->get_texture();
+        if(texture && texture->get_width() != 0 && texture->get_height() != 0)
+        {
+            float aspectRatio = (float)texture->get_width() / (float)texture->get_height();
+            return aspectRatio;
+        }
+
+        DEBUG("Using default aspect ratio (texture missing)");
+        return 16.0f / 9.0f;
+    }
 
     void CustomVideoPlayer::Mute() {}
 
@@ -291,6 +301,7 @@ namespace Cinema
     void CustomVideoPlayer::set_time(double value)
     {
         player->time = value;
+        DEBUG("set time to {}", value);
     }
 
     void CustomVideoPlayer::set_sendFrameReadyEvents(bool value)

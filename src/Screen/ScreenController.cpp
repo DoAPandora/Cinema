@@ -228,7 +228,7 @@ namespace Cinema
                 materialPropertyBlock = this->materialPropertyBlock;
             }
 
-            auto elliptical = vigenette == std::nullopt;
+            bool elliptical = vigenette == std::nullopt;
             SetShaderFloat(VignetteRadius, vigenette->radius, 0, 1, 1);
             SetShaderFloat(VignetteSoftness, vigenette->softness, 0, 1, elliptical ? 0.02f : 0.005f);
         }

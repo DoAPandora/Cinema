@@ -315,14 +315,14 @@ namespace Cinema::VideoLoader
 
     void SaveVideoConfig(std::shared_ptr<VideoConfig> videoConfig)
     {
-        if(videoConfig->levelDir == std::nullopt || videoConfig->ConfigPath == std::nullopt ||
-           !std::filesystem::exists(*videoConfig->levelDir))
+        if(!videoConfig->levelDir.has_value() || !videoConfig->ConfigPath.has_value() ||
+           !std::filesystem::exists(videoConfig->levelDir.value()))
         {
-            WARN("Failed to save video. Path {} does not exist.", *videoConfig->levelDir);
+            WARN("Failed to save video. Path {} does not exist.", videoConfig->levelDir.value());
             return;
         }
 
-        auto configPath = *videoConfig->ConfigPath;
+        auto configPath = videoConfig->ConfigPath.value();
         SaveVideoConfigToPath(videoConfig, configPath);
     }
 
@@ -351,7 +351,7 @@ namespace Cinema::VideoLoader
 
     void DeleteVideo(std::shared_ptr<VideoConfig> videoConfig)
     {
-        if(videoConfig->VideoPath == std::nullopt)
+        if(!videoConfig->VideoPath.has_value())
         {
             WARN("Tried to delete video, but its path was null");
             return;
@@ -359,7 +359,7 @@ namespace Cinema::VideoLoader
 
         try
         {
-            std::filesystem::remove(*videoConfig->VideoPath);
+            std::filesystem::remove(videoConfig->VideoPath.value());
             INFO("Deleted video at {}", videoConfig->VideoPath);
             if(videoConfig->downloadState != DownloadState::Cancelled)
             {
@@ -375,7 +375,7 @@ namespace Cinema::VideoLoader
 
     bool DeleteConfig(std::shared_ptr<VideoConfig> videoConfig, GlobalNamespace::BeatmapLevel* level)
     {
-        if(videoConfig->levelDir == std::nullopt)
+        if(!videoConfig->levelDir.has_value())
         {
             ERROR("levelDir was null when trying to delete config");
             return false;
@@ -383,7 +383,7 @@ namespace Cinema::VideoLoader
 
         try
         {
-            auto cinemaConfigPath = GetConfigPath(*videoConfig->levelDir);
+            auto cinemaConfigPath = GetConfigPath(videoConfig->levelDir.value());
             if(std::filesystem::exists(cinemaConfigPath))
             {
                 std::filesystem::remove(cinemaConfigPath);
