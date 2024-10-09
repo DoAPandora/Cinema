@@ -51,6 +51,7 @@ namespace Cinema
         body->transform->localPosition = Vector3(0, 0, 0.4f);
         body->transform->localScale = Vector3(1.01f, 1.01f, 1.01f);
         body->layer = LayerMask::NameToLayer("Environment");
+        AssignBodyMaterial(body->GetComponent<Renderer*>());
     }
 
     void ScreenController::OnGameSceneLoadedFresh()
@@ -58,8 +59,8 @@ namespace Cinema
         for(auto screen : screens)
         {
             Transform* body = screen->transform->Find("Body");
-            Renderer* bodyRenderer = body->GetComponent<Renderer*>();
-            if(bodyRenderer == nullptr)
+            UnityW<Renderer> bodyRenderer = body->GetComponent<Renderer*>();
+            if(!bodyRenderer)
             {
                 ERROR("Could not find body renderer for screen");
                 return;
@@ -74,14 +75,22 @@ namespace Cinema
 
     void ScreenController::AssignBodyMaterial(Renderer* bodyRenderer)
     {
-        UnityW<Shader> bodyShader = Resources::FindObjectsOfTypeAll<Shader*>().back_or_default([this](Shader* x)
+        UnityW<Shader> bodyShader = Resources::FindObjectsOfTypeAll<Shader*>().back_or_default([](Shader* x)
                                                                                                { return x->name == BODY_SHADER_NAME; });
-        if(bodyShader)
+        if(!bodyShader)
         {
-            bodyRenderer->material = Material::New_ctor(bodyShader);
+            bodyShader = Shader::Find(BODY_SHADER_NAME);
+            if(!bodyShader)
+            {
+                ERROR("Could not find video shader!");
+                return;
+            }
         }
 
-        bodyRenderer->material->color = Color(0, 0, 0, 0);
+        bodyRenderer->material = Material::New_ctor(bodyShader);
+        DEBUG("Assigned shader with name {}", bodyShader->name);
+
+        // bodyRenderer->material->color = Color(0, 0, 0, 0);
     }
 
     void ScreenController::SetScreensActive(bool active)
@@ -112,7 +121,7 @@ namespace Cinema
         return renderTexture;
     }
 
-    void ScreenController::SetPlacement(Cinema::Placement& placement)
+    void ScreenController::SetPlacement(const Cinema::Placement& placement)
     {
         SetPlacement(placement.position, placement.rotation, placement.width, placement.height, placement.curvature, placement.subsurfaces, placement.curveYAxis);
     }
