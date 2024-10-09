@@ -1,6 +1,7 @@
 #include "Screen/PlaybackController.hpp"
-#include "Hooks/LevelData.hpp"
+#include "Hooks/LevelDataHooks.hpp"
 #include "Util/Events.hpp"
+#include "Util/Util.hpp"
 #include "Video/VideoLoader.hpp"
 #include "main.hpp"
 
@@ -9,6 +10,7 @@
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/Resources.hpp"
 #include "UnityEngine/SceneManagement/SceneManager.hpp"
+#include "UnityEngine/SceneManagement/Scene.hpp"
 #include "UnityEngine/WaitForSeconds.hpp"
 
 #include "GlobalNamespace/EnvironmentInfoSO.hpp"
@@ -133,10 +135,13 @@ namespace Cinema
     void PlaybackController::OnMenuSceneLoaded()
     {
         INFO("MenuSceneLoaded");
+        activeScene = Scene::Menu;
+        videoPlayer->Hide();
         StopAllCoroutines();
         previewWaitingForPreviewPlayer = true;
         get_gameObject()->SetActive(true);
         videoPlayer->Pause();
+        SceneChanged();
     }
 
     void PlaybackController::OnMenuSceneLoadedFresh(GlobalNamespace::ScenesTransitionSetupDataSO* transitionSetupData)
@@ -164,53 +169,76 @@ namespace Cinema
 
     void PlaybackController::GameSceneActive()
     {
-        auto data = LevelData::get_currentGameplayCoreData();
-        if(!data)
+        if(Util::IsMultiplayer())
+        {
             return;
+        }
 
-        StringW sceneName = data->environmentInfo->sceneInfo->sceneName;
-        auto scene = SceneManagement::SceneManager::GetSceneByName(sceneName);
-        /* Crashes on next scene transition */
-        // if(scene.IsValid())
-        //     SceneManagement::SceneManager::MoveGameObjectToScene(get_gameObject(), scene);
+        if(LevelData::levelData.isSet)
+        {
+            StringW sceneName = LevelData::levelData.gameplayCoreSceneSetupData->environmentInfo->sceneInfo->sceneName;
+            auto scene = SceneManagement::SceneManager::GetSceneByName(sceneName);
+            /* Crashes on next scene transition */
+            SceneManagement::SceneManager::MoveGameObjectToScene(get_gameObject(), scene);
+
+        }
+
         INFO("Moving to game scene");
     }
 
     void PlaybackController::GameSceneLoaded()
     {
-        get_gameObject()->SetActive(true);
         DEBUG("GameSceneLoaded");
         StopAllCoroutines();
+
+        activeScene = Util::IsMultiplayer() ? Scene::MultiplayerGameplay : Scene::SoloGameplay;
 
         if(!getModConfig().enabled.GetValue())
         {
             INFO("Mod disabled");
+            videoPlayer->Hide();
             return;
         }
 
-        videoPlayer->get_gameObject()->SetActive(false);
-
-        auto data = LevelData::get_currentGameplayCoreData();
-        if(!data)
+        if(LevelData::levelData.mode == Gameplay::Mode::None)
         {
-            INFO("LevelData was null");
+            DEBUG("Level mode was none");
             return;
         }
 
-        auto level = data->beatmapLevel;
-        auto config = VideoLoader::GetConfigForLevel(level);
-        if(config != nullptr)
+        auto level = LevelData::levelData.gameplayCoreSceneSetupData->___beatmapLevel;
+        if(currentLevel->___levelID != level->___levelID)
         {
-            videoPlayer->get_gameObject()->SetActive(false);
-            INFO("Could not find config for level");
+            auto video = VideoLoader::GetConfigForLevel(level);
+            SetSelectedLevel(level, video);
+        }
+
+        if(!videoConfig /* || !videoConfig->isPlayable */)
+        {
+            DEBUG("No video configured, or video is not playable: {}", videoConfig->VideoPath);
+
             return;
         }
 
-        SetSelectedLevel(level, config);
-        if(!config->get_isPlayable())
-            return;
+        gameObject->active = true;
 
+        if(videoConfig->needsToSave)
+        {
+            VideoLoader::SaveVideoConfig(videoConfig);
+        }
+
+        videoPlayer->SetPlacement(Placement::CreatePlacementForConfig(videoConfig, activeScene, videoPlayer->GetVideoAspectRatio()));
+
+        if(videoConfig->get_TransparencyEnabled())
+        {
+            videoPlayer->Show();
+            // 
+        }
+
+        SetAudioSourcePanning(0);
+        videoPlayer->Mute();
         StartCoroutine(custom_types::Helpers::CoroutineHelper::New(PlayVideoAfterAudioSourceCoroutine(false)));
+        SceneChanged();
     }
 
     void PlaybackController::SetAudioSourcePanning(float pan) {}
@@ -220,10 +248,10 @@ namespace Cinema
         float totalOffset = videoConfig->GetOffsetInSec();
         float songSpeed = 1;
 
-        auto data = LevelData::get_currentGameplayCoreData();
-        if(data)
+        auto data = LevelData::levelData;
+        if(data.isSet)
         {
-            songSpeed = data->gameplayModifiers->get_songSpeedMul();
+            songSpeed = data.gameplayCoreSceneSetupData->gameplayModifiers->get_songSpeedMul();
             if(totalOffset + startTime < 0)
                 totalOffset /= songSpeed * *videoConfig->playbackSpeed;
         }

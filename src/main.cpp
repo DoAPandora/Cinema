@@ -1,10 +1,11 @@
 #include "main.hpp"
 #include "Video/VideoLoader.hpp"
 #include "VideoMenu/VideoMenu.hpp"
+#include "Hooks/LevelDataHooks.hpp"
+#include "Screen/PlaybackController.hpp"
 
 #include "bsml/shared/BSML.hpp"
 
-#include "Screen/PlaybackController.hpp"
 
 #include "assets.hpp"
 
@@ -16,7 +17,12 @@
 
 #include "bs-events/shared/BSEvents.hpp"
 
+#include "UnityEngine/SceneManagement/SceneManager.hpp"
+
+#include "custom-types/shared/delegate.hpp"
+
 modloader::ModInfo modInfo{MOD_ID, VERSION, 0};
+
 
 
 MAKE_AUTO_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &GlobalNamespace::DefaultScenesTransitionsFromInit::TransitionToNextScene, void, GlobalNamespace::DefaultScenesTransitionsFromInit* self, bool goStraightToMenu, bool goStraightToEditor, bool goToRecordingToolScene)
@@ -65,6 +71,15 @@ CINEMA_EXPORT void late_load() noexcept
     BSML::Init();
 
     SongCore::API::Capabilities::RegisterCapability("Cinema");
+
+    using namespace UnityEngine::SceneManagement;
+    auto activeSceneChanged = SceneManager::getStaticF_activeSceneChanged();
+    auto callback = custom_types::MakeDelegate<decltype(activeSceneChanged)>(std::function([](Scene prev, Scene next){
+        DEBUG("Scene changed: {} -> {}", prev.get_name(), next.get_name());
+        Cinema::LevelData::levelData.Clear();
+    }));
+    activeSceneChanged = (decltype(activeSceneChanged))System::Delegate::Combine(activeSceneChanged, callback);
+    SceneManager::setStaticF_activeSceneChanged(activeSceneChanged);
 }
 
 #include "bsml/shared/BSMLDataCache.hpp"

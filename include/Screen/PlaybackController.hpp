@@ -6,6 +6,7 @@
 #include "Screen/CustomVideoPlayer.hpp"
 #include "Video/VideoConfig.hpp"
 #include "Util/EventArgs.hpp"
+#include "Util/Scene.hpp"
 
 #include "UnityEngine/MonoBehaviour.hpp"
 #include "UnityEngine/AudioSource.hpp"
@@ -35,6 +36,7 @@ DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour,
 
     public:
 
+    Scene activeScene;
     std::shared_ptr<VideoConfig> videoConfig;
     std::chrono::system_clock::time_point audioSourceStartTime;
 
