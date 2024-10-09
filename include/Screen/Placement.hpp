@@ -2,6 +2,9 @@
 
 #include "UnityEngine/Vector3.hpp"
 
+#include "Util/Scene.hpp"
+#include "Video/VideoConfig.hpp"
+
 #include <optional>
 
 namespace Cinema
@@ -21,8 +24,13 @@ namespace Cinema
         std::optional<bool> curveYAxis;
         std::optional<int> subsurfaces;
 
-        // defined in main.cpp
-        static Placement MenuPlacement;
+        static Placement CreatePlacementForConfig(std::shared_ptr<VideoConfig> config, Cinema::Scene scene, float aspectRatio);
+        static Placement GetDefaultPlacementForScene(Cinema::Scene scene);
+        static std::optional<Placement> GetDefaultEnvironmentPlacement();
 
+        static Placement SoloGameplayPlacement;
+        static Placement MultiplayerPlacement;
+        static Placement MenuPlacement;
+        static Placement CoverPlacement;
     };
 }

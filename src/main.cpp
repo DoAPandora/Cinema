@@ -18,7 +18,6 @@
 
 modloader::ModInfo modInfo{MOD_ID, VERSION, 0};
 
-Cinema::Placement Cinema::Placement::MenuPlacement{UnityEngine::Vector3(0, 4, 16), UnityEngine::Vector3(0, 0, 0), 8.0f};
 
 MAKE_AUTO_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &GlobalNamespace::DefaultScenesTransitionsFromInit::TransitionToNextScene, void, GlobalNamespace::DefaultScenesTransitionsFromInit* self, bool goStraightToMenu, bool goStraightToEditor, bool goToRecordingToolScene)
 {
@@ -29,17 +28,6 @@ MAKE_AUTO_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &Gl
     Cinema::VideoMenu::get_instance()->AddTab();
 }
 
-// void TestCurvedSurface(GlobalNamespace::ScenesTransitionSetupDataSO *)
-// {
-//     DEBUG("Testing curved surface");
-//     auto go = UnityEngine::GameObject::New_ctor("CurvedSurfaceTest");
-//     UnityEngine::Object::DontDestroyOnLoad(go);
-//     go->get_transform()->set_position({0, 1, 1});
-//     auto body = go->AddComponent<Cinema::CurvedSurface *>();
-
-//     body->Initialise(16.0f / 10.0f, 9.0f / 10.0f, 5, 60, 30, false);
-//     body->Generate();
-// }
 
 CINEMA_EXPORT void setup(CModInfo* info) noexcept
 {
