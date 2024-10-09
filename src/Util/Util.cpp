@@ -1,4 +1,5 @@
 #include "Util/Util.hpp"
+#include "Hooks/MultiplayerHooks.hpp"
 
 #include <regex>
 
@@ -37,5 +38,10 @@ namespace Cinema::Util
         }
 
         return environmentName;
+    }
+
+    bool IsMultiplayer()
+    {
+        return MultiplayerHooks::IsMultiplayer();
     }
 } 
