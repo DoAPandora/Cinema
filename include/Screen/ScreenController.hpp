@@ -50,7 +50,6 @@ public:
 
     DECLARE_INSTANCE_METHOD(void, CreateScreen, UnityEngine::Transform* parent);
     DECLARE_INSTANCE_METHOD(void, OnGameSceneLoadedFresh);
-    DECLARE_INSTANCE_METHOD(void, AssignBodyMaterial, UnityEngine::Renderer* bodyRenderer);
     DECLARE_INSTANCE_METHOD(void, SetScreensActive, bool active);
     DECLARE_INSTANCE_METHOD(void, SetScreenBodiesActive, bool active);
     DECLARE_INSTANCE_METHOD(UnityEngine::Renderer*, GetRenderer);
@@ -65,8 +64,9 @@ public:
 public:
 
     static void CreateScreenBody(UnityEngine::Component* parent);
+    static void AssignBodyMaterial(UnityEngine::Renderer* bodyRenderer);
 
-    void SetPlacement(Placement& placement);
+    void SetPlacement(const Placement& placement);
     void SetPlacement(UnityEngine::Vector3 position, UnityEngine::Vector3 rotation, float width, float height, std::optional<float> curvatureDegrees = std::nullopt, std::optional<int> subsurfaces = std::nullopt, std::optional<bool> curveYAxis = false);
     void InitializeSurfaces(float width, float height, float distance, std::optional<float> curvatureDegrees, std::optional<int> subsurfaces, std::optional<bool> curveYAxis);
     void SetBloomIntensity(std::optional<float> bloomIntensity);

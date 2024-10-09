@@ -71,8 +71,6 @@ public:
     DECLARE_INSTANCE_METHOD(void, SetStaticTexture, UnityEngine::Texture* texture);
     DECLARE_INSTANCE_METHOD(void, ClearTexture);
 
-    DECLARE_INSTANCE_METHOD(UnityEngine::Video::VideoPlayer*, CreateVideoPlayer, UnityEngine::Transform* parent);
-
     DECLARE_INSTANCE_METHOD(void, VideoPlayerPrepareComplete, UnityEngine::Video::VideoPlayer* source);
     DECLARE_INSTANCE_METHOD(void, VideoPlayerStarted, UnityEngine::Video::VideoPlayer* source);
     DECLARE_INSTANCE_METHOD(void, VideoPlayerFinished, UnityEngine::Video::VideoPlayer* source);
@@ -102,7 +100,7 @@ public:
     public:
 
     void SetDefaultMenuPlacement(std::optional<float> width = std::nullopt);
-    void SetPlacement(Placement& placement);
+    void SetPlacement(const Placement& placement);
 
     static UnityEngine::Shader* GetShader();
     void SetBloomIntensity(std::optional<float> bloomIntensity);

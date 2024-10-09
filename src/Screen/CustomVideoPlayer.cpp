@@ -95,7 +95,7 @@ namespace Cinema
         SetPlacement(placement);
     }
 
-    void CustomVideoPlayer::SetPlacement(Placement& placement)
+    void CustomVideoPlayer::SetPlacement(const Placement& placement)
     {
         screenController->SetPlacement(placement);
     }
