@@ -76,7 +76,10 @@ CINEMA_EXPORT void late_load() noexcept
     auto activeSceneChanged = SceneManager::getStaticF_activeSceneChanged();
     auto callback = custom_types::MakeDelegate<decltype(activeSceneChanged)>(std::function([](Scene prev, Scene next){
         DEBUG("Scene changed: {} -> {}", prev.get_name(), next.get_name());
-        Cinema::LevelData::levelData.Clear();
+        if(next.get_name() == "MainMenu")
+        {
+            Cinema::LevelData::levelData.Clear();
+        }
     }));
     activeSceneChanged = (decltype(activeSceneChanged))System::Delegate::Combine(activeSceneChanged, callback);
     SceneManager::setStaticF_activeSceneChanged(activeSceneChanged);
