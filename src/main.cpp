@@ -17,7 +17,7 @@
 
 #include "bs-events/shared/BSEvents.hpp"
 
-#include "UnityEngine/SceneManagement/SceneManager.hpp"
+#include "UnityEngine/SceneManagement/SceneManagement.hpp"
 
 #include "custom-types/shared/delegate.hpp"
 
@@ -75,7 +75,6 @@ CINEMA_EXPORT void late_load() noexcept
     using namespace UnityEngine::SceneManagement;
     auto activeSceneChanged = SceneManager::getStaticF_activeSceneChanged();
     auto callback = custom_types::MakeDelegate<decltype(activeSceneChanged)>(std::function([](Scene prev, Scene next){
-        DEBUG("Scene changed: {} -> {}", prev.get_name(), next.get_name());
         if(next.get_name() == "MainMenu")
         {
             Cinema::LevelData::levelData.Clear();
