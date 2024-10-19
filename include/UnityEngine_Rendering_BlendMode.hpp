@@ -1,7 +1,7 @@
 #pragma once
 
 namespace UnityEngine::Rendering {
-    enum class BlendMode {
+    enum class BlendMode : int32_t {
         Zero,
         One,
         DstColor,
