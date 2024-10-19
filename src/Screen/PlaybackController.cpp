@@ -1,5 +1,6 @@
 #include "Screen/PlaybackController.hpp"
 #include "Hooks/LevelDataHooks.hpp"
+#include "Util/Scene.hpp"
 #include "Util/Util.hpp"
 #include "Video/VideoLoader.hpp"
 #include "main.hpp"
@@ -233,7 +234,8 @@ namespace Cinema
         if(videoConfig->get_TransparencyEnabled())
         {
             videoPlayer->Show();
-            // 
+            videoPlayer->ScreenColor = Color::get_black();
+            videoPlayer->ShowScreenBody();
         }
 
         SetAudioSourcePanning(0);
@@ -246,6 +248,21 @@ namespace Cinema
 
     void PlaybackController::PlayVideo(float startTime)
     {
+        if(!videoConfig)
+        {
+            ERROR("VideoConfig was null!");
+            return;
+        }
+
+
+        if(videoConfig->TransparencyEnabled && activeScene != Scene::Menu)
+        {
+            videoPlayer->ShowScreenBody();
+        } else
+        {
+            videoPlayer->HideScreenBody();
+        }
+
         float totalOffset = videoConfig->GetOffsetInSec();
         float songSpeed = 1;
 

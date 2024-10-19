@@ -23,10 +23,12 @@ DECLARE_CLASS_CODEGEN(Cinema, CustomVideoPlayer, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_FIELD(UnityEngine::Renderer*, screenRenderer);
     DECLARE_INSTANCE_FIELD(UnityEngine::RenderTexture*, renderTexture);
 
-    DECLARE_INSTANCE_FIELD(float, volumeScale);
-    DECLARE_INSTANCE_FIELD(bool, muted);
-    DECLARE_INSTANCE_FIELD(bool, bodyVisible);
-    DECLARE_INSTANCE_FIELD(bool, waitingForFadeOut);
+    inline static constexpr float MAX_VOLUME = 0.28f;
+    float volumeScale = 1;
+    bool muted = true;
+    bool bodyVisible;
+    bool waitingForFadeOut;
+    bool videoEnded;
     
     EasingController fadeController;
 
@@ -35,16 +37,18 @@ public:
     inline static ConstString CINEMA_TEXTURE_NAME ="_CinemaVideoTexture";
     inline static ConstString STATUS_PROPERTY_NAME = "_CinemaVideoIsPlaying";
     inline static constexpr float MAX_BRIGHTNESS = 0.92f;
-    static constexpr UnityEngine::Color screenColorOn = Sombrero::FastColor::white().Alpha(0) * MAX_BRIGHTNESS;
-    static constexpr UnityEngine::Color screenColorOff = Sombrero::FastColor::clear();
+    static constexpr Sombrero::FastColor screenColorOn = Sombrero::FastColor::white().Alpha(0) * MAX_BRIGHTNESS;
+    static constexpr Sombrero::FastColor screenColorOff = Sombrero::FastColor::clear();
     inline static int MainTex = UnityEngine::Shader::PropertyToID(MAIN_TEXTURE_NAME);
     inline static int CinemaVideoTexture = UnityEngine::Shader::PropertyToID(CINEMA_TEXTURE_NAME);
     inline static int CinemaStatusProperty = UnityEngine::Shader::PropertyToID(STATUS_PROPERTY_NAME);
 
+    std::string currentlyPlayingVideo;
     UnityEngine::Video::VideoPlayer::ErrorEventHandler* videoPlayerErrorReceived;
     UnityEngine::Video::VideoPlayer::EventHandler* videoPlayerPrepareComplete;
     UnityEngine::Video::VideoPlayer::EventHandler* videoPlayerStarted;
     UnityEngine::Video::VideoPlayer::EventHandler* videoPlayerFinished;
+    UnityEngine::Video::VideoPlayer::FrameReadyEventHandler* videoPlayerFirstFrameReady;
 
     DECLARE_DEFAULT_CTOR();
 
@@ -106,6 +110,8 @@ public:
 
     static UnityEngine::Shader* GetShader();
     void SetBloomIntensity(std::optional<float> bloomIntensity);
+
+    bool get_VideoEnded();
 
     __declspec(property(get=get_ScreenColor, put=set_ScreenColor)) UnityEngine::Color ScreenColor;
     __declspec(property(get=get_PlaybackSpeed, put=set_PlaybackSpeed)) float PlaybackSpeed;

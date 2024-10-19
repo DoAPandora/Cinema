@@ -1,3 +1,4 @@
+#include "Screen/ScreenController.hpp"
 #include "main.hpp"
 
 #include "Screen/CustomVideoPlayer.hpp"
@@ -13,6 +14,7 @@
 #include "custom-types/shared/delegate.hpp"
 
 #include "assets.hpp"
+#include <functional>
 
 using namespace UnityEngine;
 using namespace UnityEngine::Video;
@@ -41,6 +43,7 @@ namespace Cinema
         // screenRenderer->material->color = screenColorOff;
         screenRenderer->material->enableInstancing = true;
         player = gameObject->AddComponent<VideoPlayer*>();
+        player->set_sendFrameReadyEvents(true);
 
         player->source = Video::VideoSource::Url;
 
@@ -72,6 +75,10 @@ namespace Cinema
                 std::bind_front(&CustomVideoPlayer::VideoPlayerFinished, this)));
         player->loopPointReached = (VideoPlayer::EventHandler*)System::Delegate::Combine(player->loopPointReached, videoPlayerFinished);
 
+        videoPlayerFirstFrameReady = custom_types::MakeDelegate<VideoPlayer::FrameReadyEventHandler*>(
+            std::function<void(VideoPlayer*, uint64_t)>(
+                std::bind_front(&CustomVideoPlayer::FirstFrameReady, this)));
+
         videoPlayerAudioSource = get_gameObject()->AddComponent<AudioSource*>();
 
         player->audioOutputMode = VideoAudioOutputMode::AudioSource;
@@ -101,7 +108,10 @@ namespace Cinema
     }
 
     void CustomVideoPlayer::OnDestroy()
-    {}
+    {
+        fadeController.easingUpdate -= {&CustomVideoPlayer::FadeControllerUpdate, this};
+        renderTexture->Release();
+    }
 
     Shader* CustomVideoPlayer::GetShader()
     {
@@ -121,13 +131,42 @@ namespace Cinema
         return shader;
     }
 
-    void CustomVideoPlayer::FadeControllerUpdate(float value) {}
+    void CustomVideoPlayer::FadeControllerUpdate(float value)
+    {
+        ScreenColor = screenColorOn * value;
+        if(!muted)
+        {
+            Volume = MAX_VOLUME * volumeScale * value;
+        }
+
+        if(value >= 1 && bodyVisible)
+        {
+            screenController->SetScreenBodiesActive(true);
+        }
+        else
+        {
+            screenController->SetScreenBodiesActive(false);
+        }
+
+        if(value == 0 && player->url == currentlyPlayingVideo && waitingForFadeOut)
+        {
+            Stop();
+        }
+    }
 
     void CustomVideoPlayer::OnMenuSceneLoaded() {}
 
-    void CustomVideoPlayer::FirstFrameReady(UnityEngine::Video::VideoPlayer*, int64_t frame) {}
+    void CustomVideoPlayer::FirstFrameReady(UnityEngine::Video::VideoPlayer*, int64_t frame)
+    {
+        FadeIn();
+        screenController->SetAspectRatio(GetVideoAspectRatio());
+        player->remove_frameReady(videoPlayerFirstFrameReady);
+    }
 
-    void CustomVideoPlayer::SetBrightness(float brightness) {}
+    void CustomVideoPlayer::SetBrightness(float brightness)
+    {
+        fadeController.value = brightness;
+    }
 
     void CustomVideoPlayer::SetBloomIntensity(std::optional<float> bloomIntensity) {}
 
@@ -140,8 +179,9 @@ namespace Cinema
 
     void CustomVideoPlayer::FadeIn(float duration)
     {
-        gameObject->active = true;
-        DEBUG("FadeIn is not implemented!");
+        screenController->SetScreensActive(true);
+        waitingForFadeOut = false;
+        fadeController.EaseIn(duration);
     }
 
     void CustomVideoPlayer::Hide()
@@ -151,14 +191,27 @@ namespace Cinema
 
     void CustomVideoPlayer::FadeOut(float duration)
     {
-        // waitingForFadeOut = true;
-        Stop();
-        DEBUG("FadeOut is not implemented!");
+        waitingForFadeOut = true;
+        fadeController.EaseOut(duration);
     }
 
-    void CustomVideoPlayer::ShowScreenBody() {}
+    void CustomVideoPlayer::ShowScreenBody()
+    {
+        bodyVisible = true;
+        if(!fadeController.IsFading() && fadeController.IsOne())
+        {
+            screenController->SetScreenBodiesActive(true);
+        }
+    }
 
-    void CustomVideoPlayer::HideScreenBody() {}
+    void CustomVideoPlayer::HideScreenBody()
+    {
+        bodyVisible = true;
+        if(!fadeController.IsFading())
+        {
+            screenController->SetScreenBodiesActive(false);
+        }
+    }
 
     void CustomVideoPlayer::CreateScreen()
     {
@@ -170,7 +223,10 @@ namespace Cinema
 
     void CustomVideoPlayer::Play()
     {
+        player->remove_frameReady(videoPlayerFirstFrameReady);
+        player->add_frameReady(videoPlayerFirstFrameReady);
         player->Play();
+        Shader::SetGlobalInt(CinemaStatusProperty, 1);
     }
 
     void CustomVideoPlayer::Pause()
@@ -214,7 +270,11 @@ namespace Cinema
     {}
 
     void CustomVideoPlayer::VideoPlayerStarted(UnityEngine::Video::VideoPlayer* source)
-    {}
+    {
+        currentlyPlayingVideo = static_cast<std::string>(source->url);
+        waitingForFadeOut = false;
+        videoEnded = false;
+    }
 
     void CustomVideoPlayer::VideoPlayerFinished(UnityEngine::Video::VideoPlayer* source)
     {}

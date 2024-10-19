@@ -29,6 +29,11 @@ namespace Cinema
         return easingValue;
     }
 
+    bool EasingController::IsFading()
+    {
+        return isFading;
+    }
+
     void EasingController::EaseIn(float duration)
     {
         StartEasingCoroutine(EasingDirection::EaseIn, duration);
@@ -41,7 +46,7 @@ namespace Cinema
 
     void EasingController::StartEasingCoroutine(EasingDirection direction, float duration)
     {
-        if(easingCoroutine)
+        if(easingCoroutine && easingCoroutine->m_Ptr.m_value)
         {
             BSML::SharedCoroutineStarter::StopCoroutine(easingCoroutine);
         }
@@ -49,7 +54,7 @@ namespace Cinema
         isFading = true;
         float speed = (int) direction / (float) std::max(0.0001f, duration);
 
-        easingCoroutine = BSML::SharedCoroutineStarter::StartCoroutine(Ease(0));
+        easingCoroutine = BSML::SharedCoroutineStarter::StartCoroutine(Ease(speed));
     }
 
     custom_types::Helpers::Coroutine EasingController::Ease(float speed)
