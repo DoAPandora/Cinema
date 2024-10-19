@@ -3,30 +3,50 @@
 #include "logger.hpp"
 
 #include "pythonlib/shared/Python.hpp"
-#include "pythonlib/shared//Utils/StringUtils.hpp"
+
 #include <filesystem>
 #include <mutex>
 #include <vector>
-
-static const std::filesystem::path DOWNLOAD_FOLDER("/sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema/Videos");
-static constexpr std::string_view BASE_DOWNLOAD_COMMAND("--no-cache-dir -o %(id)s.%(ext)s -P /sdcard/ModData/com.beatgames.beatsaber/Mods/Cinema/Videos ");
+#include <stop_token>
 
 namespace Cinema
 {
-    void DownloadController::DownloadVideoThread(std::stop_token stopToken, std::shared_ptr<VideoConfig> video, const std::function<void(std::shared_ptr<VideoConfig>)> statusUpdate, const std::function<void(std::shared_ptr<VideoConfig>, bool)> onFinished)
+    void DownloadController::StartDownload(std::shared_ptr<VideoConfig> video)
+    {
+        video->downloadState = DownloadState::Preparing;
+
+        std::string uuid(readfile("/proc/sys/kernel/random/uuid"));
+        std::filesystem::path videoTempFolder(getDataDir("Cinema"));
+        // for some reason it has a newline character at the end
+        videoTempFolder = videoTempFolder / "tmp" / uuid.substr(0, uuid.size() - 1);
+        std::lock_guard lock(currentDownloadsMutex);
+        std::stop_source stopSource;
+        currentDownloads.emplace_back(video, stopSource);
+
+        std::jthread(std::bind_front(&DownloadController::DownloadVideoThread, this),
+            std::move(videoTempFolder), std::move(video), stopSource.get_token()
+        ).detach();
+    }
+
+    void DownloadController::DownloadVideoThread(std::filesystem::path tempDir, std::shared_ptr<VideoConfig> video, std::stop_token stopToken)
     {
         INFO("Downloading video {}", video->videoID);
+
+        if(!std::filesystem::exists(tempDir))
+        {
+            std::filesystem::create_directories(tempDir);
+        }
+
         std::function<void(int, char*)> eventHandler = [&](int type, char* data)
         {
+            if(stopToken.stop_requested())
+            {
+                return;
+            }
             switch(type)
             {
             case 0:
                 {
-                    if(stopToken.stop_requested()) 
-                    {
-                        // dont send progress updates if cancelled
-                        return;
-                    }
                     std::string_view dataString(data);
                     if(dataString.find("[download]") != std::string::npos && dataString.find('%') != std::string::npos)
                     {
@@ -37,7 +57,7 @@ namespace Cinema
                             percentange = percentange.substr(0, percentange.size() -1 );
 
                         video->downloadProgress = std::stof(percentange.data());
-                        statusUpdate(video);
+                        onDownloadProgress.invoke(video);
                     }
                 }
                 break;
@@ -48,17 +68,15 @@ namespace Cinema
         Python::PythonWriteEvent += eventHandler;
         Python::PyRun_SimpleString("from yt_dlp.__init__ import _real_main");
 
-        std::string command{"_real_main([\"--no-cache-dir\", \"-v\", \"-o\", \"%(id)s.%(ext)s\", \"-P\", \""};
-        std::filesystem::path videoOutputDir = video->levelDir.value();
-        command.append(videoOutputDir)
-            .append("\",\"").append(video->videoID.value()).append("\"])");
+                                                        // vp9 1080p -> vp8 1080p -> h264 1080p -> ...720p -> ...480p
+        std::string command(fmt::format("_real_main(['-v', '-f', '248/616/170/137/216/247/169/136/244/168/135', '-o', 'video.mp4', '-P', '{}', '{}'])", tempDir.c_str(), video->videoID.value()));
         DEBUG("Running command {}", command);
 
+        Python::PythonWriteEvent += eventHandler;
         int status = Python::PyRun_SimpleString(command.c_str());
         bool error = status != 0;
-        Python::PythonWriteEvent -= eventHandler;
-
         DEBUG("Python process returned result {}", status);
+        Python::PythonWriteEvent -= eventHandler;
 
         {
             std::lock_guard lock(currentDownloadsMutex);
@@ -67,35 +85,26 @@ namespace Cinema
                 { return downloadInfo.first == video; });
         }
 
-        std::filesystem::path outputfile = videoOutputDir / (video->videoID.value() + ".mp4");
-        if(stopToken.stop_requested())
-        {
-            DEBUG("Video {} download was cancelled!", video->videoID);
-            if(std::filesystem::exists(outputfile))
-            {
-                std::filesystem::remove(outputfile);
-            }
-            video->downloadState = DownloadState::Cancelled;
-            onFinished(video, false);
-            return;
-        }
-
         if(error)
         {
-            DEBUG("Video {} download errored!", video->videoID);
-            video->downloadState = DownloadState::NotDownloaded;
-            if(std::filesystem::exists(outputfile))
-            {
-                std::filesystem::remove(outputfile);
-            }
-            onFinished(video, false);
-            return;
+            ERROR("An error occured while downloading video");
+        } else if(stopToken.stop_requested())
+        {
+            DEBUG("Stop was requested on download");
         }
 
-        std::filesystem::rename(videoOutputDir / (video->videoID.value() + ".mp4"), videoOutputDir / video->GetVideoFileName(video->levelDir.value()));
+
+        if(!error && !stopToken.stop_requested() && std::filesystem::exists(tempDir / "video.mp4"))
+        {
+            std::filesystem::rename(tempDir / "video.mp4", std::filesystem::path(video->levelDir.value()) / video->GetVideoFileName(video->levelDir.value()));
+        }
+        std::filesystem::remove(tempDir);
 
         video->UpdateDownloadState();
-        onFinished(video, true);
+        if(!error && !stopToken.stop_requested())
+        {
+            onDownloadFinished.invoke(video);
+        }
     }
 
     void DownloadController::CancelDownload(std::shared_ptr<VideoConfig> video)
@@ -109,8 +118,8 @@ namespace Cinema
             return;
         }
 
-        DEBUG("Cancelled download of video {}", video->videoID);
         downloadInfo->second.request_stop();
+        DEBUG("Requested stop for download {}", downloadInfo->first->videoID);
         currentDownloads.erase(downloadInfo);
     }
 }

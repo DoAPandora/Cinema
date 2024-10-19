@@ -4,12 +4,13 @@
 
 #include <logger.hpp>
 
-#include <functional>
+#include "beatsaber-hook/shared/utils/typedefs-wrappers.hpp"
+
 #include <mutex>
+#include <stop_token>
 #include <utility>
 #include <vector>
-#include <thread>
-#include <stop_token>
+#include <filesystem>
 
 namespace Cinema
 {
@@ -17,28 +18,15 @@ namespace Cinema
     {
         std::mutex currentDownloadsMutex;
         std::vector<std::pair<std::shared_ptr<VideoConfig>, std::stop_source>> currentDownloads;
-
     public:
 
-        inline void StartDownload(std::shared_ptr<VideoConfig> video, const std::function<void(std::shared_ptr<VideoConfig>)>& statusUpdate, const std::function<void(std::shared_ptr<VideoConfig>, bool)>& onFinished)
-        {
-            if(!video)
-            {
-                return onFinished(nullptr, false);
-            }
+        UnorderedEventCallback<std::shared_ptr<VideoConfig>> onDownloadProgress;
+        UnorderedEventCallback<std::shared_ptr<VideoConfig>> onDownloadFinished;
 
-            video->downloadState = DownloadState::Preparing;
-            std::stop_source stopSource;
-            std::jthread(std::bind_front(&DownloadController::DownloadVideoThread, this),
-                stopSource.get_token(), video, std::forward<const std::function<void(std::shared_ptr<VideoConfig>)>>(statusUpdate), std::forward<const std::function<void(std::shared_ptr<VideoConfig>, bool)>>(onFinished)
-            ).detach();
-            std::lock_guard lock(currentDownloadsMutex);
-            currentDownloads.emplace_back(video, stopSource);
-        }
-
+        void StartDownload(std::shared_ptr<VideoConfig> video);
         void CancelDownload(std::shared_ptr<VideoConfig> video);
 
     private:
-        void DownloadVideoThread(std::stop_token stopToken, std::shared_ptr<VideoConfig> video, const std::function<void(std::shared_ptr<VideoConfig>)> statusUpdate, const std::function<void(std::shared_ptr<VideoConfig>, bool)> onFinished);
+        void DownloadVideoThread(std::filesystem::path tempDir, std::shared_ptr<VideoConfig> video, std::stop_token stopToken);
     };
 }

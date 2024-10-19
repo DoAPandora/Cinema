@@ -137,7 +137,7 @@ public:
     void OnDifficultySelected(ExtraSongDataArgs extraSongDataArgs);
     void OnConfigChanged(std::shared_ptr<VideoConfig> config);// might not be needed
 //    custom_types::Helpers::Coroutine UpdateSearchResults()
-    void OnDownloadFinished(std::shared_ptr<VideoConfig> video, bool success);
+    void OnDownloadFinished(std::shared_ptr<VideoConfig> video);
     // search progress
     custom_types::Helpers::Coroutine SearchLoadingCoroutine();
 

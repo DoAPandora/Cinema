@@ -70,9 +70,15 @@ namespace Cinema
         }
 
         videoMenuInitialized = true;
-        DEBUG("DisablingUI");
         videoDetails->get_gameObject()->SetActive(false);
         videoSearchResults->get_gameObject()->SetActive(false);
+
+        downloadController.onDownloadProgress += [this](std::shared_ptr<VideoConfig> video) {
+            BSML::MainThreadScheduler::Schedule(std::bind(&VideoMenu::OnDownloadProgress, this, std::forward<decltype(video)>(video)));
+        };
+        downloadController.onDownloadFinished += [this](std::shared_ptr<VideoConfig> video) {
+            BSML::MainThreadScheduler::Schedule(std::bind(&VideoMenu::OnDownloadFinished, this, std::forward<decltype(video)>(video)));
+        };
     }
 
     void VideoMenu::CreateStatusListener()
@@ -452,9 +458,8 @@ namespace Cinema
 
     void VideoMenu::SearchAction() {}
 
-    void VideoMenu::OnDownloadFinished(std::shared_ptr<VideoConfig> video, bool success)
+    void VideoMenu::OnDownloadFinished(std::shared_ptr<VideoConfig> video)
     {
-        INFO("Finished downloading video {} {}", video->videoID, success);
         BSML::MainThreadScheduler::Schedule([this, video]()
         {
             UpdateStatusText(video);
@@ -492,7 +497,7 @@ namespace Cinema
         case DownloadState::Cancelled:
             {
                 currentVideo->downloadProgress = 0;
-                downloadController.StartDownload(currentVideo, std::bind_front(&VideoMenu::OnDownloadProgress, this), std::bind_front(&VideoMenu::OnDownloadFinished, this));
+                downloadController.StartDownload(currentVideo);
                 currentVideo->needsToSave = true;
                 VideoLoader::AddConfigToCache(currentVideo, currentLevel);
                 break;
