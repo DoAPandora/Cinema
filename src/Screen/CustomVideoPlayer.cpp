@@ -5,13 +5,12 @@
 #include "UnityEngine/AssetBundle.hpp"
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/Material.hpp"
-#include "UnityEngine/PrimitiveType.hpp"
-#include "UnityEngine/Quaternion.hpp"
-#include "UnityEngine/Resources.hpp"
 #include "UnityEngine/TextureWrapMode.hpp"
 #include "UnityEngine/Video/VideoAudioOutputMode.hpp"
 #include "UnityEngine/Video/VideoRenderMode.hpp"
 #include "UnityEngine/Video/VideoSource.hpp"
+
+#include "custom-types/shared/delegate.hpp"
 
 #include "assets.hpp"
 
@@ -83,6 +82,9 @@ namespace Cinema
         //        screenController->SetScreensActive(false);
 
         screenController->EnableColorBlending(true);
+        
+        fadeController.easingUpdate += {&CustomVideoPlayer::FadeControllerUpdate, this};
+
         SetDefaultMenuPlacement();
     }
 

@@ -1,6 +1,5 @@
 #include "Screen/PlaybackController.hpp"
 #include "Hooks/LevelDataHooks.hpp"
-#include "Util/Events.hpp"
 #include "Util/Util.hpp"
 #include "Video/VideoLoader.hpp"
 #include "main.hpp"
@@ -22,6 +21,8 @@
 #include "BeatSaber/GameSettings/MainSettings.hpp"
 
 #include "bsml/shared/Helpers/getters.hpp"
+
+#include "custom-types/shared/delegate.hpp"
 
 DEFINE_TYPE(Cinema, PlaybackController);
 

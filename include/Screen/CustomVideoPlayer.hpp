@@ -13,6 +13,7 @@
 
 #include "ScreenController.hpp"
 #include "Placement.hpp"
+#include "Util/EasingController.hpp"
 
 DECLARE_CLASS_CODEGEN(Cinema, CustomVideoPlayer, UnityEngine::MonoBehaviour,
 
@@ -26,6 +27,8 @@ DECLARE_CLASS_CODEGEN(Cinema, CustomVideoPlayer, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_FIELD(bool, muted);
     DECLARE_INSTANCE_FIELD(bool, bodyVisible);
     DECLARE_INSTANCE_FIELD(bool, waitingForFadeOut);
+    
+    EasingController fadeController;
 
 public:
     inline static ConstString MAIN_TEXTURE_NAME = "_MainTex";
