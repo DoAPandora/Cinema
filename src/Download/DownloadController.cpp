@@ -1,16 +1,57 @@
 #include "Download/DownloadController.hpp"
+#include "ModConfig.hpp"
 #include "Video/VideoConfig.hpp"
 #include "logger.hpp"
+#include "assets.hpp"
 
 #include "pythonlib/shared/Python.hpp"
+#include "pythonlib/shared/Utils/FileUtils.hpp"
 
 #include <filesystem>
 #include <mutex>
+#include <thread>
 #include <vector>
 #include <stop_token>
 
+using std::filesystem::path;
+
+static const std::string YTDLP_HASH(YTDLP_FILE_HASH);
+
 namespace Cinema
 {
+    bool DownloadController::IsReady()
+    {
+        return isReady;
+    }
+
+    void DownloadController::Setup()
+    {
+        std::jthread([](){
+            const path ytdlp = path(FileUtils::getScriptsPath()) / "yt_dlp";
+            if(getModConfig().ytdlpFileHash.GetValue() != YTDLP_HASH)
+            {
+                if(direxists(ytdlp.c_str()))
+                {
+                    DEBUG("Current ytdlp was an old version, removing old version!");
+                    std::filesystem::remove_all(ytdlp);
+                } else
+                {
+                    DEBUG("No ytdlp install was found, installing now!");
+                }
+
+                FileUtils::ExtractZip(IncludedAssets::ytdlp_zip, ytdlp.c_str());
+                getModConfig().ytdlpFileHash.SetValue(YTDLP_HASH);
+            } else 
+            {
+                DEBUG("Current install of ytdlp was already up to date!");
+            }
+
+            Python::PyRun_SimpleString("from yt_dlp.__init__ import _real_main");
+            DEBUG("Successfully set up ytdlp");
+            isReady = true;
+        }).detach();
+    }
+
     void DownloadController::StartDownload(std::shared_ptr<VideoConfig> video)
     {
         video->downloadState = DownloadState::Preparing;
@@ -30,6 +71,14 @@ namespace Cinema
 
     void DownloadController::DownloadVideoThread(std::filesystem::path tempDir, std::shared_ptr<VideoConfig> video, std::stop_token stopToken)
     {
+        if(!IsReady())
+        {
+            DEBUG("Python was not ready, waiting");
+            while(!isReady)
+            {
+                std::this_thread::yield();
+            }
+        }
         INFO("Downloading video {}", video->videoID);
 
         if(!std::filesystem::exists(tempDir))
@@ -66,7 +115,7 @@ namespace Cinema
             }
         };
         Python::PythonWriteEvent += eventHandler;
-        Python::PyRun_SimpleString("from yt_dlp.__init__ import _real_main");
+        
 
                                                         // vp9 1080p -> vp8 1080p -> h264 1080p -> ...720p -> ...480p
         std::string command(fmt::format("_real_main(['-v', '-f', '248/616/170/137/216/247/169/136/244/168/135', '-o', 'video.mp4', '-P', '{}', '{}'])", tempDir.c_str(), video->videoID.value()));

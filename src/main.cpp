@@ -1,4 +1,5 @@
 #include "main.hpp"
+#include "Download/DownloadController.hpp"
 #include "Video/VideoLoader.hpp"
 #include "VideoMenu/VideoMenu.hpp"
 #include "Hooks/LevelDataHooks.hpp"
@@ -12,8 +13,6 @@
 #include "GlobalNamespace/DefaultScenesTransitionsFromInit.hpp"
 
 #include "songcore/shared/SongCore.hpp"
-
-#include "pythonlib/shared/Utils/FileUtils.hpp"
 
 #include "bs-events/shared/BSEvents.hpp"
 
@@ -64,9 +63,7 @@ CINEMA_EXPORT void late_load() noexcept
 
     INFO("Installed all hooks!");
 
-    std::string ytdlp = FileUtils::getScriptsPath() + "/yt_dlp";
-    if(!direxists(ytdlp))
-        FileUtils::ExtractZip(IncludedAssets::ytdlp_zip, ytdlp);
+    Cinema::DownloadController::Setup();
 
     BSML::Init();
 

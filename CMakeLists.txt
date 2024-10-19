@@ -62,44 +62,48 @@ target_link_libraries(${COMPILE_ID} PRIVATE -llog)
 include(extern.cmake)
 
 add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
-        COMMAND ${CMAKE_STRIP} -d --strip-all
-        "lib${COMPILE_ID}.so" -o "stripped_lib${COMPILE_ID}.so"
-        COMMENT "Strip debug symbols done on final binary.")
+COMMAND ${CMAKE_STRIP} -d --strip-all
+"lib${COMPILE_ID}.so" -o "stripped_lib${COMPILE_ID}.so"
+COMMENT "Strip debug symbols done on final binary.")
 
 add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory debug
-        COMMENT "Make directory for debug symbols"
-        )
+COMMAND ${CMAKE_COMMAND} -E make_directory debug
+COMMENT "Make directory for debug symbols"
+)
 
 add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E rename lib${COMPILE_ID}.so debug/lib${COMPILE_ID}.so
-        COMMENT "Rename the lib to debug_ since it has debug symbols"
-        )
+COMMAND ${CMAKE_COMMAND} -E rename lib${COMPILE_ID}.so debug/lib${COMPILE_ID}.so
+COMMENT "Rename the lib to debug_ since it has debug symbols"
+)
 
 # strip debug symbols from the .so and all dependencies
 add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E rename stripped_lib${COMPILE_ID}.so lib${COMPILE_ID}.so
-        COMMENT "Rename the stripped lib to regular"
-        )
-        foreach(so_file ${so_list})
-        cmake_path(GET so_file FILENAME file)
+COMMAND ${CMAKE_COMMAND} -E rename stripped_lib${COMPILE_ID}.so lib${COMPILE_ID}.so
+COMMENT "Rename the stripped lib to regular"
+)
+foreach(so_file ${so_list})
+cmake_path(GET so_file FILENAME file)
 
-        add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy ${so_file} debug/${file}
-                COMMENT "Copy so files for ndk stack"
-        )
+add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy ${so_file} debug/${file}
+COMMENT "Copy so files for ndk stack"
+)
 
-        add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
-                COMMAND ${CMAKE_STRIP} -g -S -d --strip-all ${so_file} -o ${file}
-                COMMENT "Strip debug symbols from the dependencies")
-        endforeach()
+add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
+COMMAND ${CMAKE_STRIP} -g -S -d --strip-all ${so_file} -o ${file}
+COMMENT "Strip debug symbols from the dependencies")
+endforeach()
 
-        foreach(a_file ${a_list})
-        cmake_path(GET a_file FILENAME file)
+foreach(a_file ${a_list})
+cmake_path(GET a_file FILENAME file)
 
-        add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${a_file} debug/${file}
-        COMMENT "Copy a files for ndk stack")
-        endforeach()
+add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy ${a_file} debug/${file}
+COMMENT "Copy a files for ndk stack")
+endforeach()
+
+file(MD5 assets/ytdlp.zip YTDLP_HASH)
+message("YTDLP hash: ${YTDLP_HASH}")
+add_compile_definitions(YTDLP_FILE_HASH="${YTDLP_HASH}")
 
 include(assets_include.cmake)

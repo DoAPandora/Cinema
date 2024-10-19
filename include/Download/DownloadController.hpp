@@ -18,7 +18,12 @@ namespace Cinema
     {
         std::mutex currentDownloadsMutex;
         std::vector<std::pair<std::shared_ptr<VideoConfig>, std::stop_source>> currentDownloads;
+
+        static inline bool isReady = false;
     public:
+
+        static void Setup();
+        static bool IsReady();
 
         UnorderedEventCallback<std::shared_ptr<VideoConfig>> onDownloadProgress;
         UnorderedEventCallback<std::shared_ptr<VideoConfig>> onDownloadFinished;
