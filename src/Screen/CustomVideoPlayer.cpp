@@ -34,8 +34,6 @@ namespace Cinema
 
     void CustomVideoPlayer::Awake()
     {
-        screenColorOn.a = 0;
-
         DEBUG("Creating CustomVideoPlayer");
 
         CreateScreen();

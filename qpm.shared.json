@@ -116,6 +116,11 @@
         "additionalData": {
           "includeQmod": false
         }
+      },
+      {
+        "id": "sombrero",
+        "versionRange": "^0.1.42",
+        "additionalData": {}
       }
     ]
   },
@@ -168,6 +173,17 @@
         }
       },
       "version": "0.4.1"
+    },
+    {
+      "dependency": {
+        "id": "sombrero",
+        "versionRange": "=0.1.42",
+        "additionalData": {
+          "headersOnly": true,
+          "branchName": "version/v0_1_42"
+        }
+      },
+      "version": "0.1.42"
     },
     {
       "dependency": {

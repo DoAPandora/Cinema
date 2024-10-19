@@ -2,9 +2,10 @@
 
 #include "custom-types/shared/macros.hpp"
 
+#include "sombrero/shared/FastColor.hpp"
+
 #include "UnityEngine/MonoBehaviour.hpp"
 #include "UnityEngine/Video/VideoPlayer.hpp"
-#include "System/MulticastDelegate.hpp"
 #include "UnityEngine/AudioSource.hpp"
 #include "UnityEngine/Renderer.hpp"
 #include "UnityEngine/RenderTexture.hpp"
@@ -12,8 +13,6 @@
 
 #include "ScreenController.hpp"
 #include "Placement.hpp"
-
-#include "DelegateW.hpp"
 
 DECLARE_CLASS_CODEGEN(Cinema, CustomVideoPlayer, UnityEngine::MonoBehaviour,
 
@@ -32,9 +31,9 @@ public:
     inline static ConstString MAIN_TEXTURE_NAME = "_MainTex";
     inline static ConstString CINEMA_TEXTURE_NAME ="_CinemaVideoTexture";
     inline static ConstString STATUS_PROPERTY_NAME = "_CinemaVideoIsPlaying";
-    inline static const float MAX_BRIGHTNESS = 0.92f;
-    UnityEngine::Color screenColorOn = UnityEngine::Color::get_white();
-    UnityEngine::Color screenColorOff = UnityEngine::Color::get_clear();
+    inline static constexpr float MAX_BRIGHTNESS = 0.92f;
+    static constexpr UnityEngine::Color screenColorOn = Sombrero::FastColor::white().Alpha(0) * MAX_BRIGHTNESS;
+    static constexpr UnityEngine::Color screenColorOff = Sombrero::FastColor::clear();
     inline static int MainTex = UnityEngine::Shader::PropertyToID(MAIN_TEXTURE_NAME);
     inline static int CinemaVideoTexture = UnityEngine::Shader::PropertyToID(CINEMA_TEXTURE_NAME);
     inline static int CinemaStatusProperty = UnityEngine::Shader::PropertyToID(STATUS_PROPERTY_NAME);

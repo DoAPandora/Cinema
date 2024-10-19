@@ -14,9 +14,6 @@
   },
   "workspace": {
     "scripts": {
-      "push": [
-        "adb push ./build/libcinema.so /sdcard/moddata/com.beatgames.beatsaber/modloader/mods"
-      ],
       "a2l": [
         "pwsh ./scripts/addr2line.ps1 libcinema.so $0"
       ],
@@ -34,6 +31,9 @@
       ],
       "format": [
         "find ./src -name *.cpp -exec clang-format -i {} ;"
+      ],
+      "push": [
+        "adb push ./build/libcinema.so /sdcard/moddata/com.beatgames.beatsaber/modloader/mods"
       ],
       "restart": [
         "pwsh ./scripts/restart-game.ps1"
@@ -115,6 +115,11 @@
       "additionalData": {
         "includeQmod": false
       }
+    },
+    {
+      "id": "sombrero",
+      "versionRange": "^0.1.42",
+      "additionalData": {}
     }
   ]
 }
