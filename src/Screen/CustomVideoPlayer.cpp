@@ -1,8 +1,10 @@
+#include "Screen/Placement.hpp"
 #include "Screen/ScreenController.hpp"
 #include "main.hpp"
 
 #include "Screen/CustomVideoPlayer.hpp"
 
+#include "UnityEngine/GL.hpp"
 #include "UnityEngine/AssetBundle.hpp"
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/Material.hpp"
@@ -262,9 +264,28 @@ namespace Cinema
 
     void CustomVideoPlayer::SetCoverTexture(UnityEngine::Texture* texture) {}
 
-    void CustomVideoPlayer::SetStaticTexture(UnityEngine::Texture* texture) {}
+    void CustomVideoPlayer::SetStaticTexture(UnityEngine::Texture* texture)
+    {
+        if(!texture)
+        {
+            ClearTexture();
+            return;
+        }
 
-    void CustomVideoPlayer::ClearTexture() {}
+        SetTexture(texture);
+        float width = ((float) texture->get_width() / texture->get_height()) * Placement::MenuPlacement.height;
+        SetDefaultMenuPlacement(width);
+        screenController->SetShaderParameters(nullptr);
+    }
+
+    void CustomVideoPlayer::ClearTexture()
+    {
+        auto rt = RenderTexture::get_active();
+        RenderTexture::set_active(renderTexture);
+        GL::Clear(true, true, Color::get_black());
+        RenderTexture::set_active(rt);
+        SetTexture(renderTexture);
+    }
 
     void CustomVideoPlayer::VideoPlayerPrepareComplete(UnityEngine::Video::VideoPlayer* source)
     {}
