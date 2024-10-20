@@ -1,6 +1,8 @@
 #include "Screen/ScreenController.hpp"
+#include "ModConfig.hpp"
 #include "Screen/CurvedSurface.hpp"
 #include "Util/SoftParent.hpp"
+#include "logger.hpp"
 #include "main.hpp"
 
 #include "UnityEngine/LayerMask.hpp"
@@ -13,6 +15,8 @@
 #include "UnityEngine/Resources.hpp"
 #include "UnityEngine/Vector3.hpp"
 #include "UnityEngine_Rendering_BlendMode.hpp"
+
+#include <optional>
 
 using namespace UnityEngine;
 
@@ -90,7 +94,7 @@ namespace Cinema
         bodyRenderer->material = Material::New_ctor(bodyShader);
         DEBUG("Assigned shader with name {}", bodyShader->name);
 
-        // bodyRenderer->material->color = Color(0, 0, 0, 0);
+        bodyRenderer->material->color = Color(0, 0, 0, 0);
     }
 
     void ScreenController::SetScreensActive(bool active)
@@ -197,8 +201,8 @@ namespace Cinema
         {
             Renderer* screenRenderer = screen->GetComponent<Renderer*>();
 
-            std::optional<VideoConfig::ColorCorrection> colorCorrection = config->colorCorrection;
-            std::optional<VideoConfig::Vigenette> vigenette = config->vigenette;
+            std::optional<VideoConfig::ColorCorrection> colorCorrection = config ? config->colorCorrection : std::nullopt;
+            std::optional<VideoConfig::Vigenette> vigenette = config ? config->vigenette : std::nullopt;
 
             screenRenderer->GetPropertyBlock(materialPropertyBlock);
 
@@ -209,7 +213,7 @@ namespace Cinema
             SetShaderFloat(Exposure, colorCorrection->exposure, 0, 5, 1);
             SetShaderFloat(Gamma, colorCorrection->gamma, 0, 5, 1);
 
-            EnableColorBlending(config->colorBlending.value_or(false));
+            EnableColorBlending(config ? config->colorBlending.value_or(false) : false);
             SetVigenette(vigenette, materialPropertyBlock);
 
             screenRenderer->SetPropertyBlock(materialPropertyBlock);
@@ -228,9 +232,20 @@ namespace Cinema
                 materialPropertyBlock = this->materialPropertyBlock;
             }
 
-            bool elliptical = vigenette == std::nullopt;
-            SetShaderFloat(VignetteRadius, vigenette->radius, 0, 1, 1);
+            bool elliptical = getModConfig().cornerRoundness.GetValue() > 0 && vigenette == std::nullopt;
+            SetShaderFloat(VignetteRadius, vigenette->radius, 0, 1, (elliptical ? 1 - getModConfig().cornerRoundness.GetValue() : 1));
             SetShaderFloat(VignetteSoftness, vigenette->softness, 0, 1, elliptical ? 0.02f : 0.005f);
+
+            auto type = vigenette.has_value() ? vigenette->type.value_or("") : "";
+            materialPropertyBlock->SetInt(VignetteElliptical,
+                (type == "oval" || type == "elliptical" || type == "ellipse" || type.empty() && elliptical)
+                ? 1 : 0
+            );
+
+            if(setPropertyBlock)
+            {
+                screenRenderer->SetPropertyBlock(this->materialPropertyBlock);
+            }
         }
     }
 
