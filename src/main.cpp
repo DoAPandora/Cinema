@@ -4,9 +4,9 @@
 #include "VideoMenu/VideoMenu.hpp"
 #include "Hooks/LevelDataHooks.hpp"
 #include "Screen/PlaybackController.hpp"
+#include "Settings/SettingsViewController.hpp"
 
 #include "bsml/shared/BSML.hpp"
-
 
 #include "assets.hpp"
 
@@ -66,6 +66,7 @@ CINEMA_EXPORT void late_load() noexcept
     Cinema::DownloadController::Setup();
 
     BSML::Init();
+    BSML::Register::RegisterMainMenu<Cinema::SettingsViewController*>("Cinema", "Cinema", "Cinema Settings");
 
     SongCore::API::Capabilities::RegisterCapability("Cinema");
 
