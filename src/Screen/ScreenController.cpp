@@ -3,7 +3,7 @@
 #include "Screen/CurvedSurface.hpp"
 #include "Util/SoftParent.hpp"
 #include "logger.hpp"
-#include "main.hpp"
+#include "Util/Util.hpp"
 
 #include "UnityEngine/LayerMask.hpp"
 #include "UnityEngine/Material.hpp"
@@ -206,14 +206,14 @@ namespace Cinema
 
             screenRenderer->GetPropertyBlock(materialPropertyBlock);
 
-            SetShaderFloat(Brightness, colorCorrection->brightness, 0, 2, 1);
-            SetShaderFloat(Contrast, colorCorrection->contrast, 0, 5, 1);
-            SetShaderFloat(Saturation, colorCorrection->saturation, 0, 5, 1);
-            SetShaderFloat(Hue, colorCorrection->hue, -360, 360, 0);
-            SetShaderFloat(Exposure, colorCorrection->exposure, 0, 5, 1);
-            SetShaderFloat(Gamma, colorCorrection->gamma, 0, 5, 1);
+            SetShaderFloat(Brightness, colorCorrection.and_then([](auto& c){ return c.brightness; }), 0, 2, 1);
+            SetShaderFloat(Contrast, colorCorrection.and_then([](auto& c){ return c.contrast; }), 0, 5, 1);
+            SetShaderFloat(Saturation, colorCorrection.and_then([](auto& c){ return c.saturation; }), 0, 5, 1);
+            SetShaderFloat(Hue, colorCorrection.and_then([](auto& c){ return c.hue; }), -360, 360, 0);
+            SetShaderFloat(Exposure, colorCorrection.and_then([](auto& c){ return c.exposure; }), 0, 5, 1);
+            SetShaderFloat(Gamma, colorCorrection.and_then([](auto& c){ return c.gamma; }), 0, 5, 1);
 
-            EnableColorBlending(config ? config->colorBlending.value_or(false) : false);
+            EnableColorBlending((getModConfig().colorBlendingEnabled.GetValue() && (config ? config->colorBlending.value_or(false) : false)) || Util::GetEnvironmentName() == "MainMenu");
             SetVigenette(vigenette, materialPropertyBlock);
 
             screenRenderer->SetPropertyBlock(materialPropertyBlock);
