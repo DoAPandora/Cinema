@@ -175,7 +175,7 @@ namespace Cinema::VideoLoader
         {
             return;
         }
-        auto success = cachedConfigs.insert({static_cast<std::string>(level->levelID), config});
+        auto success = cachedConfigs.emplace(static_cast<std::string>(level->levelID), config);
         if(success.second)
         {
             DEBUG("Adding config for {} to cache", level->levelID);

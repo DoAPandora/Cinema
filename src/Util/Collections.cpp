@@ -67,7 +67,7 @@ namespace Collections
         }
 
         auto extraSongData = ExtraSongData::ExtraSongData(difficulties);
-        extraSongDataCache.insert({hash, extraSongData});
+        extraSongDataCache.emplace(hash, extraSongData);
 
         return extraSongData;
     }
