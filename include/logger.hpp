@@ -9,7 +9,7 @@ struct fmt::formatter<std::optional<T>> : formatter<string_view>
 {
     // parse is inherited from formatter<string_view>.
     template <typename FormatContext>
-    auto format(std::optional<T> s, FormatContext& ctx)
+    auto format(std::optional<T> s, FormatContext& ctx) const
     {
         if(s.has_value())
         {
@@ -20,7 +20,7 @@ struct fmt::formatter<std::optional<T>> : formatter<string_view>
     }
 };
 
-static constexpr auto Logger = Paper::ConstLoggerContext("CINEMA");
+inline constexpr auto Logger = Paper::ConstLoggerContext("CINEMA");
 
 #define INFO(message, ...) Logger.info(message, ## __VA_ARGS__)
 #define ERROR(message, ...) Logger.error(message, ## __VA_ARGS__)
