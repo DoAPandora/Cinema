@@ -76,7 +76,7 @@ namespace Cinema
 
     std::string VideoConfig::GetVideoFileName(std::string levelPath) const
     {
-        std::string fileName = videoFile.value_or(Cinema::Util::ReplaceIllegalFilesystemChar(title.value_or(videoID.value_or("video"))));
+        std::string fileName = Cinema::Util::ReplaceIllegalFilesystemChar(videoFile.value_or(title.value_or(videoID.value_or("video"))));
         if(!fileName.ends_with(".mp4"))
         {
             fileName.append(".mp4");

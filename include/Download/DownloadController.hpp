@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Video/VideoConfig.hpp>
+#include "Settings/VideoQuality.hpp"
 
 #include <logger.hpp>
 
@@ -28,10 +29,10 @@ namespace Cinema
         UnorderedEventCallback<std::shared_ptr<VideoConfig>> onDownloadProgress;
         UnorderedEventCallback<std::shared_ptr<VideoConfig>> onDownloadFinished;
 
-        void StartDownload(std::shared_ptr<VideoConfig> video);
+        void StartDownload(std::shared_ptr<VideoConfig> video, VideoQuality::Mode quality);
         void CancelDownload(std::shared_ptr<VideoConfig> video);
 
     private:
-        void DownloadVideoThread(std::filesystem::path tempDir, std::shared_ptr<VideoConfig> video, std::stop_token stopToken);
+        void DownloadVideoThread(std::filesystem::path tempDir, std::shared_ptr<VideoConfig> video, VideoQuality::Mode quality, std::stop_token stopToken);
     };
 }

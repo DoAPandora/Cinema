@@ -1,5 +1,6 @@
 #include "VideoMenu/VideoMenu.hpp"
 #include "Screen/PlaybackController.hpp"
+#include "Settings/VideoQuality.hpp"
 #include "Util/Events.hpp"
 #include "Video/VideoConfig.hpp"
 #include "Video/VideoLoader.hpp"
@@ -143,6 +144,9 @@ namespace Cinema
     {
         BSML::MainThreadScheduler::Schedule([this, videoConfig]()
         {
+            // No cancelling for now
+            // stopping the python execution is difficult
+            SetButtonState(videoConfig->downloadState == DownloadState::Downloaded || videoConfig->downloadState == DownloadState::NotDownloaded);
             UpdateStatusText(videoConfig);
             SetupLevelDetailView(videoConfig);
         });
@@ -177,14 +181,12 @@ namespace Cinema
         case DownloadState::DownloadingVideo:
         case DownloadState::DownloadingAudio:
             {
-                deleteVideoButtonText->SetTextInternal("Cancel");
+                // deleteVideoButtonText->SetTextInternal("Cancel");
                 previewButton->set_interactable(false);
-                deleteVideoButton->get_transform()->Find(
-                                                      "Underline")
+                deleteVideoButton->get_transform()->Find("Underline")
                     ->get_gameObject()
                     ->GetComponent<UnityEngine::UI::Image*>()
-                    ->set_color(
-                        UnityEngine::Color::get_gray());
+                    ->set_color(UnityEngine::Color::get_gray());
                 break;
             }
         case DownloadState::NotDownloaded:
@@ -199,20 +201,17 @@ namespace Cinema
                     deleteVideoButton->set_interactable(true);
                 }
 
-                deleteVideoButton->get_transform()->Find(
-                                                      "Underline")
+                deleteVideoButton->get_transform()->Find("Underline")
                     ->get_gameObject()
                     ->GetComponent<UnityEngine::UI::Image*>()
-                    ->set_color(
-                        underlineColor);
+                    ->set_color(underlineColor);
                 previewButton->set_interactable(false);
                 break;
             }
         default:
             {
                 deleteVideoButtonText->SetTextInternal("Delete Video");
-                deleteVideoButton->get_transform()->Find(
-                                                      "Underline")
+                deleteVideoButton->get_transform()->Find("Underline")
                     ->get_gameObject()
                     ->GetComponent<UnityEngine::UI::Image*>()
                     ->set_color(
@@ -238,7 +237,7 @@ namespace Cinema
 
         videoSearchResults->get_gameObject()->SetActive(false);
 
-        if(currentVideo == nullptr)
+        if(!currentVideo)
         {
             DEBUG("Current video is null");
             ResetVideoMenu();
@@ -345,6 +344,21 @@ namespace Cinema
                 break;
             case DownloadState::Downloading:
                 videoStatus->text = fmt::format("Downloading {:.1f}%", videoConfig->downloadProgress);
+                videoStatus->color = Color::get_yellow();
+                previewButton->interactable = false;
+                break;
+            case DownloadState::DownloadingVideo:
+                videoStatus->text = fmt::format("Downloading video {:.1f}%", videoConfig->downloadProgress);
+                videoStatus->color = Color::get_yellow();
+                previewButton->interactable = false;
+                break;
+            case DownloadState::DownloadingAudio:
+                videoStatus->text = fmt::format("Downloading audio {:.1f}%", videoConfig->downloadProgress);
+                videoStatus->color = Color::get_yellow();
+                previewButton->interactable = false;
+                break;
+            case DownloadState::Converting:
+                videoStatus->text = "Converting...";
                 videoStatus->color = Color::get_yellow();
                 previewButton->interactable = false;
                 break;
@@ -490,14 +504,14 @@ namespace Cinema
         case DownloadState::DownloadingAudio:
         case DownloadState::DownloadingVideo:
             {
-                downloadController.CancelDownload(currentVideo);
+                // downloadController.CancelDownload(currentVideo);
                 break;
             }
         case DownloadState::NotDownloaded:
         case DownloadState::Cancelled:
             {
                 currentVideo->downloadProgress = 0;
-                downloadController.StartDownload(currentVideo);
+                downloadController.StartDownload(currentVideo, (VideoQuality::Mode)getModConfig().qualityMode.GetValue());
                 currentVideo->needsToSave = true;
                 VideoLoader::AddConfigToCache(currentVideo, currentLevel);
                 break;

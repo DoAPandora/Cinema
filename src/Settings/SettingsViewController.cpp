@@ -170,6 +170,6 @@ namespace Cinema
 
     void SettingsViewController::set_qualityMode(StringW value)
     {
-        getModConfig().qualityMode.SetValue(std::stoi(static_cast<std::string>(value)));
+        getModConfig().qualityMode.SetValue(std::stoi(static_cast<std::string>(value).substr(0, value->Length - 1)));
     }
 }

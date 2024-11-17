@@ -24,5 +24,7 @@ DECLARE_CLASS_CODEGEN(Cinema, SettingsViewController, HMUI::ViewController,
     DECLARE_BSML_PROPERTY(bool, coverEnabled);
     DECLARE_BSML_PROPERTY(StringW, qualityMode);
 
+    BSML_OPTIONS_LIST_OBJECT(modes, "1080p", "720p", "480p");
+
     static inline const float FADE_DURATION = 0.2f;
 )
