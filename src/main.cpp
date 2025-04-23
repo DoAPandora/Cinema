@@ -14,8 +14,6 @@
 
 #include "songcore/shared/SongCore.hpp"
 
-#include "bs-events/shared/BSEvents.hpp"
-
 #include "UnityEngine/SceneManagement/SceneManagement.hpp"
 
 #include "custom-types/shared/delegate.hpp"
@@ -24,10 +22,9 @@ modloader::ModInfo modInfo{MOD_ID, VERSION, 0};
 
 
 
-MAKE_AUTO_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &GlobalNamespace::DefaultScenesTransitionsFromInit::TransitionToNextScene, void, GlobalNamespace::DefaultScenesTransitionsFromInit* self, bool goStraightToMenu, bool goStraightToEditor, bool goToRecordingToolScene)
+MAKE_AUTO_HOOK_MATCH(DefaultScenesTransitionsFromInit_TransitionToNextScene, &GlobalNamespace::DefaultScenesTransitionsFromInit::TransitionToNextScene, void, GlobalNamespace::DefaultScenesTransitionsFromInit* self, bool goStraightToMenu, bool goStraightToEditor, bool goToRecordingToolScene, ::System::Action* onFinishShaderWarmup)
 {
-    DefaultScenesTransitionsFromInit_TransitionToNextScene(self, goStraightToMenu, goStraightToEditor, goToRecordingToolScene);
-    DEBUG("Creating PlaybackController");
+    DefaultScenesTransitionsFromInit_TransitionToNextScene(self, goStraightToMenu, goStraightToEditor, goToRecordingToolScene, onFinishShaderWarmup);
     Cinema::PlaybackController::Create();
     Cinema::VideoMenu::get_instance()->Init();
     Cinema::VideoMenu::get_instance()->AddTab();
@@ -52,7 +49,6 @@ CINEMA_EXPORT void late_load() noexcept
 {
     il2cpp_functions::Init();
     custom_types::Register::AutoRegister();
-    BSEvents::Init();
 
     mkpath(VIDEO_DIR);
     mkpath(THUMBNAIL_DIR);

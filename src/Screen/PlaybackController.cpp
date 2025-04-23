@@ -5,8 +5,6 @@
 #include "Video/VideoLoader.hpp"
 #include "main.hpp"
 
-#include "bs-events/shared/BSEvents.hpp"
-
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/Resources.hpp"
 #include "UnityEngine/SceneManagement/SceneManager.hpp"
@@ -18,12 +16,11 @@
 #include "GlobalNamespace/GameplayModifiers.hpp"
 #include "GlobalNamespace/SceneInfo.hpp"
 
-#include "BeatSaber/GameSettings/Audio.hpp"
-#include "BeatSaber/GameSettings/MainSettings.hpp"
-
 #include "bsml/shared/Helpers/getters.hpp"
 
 #include "custom-types/shared/delegate.hpp"
+
+#include "metacore/shared/events.hpp"
 
 DEFINE_TYPE(Cinema, PlaybackController);
 
@@ -71,12 +68,15 @@ namespace Cinema
         // //        fr = {&PlaybackController::FrameReady, this};
         // //        videoPlayer->player->frameReady += frameReady;
 
-        BSEvents::songPaused += {&PlaybackController::PauseVideo, this};
-        BSEvents::songUnpaused += {&PlaybackController::ResumeVideo, this};
-        BSEvents::menuSceneLoaded += {&PlaybackController::OnMenuSceneLoaded, this};
-        BSEvents::lateMenuSceneLoadedFresh += {&PlaybackController::OnMenuSceneLoadedFresh, this};
-        BSEvents::gameSceneActive += {&PlaybackController::GameSceneActive, this};
-        BSEvents::gameSceneLoaded += {&PlaybackController::GameSceneLoaded, this};
+
+        MetaCore::Events::AddCallback(MetaCore::Events::Events::MapPaused, std::bind_front(&PlaybackController::PauseVideo, this));
+        MetaCore::Events::AddCallback(MetaCore::Events::Events::MapUnpaused, std::bind_front(&PlaybackController::PauseVideo, this));
+        // BSEvents::songPaused += {&PlaybackController::PauseVideo, this};
+        // BSEvents::songUnpaused += {&PlaybackController::ResumeVideo, this};
+        // BSEvents::menuSceneLoaded += {&PlaybackController::OnMenuSceneLoaded, this};
+        // BSEvents::lateMenuSceneLoadedFresh += {&PlaybackController::OnMenuSceneLoadedFresh, this};
+        // BSEvents::gameSceneActive += {&PlaybackController::GameSceneActive, this};
+        // BSEvents::gameSceneLoaded += {&PlaybackController::GameSceneLoaded, this};
 
         // OnMenuSceneLoadedFresh(nullptr);
     }
@@ -150,11 +150,9 @@ namespace Cinema
     {
         OnMenuSceneLoaded();
 
-        mainSettingsHandler = BSML::Helpers::GetDiContainer()->Resolve<BeatSaber::GameSettings::MainSettingsHandler*>();
-        if(mainSettingsHandler)
-        {
-            this->videoPlayer->volumeScale = mainSettingsHandler->get_instance()->audioSettings->volume;
-        }
+        settingsManager = BSML::Helpers::GetDiContainer()->Resolve<GlobalNamespace::SettingsManager*>();
+        videoPlayer->volumeScale = settingsManager->settings.audio.volume;
+        videoPlayer->screenController->OnGameSceneLoadedFresh();
     }
 
     void PlaybackController::SceneChanged() {}
@@ -178,7 +176,7 @@ namespace Cinema
 
         if(LevelData::levelData.isSet)
         {
-            StringW sceneName = LevelData::levelData.gameplayCoreSceneSetupData->environmentInfo->sceneInfo->sceneName;
+            StringW sceneName = LevelData::levelData.gameplayCoreSceneSetupData->targetEnvironmentInfo->sceneInfo->sceneName;
             auto scene = SceneManagement::SceneManager::GetSceneByName(sceneName);
             SceneManagement::SceneManager::MoveGameObjectToScene(get_gameObject(), scene);
         }

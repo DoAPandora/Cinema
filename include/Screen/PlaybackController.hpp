@@ -14,11 +14,13 @@
 #include "GlobalNamespace/SongPreviewPlayer.hpp"
 #include "GlobalNamespace/AudioTimeSyncController.hpp"
 #include "GlobalNamespace/ScenesTransitionSetupDataSO.hpp"
+#include "GlobalNamespace/SettingsManager.hpp"
 
 DECLARE_CLASS_CODEGEN(Cinema, PlaybackController, UnityEngine::MonoBehaviour) {
 
     DECLARE_INSTANCE_FIELD(CustomVideoPlayer*, videoPlayer);
     DECLARE_INSTANCE_FIELD(GlobalNamespace::AudioTimeSyncController*, audioTimeSyncController);
+    DECLARE_INSTANCE_FIELD(GlobalNamespace::SettingsManager*, settingsManager);
     DECLARE_INSTANCE_FIELD(GlobalNamespace::SongPreviewPlayer*, songPreviewPlayer);
     DECLARE_INSTANCE_FIELD(GlobalNamespace::BeatmapLevel*, currentLevel);
     DECLARE_INSTANCE_FIELD(UnityEngine::AudioSource*, activeAudioSource);

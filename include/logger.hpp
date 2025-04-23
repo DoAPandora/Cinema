@@ -2,7 +2,7 @@
 #include "beatsaber-hook/shared/utils/typedefs.h"
 #include <string_view>
 
-#include "paper/shared/logger.hpp"
+#include "paper2_scotland2/shared/logger.hpp"
 
 template <typename T>
 struct fmt::formatter<std::optional<T>> : formatter<string_view>

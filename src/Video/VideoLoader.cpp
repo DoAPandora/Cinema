@@ -144,13 +144,13 @@ namespace Cinema::VideoLoader
         // list.insert_range(BeatmapLevelsModel->ostAndExtrasBeatmapLevelsRepository->beatmapLevelPacks);
         for(BeatmapLevelPack* levelPack : list)
         {
-            officialMaps->AddRange(reinterpret_cast<BeatmapLevelsEnumerable*>(levelPack->beatmapLevels->GetEnumerator()));
+            officialMaps->AddRange(reinterpret_cast<BeatmapLevelsEnumerable*>(levelPack->_beatmapLevels->GetEnumerator()));
         }
         list.clear();
         // list.insert_range(BeatmapLevelsModel->dlcBeatmapLevelsRepository->beatmapLevelPacks);
         for(BeatmapLevelPack* levelPack : list)
         {
-            officialMaps->AddRange(reinterpret_cast<BeatmapLevelsEnumerable*>(levelPack->beatmapLevels->GetEnumerator()));
+            officialMaps->AddRange(reinterpret_cast<BeatmapLevelsEnumerable*>(levelPack->_beatmapLevels->GetEnumerator()));
         }
 
         return officialMaps;
