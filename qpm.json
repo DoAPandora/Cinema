@@ -57,51 +57,37 @@
   "dependencies": [
     {
       "id": "beatsaber-hook",
-      "versionRange": "^5.0.0",
-      "additionalData": {
-        "extraFiles": [
-          "src/inline-hook"
-        ]
-      }
-    },
-    {
-      "id": "bs-events",
-      "versionRange": "^1.1.0",
+      "versionRange": "^6.4.1",
       "additionalData": {}
     },
     {
       "id": "pythonlib",
-      "versionRange": "^0.4.0",
+      "versionRange": "^0.4.2",
       "additionalData": {}
     },
     {
       "id": "config-utils",
-      "versionRange": "^1.4.1",
-      "additionalData": {}
-    },
-    {
-      "id": "paper",
-      "versionRange": "^3.6.3<3.7.0",
+      "versionRange": "^2.0.2",
       "additionalData": {}
     },
     {
       "id": "rapidjson-macros",
-      "versionRange": "^1.2.1",
+      "versionRange": "^2.1.0",
       "additionalData": {}
     },
     {
       "id": "bs-cordl",
-      "versionRange": "^3700.0.0",
+      "versionRange": "^4004.0.0",
       "additionalData": {}
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.17.3",
+      "versionRange": "^0.18.2",
       "additionalData": {}
     },
     {
       "id": "bsml",
-      "versionRange": "^0.4.42",
+      "versionRange": "^0.4.51",
       "additionalData": {}
     },
     {
@@ -118,11 +104,21 @@
     },
     {
       "id": "sombrero",
-      "versionRange": "^0.1.42",
+      "versionRange": "^0.1.43",
       "additionalData": {}
     },
     {
       "id": "hollywood",
+      "versionRange": "^1.1.0",
+      "additionalData": {}
+    },
+    {
+      "id": "paper2_scotland2",
+      "versionRange": "^4.6.1",
+      "additionalData": {}
+    },
+    {
+      "id": "metacore",
       "versionRange": "^1.0.0",
       "additionalData": {}
     }
