@@ -23,7 +23,7 @@
 #include "bsml/shared/BSML/Components/Keyboard/ModalKeyboard.hpp"
 #include "bsml/shared/BSML/Parsing/BSMLParserParams.hpp"
 
-DECLARE_CLASS_CODEGEN(Cinema, VideoMenuStatus, UnityEngine::MonoBehaviour,
+DECLARE_CLASS_CODEGEN(Cinema, VideoMenuStatus, UnityEngine::MonoBehaviour) {
 
 public:
 
@@ -34,9 +34,9 @@ public:
     DECLARE_INSTANCE_METHOD(void, OnDisable);
 
     DECLARE_DEFAULT_CTOR();
-)
+};
 
-DECLARE_CLASS_CODEGEN(Cinema, VideoMenu, UnityEngine::MonoBehaviour,
+DECLARE_CLASS_CODEGEN(Cinema, VideoMenu, UnityEngine::MonoBehaviour) {
 
     DECLARE_INSTANCE_FIELD(UnityW<UnityEngine::GameObject>, rootObject);
     DECLARE_INSTANCE_FIELD(UnityEngine::RectTransform*, noVideoBg);
@@ -66,12 +66,12 @@ DECLARE_CLASS_CODEGEN(Cinema, VideoMenu, UnityEngine::MonoBehaviour,
     DECLARE_INSTANCE_FIELD(UnityEngine::Coroutine*, updateSearchResultsCoroutine);
 
     //Menu status + detail view controller
-    DECLARE_INSTANCE_FIELD(UnityW<VideoMenuStatus>, menuStatus);
-    DECLARE_INSTANCE_FIELD(bool, videoMenuInitialized);
-    DECLARE_INSTANCE_FIELD(GlobalNamespace::BeatmapLevel*, currentLevel);
-    DECLARE_INSTANCE_FIELD(bool, currentLevelIsPlaylistSong); // is this even needed on quest ?
-    DECLARE_INSTANCE_FIELD(bool, videoMenuActive);
-    DECLARE_INSTANCE_FIELD(int, selectedCell);
+    UnityW<VideoMenuStatus> menuStatus;
+    bool videoMenuInitialized;
+    GlobalNamespace::BeatmapLevel* currentLevel;
+    bool currentLevelIsPlaylistSong; // is this even needed on quest ?
+    bool videoMenuActive;
+    int selectedCell;
 
     static inline UnityW<VideoMenu> instance;
     DownloadController downloadController;
@@ -90,43 +90,45 @@ public:
     // download controller, search controller, result array
 
     DECLARE_DEFAULT_CTOR();
-
-    DECLARE_INSTANCE_METHOD(void, Init);
-    DECLARE_INSTANCE_METHOD(void, CreateStatusListener);
-    DECLARE_INSTANCE_METHOD(void, AddTab);
-    DECLARE_INSTANCE_METHOD(void, RemoveTab);
-    DECLARE_INSTANCE_METHOD(void, ResetVideoMenu);
-    DECLARE_INSTANCE_METHOD(void, SetButtonState, bool state);
-    DECLARE_INSTANCE_METHOD(void, SetupVideoDetails);
-    DECLARE_INSTANCE_METHOD(void, SetThumbnailFromCover, GlobalNamespace::BeatmapLevel* level);
-    DECLARE_INSTANCE_METHOD(void, SetSelectedLevel, GlobalNamespace::BeatmapLevel* level);
-    DECLARE_INSTANCE_METHOD(void, HandleDidSelectLevel, GlobalNamespace::BeatmapLevel* level, bool isPlaylistSong = false);
-    DECLARE_INSTANCE_METHOD(void, OnLevelSelected, GlobalNamespace::BeatmapLevel* level);
-    DECLARE_INSTANCE_METHOD(void, StatusViewerDidEnable);
-    DECLARE_INSTANCE_METHOD(void, StatusViewerDidDisable);
-    DECLARE_INSTANCE_METHOD(void, ApplyOffset, int offset);
-    DECLARE_INSTANCE_METHOD(void, SearchAction);
-    DECLARE_INSTANCE_METHOD(void, ShowKeyboard);
-    DECLARE_INSTANCE_METHOD(void, OnRefineAction);
-    DECLARE_INSTANCE_METHOD(void, OnDeleteVideoAction);
     DECLARE_INSTANCE_METHOD(void, OnDeleteConfigAction);
-    DECLARE_INSTANCE_METHOD(void, OnBackAction);
-    DECLARE_INSTANCE_METHOD(void, SearchFinished);
-    DECLARE_INSTANCE_METHOD(void, ResetSearchView);
-    DECLARE_INSTANCE_METHOD(void, OnQueryAction, StringW query);
-    DECLARE_INSTANCE_METHOD(void, OnSelectCell, HMUI::TableView* view, int idx);
-    DECLARE_INSTANCE_METHOD(void, OnDownloadAction);
-    DECLARE_INSTANCE_METHOD(void, OnPreviewAction);
+    DECLARE_INSTANCE_METHOD(void, OnDeleteVideoAction);
     DECLARE_INSTANCE_METHOD(void, DecreaseOffsetHigh);
     DECLARE_INSTANCE_METHOD(void, DecreaseOffsetMid);
     DECLARE_INSTANCE_METHOD(void, DecreaseOffsetLow);
     DECLARE_INSTANCE_METHOD(void, IncreaseOffsetHigh);
     DECLARE_INSTANCE_METHOD(void, IncreaseOffsetMid);
     DECLARE_INSTANCE_METHOD(void, IncreaseOffsetLow);
+    DECLARE_INSTANCE_METHOD(void, OnPreviewAction);
+    DECLARE_INSTANCE_METHOD(void, OnRefineAction);
+    DECLARE_INSTANCE_METHOD(void, OnBackAction);
+    DECLARE_INSTANCE_METHOD(void, OnDownloadAction);
+    DECLARE_INSTANCE_METHOD(void, OnQueryAction, StringW query);
+    DECLARE_INSTANCE_METHOD(void, SearchAction);
 
-    DECLARE_INSTANCE_METHOD(void, set_CustomizeOffset, bool value);
-    DECLARE_INSTANCE_METHOD(bool, get_CustomizeOffset);
+public:
 
+    void Init();
+    void CreateStatusListener();
+    void AddTab();
+    void RemoveTab();
+    void ResetVideoMenu();
+    void SetButtonState(bool state);
+    void SetupVideoDetails();
+    void SetThumbnailFromCover(GlobalNamespace::BeatmapLevel* level);
+    void SetSelectedLevel(GlobalNamespace::BeatmapLevel* level);
+    void HandleDidSelectLevel(GlobalNamespace::BeatmapLevel* level, bool isPlaylistSong = false);
+    void OnLevelSelected(GlobalNamespace::BeatmapLevel* level);
+    void StatusViewerDidEnable();
+    void StatusViewerDidDisable();
+    void ApplyOffset(int offset);
+    void ShowKeyboard();
+    void SearchFinished();
+    void ResetSearchView();
+    void OnSelectCell(HMUI::TableView* view, int idx);
+    
+    void set_CustomizeOffset(bool value);
+    bool get_CustomizeOffset();
+    
 public:
 
     void OnDownloadProgress(std::shared_ptr<VideoConfig> videoConfig);
@@ -143,4 +145,4 @@ public:
 
     __declspec(property(get=get_CustomizeOffset)) bool CustomizeOffset;
 
-)
+};

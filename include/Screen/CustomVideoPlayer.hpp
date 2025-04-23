@@ -15,7 +15,7 @@
 #include "Placement.hpp"
 #include "Util/EasingController.hpp"
 
-DECLARE_CLASS_CODEGEN(Cinema, CustomVideoPlayer, UnityEngine::MonoBehaviour,
+DECLARE_CLASS_CODEGEN(Cinema, CustomVideoPlayer, UnityEngine::MonoBehaviour) {
 
     DECLARE_INSTANCE_FIELD(UnityEngine::Video::VideoPlayer*, player);
     DECLARE_INSTANCE_FIELD(UnityEngine::AudioSource*, videoPlayerAudioSource);
@@ -54,62 +54,62 @@ public:
 
     DECLARE_INSTANCE_METHOD(void, Awake);
     DECLARE_INSTANCE_METHOD(void, OnDestroy);
-    DECLARE_INSTANCE_METHOD(void, CreateScreen);
-    DECLARE_INSTANCE_METHOD(void, FadeControllerUpdate, float value);
-    DECLARE_INSTANCE_METHOD(void, OnMenuSceneLoaded);
-    DECLARE_INSTANCE_METHOD(void, FirstFrameReady, UnityEngine::Video::VideoPlayer*, int64_t frame);
-    DECLARE_INSTANCE_METHOD(void, SetBrightness, float brightness);
-    DECLARE_INSTANCE_METHOD(void, LoopVideo, bool loop);
-    DECLARE_INSTANCE_METHOD(void, Show);
-    DECLARE_INSTANCE_METHOD(void, FadeIn, float duration = 0.4f);
-    DECLARE_INSTANCE_METHOD(void, Hide);
-    DECLARE_INSTANCE_METHOD(void, FadeOut, float duration = 0.7f);
-    DECLARE_INSTANCE_METHOD(void, ShowScreenBody);
-    DECLARE_INSTANCE_METHOD(void, HideScreenBody);
-    DECLARE_INSTANCE_METHOD(void, Play);
-    DECLARE_INSTANCE_METHOD(void, Pause);
-    DECLARE_INSTANCE_METHOD(void, Stop);
-    DECLARE_INSTANCE_METHOD(void, Prepare);
     DECLARE_INSTANCE_METHOD(void, Update);
-    DECLARE_INSTANCE_METHOD(void, UpdateScreenContent);
-    DECLARE_INSTANCE_METHOD(void, SetTexture, UnityEngine::Texture* texture);
-    DECLARE_INSTANCE_METHOD(void, SetCoverTexture, UnityEngine::Texture* texture);
-    DECLARE_INSTANCE_METHOD(void, SetStaticTexture, UnityEngine::Texture* texture);
-    DECLARE_INSTANCE_METHOD(void, ClearTexture);
 
-    DECLARE_INSTANCE_METHOD(void, VideoPlayerPrepareComplete, UnityEngine::Video::VideoPlayer* source);
-    DECLARE_INSTANCE_METHOD(void, VideoPlayerStarted, UnityEngine::Video::VideoPlayer* source);
-    DECLARE_INSTANCE_METHOD(void, VideoPlayerFinished, UnityEngine::Video::VideoPlayer* source);
-    DECLARE_INSTANCE_METHOD(void, VideoPlayerErrorReceived, UnityEngine::Video::VideoPlayer* source, StringW message);
+public:
 
-    DECLARE_INSTANCE_METHOD(float, GetVideoAspectRatio);
-    DECLARE_INSTANCE_METHOD(void, Mute);
-    DECLARE_INSTANCE_METHOD(void, Unmute);
-    DECLARE_INSTANCE_METHOD(void, SetSoftParent, UnityEngine::Transform* parent);
+    void CreateScreen();
+    void FadeControllerUpdate(float value);
+    void OnMenuSceneLoaded();
+    void FirstFrameReady(UnityEngine::Video::VideoPlayer*, int64_t frame);
+    void SetBrightness(float brightness);
+    void LoopVideo(bool loop);
+    void Show();
+    void FadeIn(float duration = 0.4f);
+    void Hide();
+    void FadeOut(float duration = 0.7f);
+    void ShowScreenBody();
+    void HideScreenBody();
+    void Play();
+    void Pause();
+    void Stop();
+    void Prepare();
+    void UpdateScreenContent();
+    void SetTexture(UnityEngine::Texture* texture);
+    void SetCoverTexture(UnityEngine::Texture* texture);
+    void SetStaticTexture(UnityEngine::Texture* texture);
+    void ClearTexture();
 
+    void VideoPlayerPrepareComplete(UnityEngine::Video::VideoPlayer* source);
+    void VideoPlayerStarted(UnityEngine::Video::VideoPlayer* source);
+    void VideoPlayerFinished(UnityEngine::Video::VideoPlayer* source);
+    void VideoPlayerErrorReceived(UnityEngine::Video::VideoPlayer* source, StringW message);
 
-    DECLARE_INSTANCE_METHOD(UnityEngine::Color, get_ScreenColor);
-    DECLARE_INSTANCE_METHOD(void, set_ScreenColor, UnityEngine::Color value);
-    DECLARE_INSTANCE_METHOD(float, get_PlaybackSpeed);
-    DECLARE_INSTANCE_METHOD(void, set_PlaybackSpeed, float value);
-    DECLARE_INSTANCE_METHOD(float, get_VideoDuration);
-    DECLARE_INSTANCE_METHOD(void, set_Volume, float value);
-    DECLARE_INSTANCE_METHOD(void, set_PanStereo, float value);
-    DECLARE_INSTANCE_METHOD(StringW, get_Url);
-    DECLARE_INSTANCE_METHOD(void, set_Url, StringW value);
-    DECLARE_INSTANCE_METHOD(bool, get_IsPlaying);
-    DECLARE_INSTANCE_METHOD(bool, get_IsFading);
-    DECLARE_INSTANCE_METHOD(bool, get_IsPrepared);
-    DECLARE_INSTANCE_METHOD(void, set_time, double value);
-    DECLARE_INSTANCE_METHOD(void, set_sendFrameReadyEvents, bool value);
-
-    public:
+    float GetVideoAspectRatio();
+    void Mute();
+    void Unmute();
+    void SetSoftParent(UnityEngine::Transform* parent);
 
     void SetDefaultMenuPlacement(std::optional<float> width = std::nullopt);
     void SetPlacement(const Placement& placement);
 
     static UnityEngine::Shader* GetShader();
     void SetBloomIntensity(std::optional<float> bloomIntensity);
+
+    UnityEngine::Color get_ScreenColor();
+    void set_ScreenColor(UnityEngine::Color value);
+    float get_PlaybackSpeed();
+    void set_PlaybackSpeed(float value);
+    float get_VideoDuration();
+    void set_Volume(float value);
+    void set_PanStereo(float value);
+    StringW get_Url();
+    void set_Url(StringW value);
+    bool get_IsPlaying();
+    bool get_IsFading();
+    bool get_IsPrepared();
+    void set_time(double value);
+    void set_sendFrameReadyEvents(bool value);
 
     bool get_VideoEnded();
 
@@ -124,4 +124,4 @@ public:
     __declspec(property(get=get_IsPrepared)) bool IsPrepared;
     __declspec(property(put=set_time)) double time;
     __declspec(property(put=set_sendFrameReadyEvents)) bool sendFrameReadyEvents;
-)
+};

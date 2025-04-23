@@ -6,7 +6,7 @@
 
 #include "bsml/shared/macros.hpp"
 
-DECLARE_CLASS_CODEGEN(Cinema, SettingsViewController, HMUI::ViewController,
+DECLARE_CLASS_CODEGEN(Cinema, SettingsViewController, HMUI::ViewController) {
 
     DECLARE_OVERRIDE_METHOD_MATCH(void, DidActivate, &HMUI::ViewController::DidActivate, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
     DECLARE_OVERRIDE_METHOD_MATCH(void, DidDeactivate, &HMUI::ViewController::DidDeactivate, bool removedFromHierarchy, bool screenSystemDisabling);
@@ -27,4 +27,4 @@ DECLARE_CLASS_CODEGEN(Cinema, SettingsViewController, HMUI::ViewController,
     BSML_OPTIONS_LIST_OBJECT(modes, "1080p", "720p", "480p");
 
     static inline const float FADE_DURATION = 0.2f;
-)
+};

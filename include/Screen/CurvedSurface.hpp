@@ -10,7 +10,7 @@
 #define SUBSURFACE_COUNT_MIN 1
 #define SUBSURFACE_COUNT_MAX 512
 
-DECLARE_CLASS_CODEGEN(Cinema, CurvedSurface, UnityEngine::MonoBehaviour,
+DECLARE_CLASS_CODEGEN(Cinema, CurvedSurface, UnityEngine::MonoBehaviour) {
 
     struct MeshData {
         ArrayW<UnityEngine::Vector3> vertices;
@@ -18,38 +18,14 @@ DECLARE_CLASS_CODEGEN(Cinema, CurvedSurface, UnityEngine::MonoBehaviour,
         ArrayW<int> triangles;
     };
 
-    DECLARE_INSTANCE_FIELD_PRIVATE(float, distance);
-    DECLARE_INSTANCE_FIELD_PRIVATE(float, height);
-    DECLARE_INSTANCE_FIELD_PRIVATE(float, width);
-    DECLARE_INSTANCE_FIELD(float, radius);
-    DECLARE_INSTANCE_FIELD(int, subsurfaceCount);
-    DECLARE_INSTANCE_FIELD(bool, curveYAxis);
-    DECLARE_INSTANCE_FIELD(float, curvatureDegreesAutomatic);
-
-public:
-
+    float distance;
+    float height;
+    float width;
+    float radius;
+    int subsurfaceCount;
+    bool curveYAxis;
+    float curvatureDegreesAutomatic;
     std::optional<float> curvatureDegreesFixed;
-
-    DECLARE_INSTANCE_METHOD(void, Update);
-    DECLARE_INSTANCE_METHOD(void, UpdateRadius);
-    DECLARE_INSTANCE_METHOD(float, GetCircleFraction);
-    DECLARE_INSTANCE_METHOD(void, Generate);
-
-public:
-
-    void Initialise(float width, float height, float distance, std::optional<float> curvatureDegrees, std::optional<int> subsurfaces, std::optional<bool> curveYAxis);
-    MeshData CreateSurface();
-    void UpdateMeshFilter(MeshData& surface);
-    void GenerateVertexPair(MeshData& surface, int i);
-    void ConnectVertices(MeshData& surface, int i, int& j) const;
-
-    DECLARE_INSTANCE_METHOD(void, set_distance, float value);
-    DECLARE_INSTANCE_METHOD(float, get_distance);
-    DECLARE_INSTANCE_METHOD(void, set_width, float value);
-    DECLARE_INSTANCE_METHOD(float, get_width);
-    DECLARE_INSTANCE_METHOD(void, set_height, float value);
-    DECLARE_INSTANCE_METHOD(float, get_height);
-    DECLARE_INSTANCE_METHOD(float, get_curvatureDegrees);
 
 public:
 
@@ -58,4 +34,25 @@ public:
     __declspec(property(get=get_height, put=set_height)) float Height;
     __declspec(property(get=get_curvatureDegrees)) float CurvatureDegrees;
 
-    )
+    DECLARE_INSTANCE_METHOD(void, Update);
+    
+public:
+
+    void UpdateRadius();
+    float GetCircleFraction();
+    void Generate();
+
+    void Initialise(float width, float height, float distance, std::optional<float> curvatureDegrees, std::optional<int> subsurfaces, std::optional<bool> curveYAxis);
+    MeshData CreateSurface();
+    void UpdateMeshFilter(MeshData& surface);
+    void GenerateVertexPair(MeshData& surface, int i);
+    void ConnectVertices(MeshData& surface, int i, int& j) const;
+
+    void set_distance(float value);
+    float get_distance();
+    void set_width(float value);
+    float get_width();
+    void set_height(float value);
+    float get_height();
+    float get_curvatureDegrees();
+};

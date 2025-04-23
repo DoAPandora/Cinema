@@ -27,11 +27,11 @@ namespace Cinema {
         Cancelled
     };
 
-    DECLARE_JSON_CLASS(VideoConfig,
+    DECLARE_JSON_STRUCT(VideoConfig) {
 
     public:
 
-        DECLARE_JSON_CLASS(EnvironmentModification,
+        DECLARE_JSON_STRUCT(EnvironmentModification) {
             VALUE(std::string, name);
             VALUE_OPTIONAL(std::string, parentName);
             VALUE_OPTIONAL(std::string, cloneFrom);
@@ -42,33 +42,33 @@ namespace Cinema {
 
             UnityEngine::GameObject* gameObject;
             EnvironmentObject* gameObjectClone;
-        );
+        };
 
-        DECLARE_JSON_CLASS(ColorCorrection,
-        VALUE_OPTIONAL(float, brightness);
-        VALUE_OPTIONAL(float, contrast);
-        VALUE_OPTIONAL(float, saturation);
-        VALUE_OPTIONAL(float, hue);
-        VALUE_OPTIONAL(float, exposure);
-        VALUE_OPTIONAL(float, gamma);
-        );
+        DECLARE_JSON_STRUCT(ColorCorrection) {
+            VALUE_OPTIONAL(float, brightness);
+            VALUE_OPTIONAL(float, contrast);
+            VALUE_OPTIONAL(float, saturation);
+            VALUE_OPTIONAL(float, hue);
+            VALUE_OPTIONAL(float, exposure);
+            VALUE_OPTIONAL(float, gamma);
+        };
 
-        DECLARE_JSON_CLASS(Vigenette,
+        DECLARE_JSON_STRUCT(Vigenette) {
             VALUE_OPTIONAL(std::string, type);
             VALUE_OPTIONAL(float, radius);
             VALUE_OPTIONAL(float, softness);
-        );
+        };
 
-        DECLARE_JSON_CLASS(ScreenConfig,
+        DECLARE_JSON_STRUCT(ScreenConfig) {
             VALUE_OPTIONAL(ConfigUtils::Vector3, position);
             VALUE_OPTIONAL(ConfigUtils::Vector3, rotation);
             VALUE_OPTIONAL(ConfigUtils::Vector3, scale);
-        );
+        };
 
-        DECLARE_JSON_CLASS(UserSettings,
+        DECLARE_JSON_STRUCT(UserSettings) {
             VALUE_OPTIONAL(bool, customOffset);
             VALUE_OPTIONAL(int, originalOffset);
-        );
+        };
 
         VALUE_OPTIONAL(std::string, videoID);
         VALUE_OPTIONAL(std::string, videoUrl);
@@ -146,10 +146,10 @@ namespace Cinema {
 
         DownloadState UpdateDownloadState();
 
-    );
+    };
 
-    DECLARE_JSON_CLASS(BundledConfig,
+    DECLARE_JSON_STRUCT(BundledConfig) {
        VALUE(std::string, levelID);
        VALUE(Cinema::VideoConfig, config);
-    );
+    };
 }
