@@ -6,7 +6,10 @@ Param(
     [Switch] $help,
 
     [Parameter(Mandatory=$false)]
-    [Switch] $release
+    [Switch] $release,
+
+    [Parameter(Mandatory=$false)]
+    [String] $buildFolder = "build"
 )
 
 if ($help -eq $true) {
@@ -35,7 +38,7 @@ if($release -eq $true) {
     $buildType = "RelWithDebInfo"
 }
 
-& cmake -G "Ninja" -DCMAKE_BUILD_TYPE="$buildType" -B build
-& cmake --build ./build
+& cmake -G "Ninja" -DCMAKE_BUILD_TYPE="$buildType" -B $buildFolder
+& cmake --build $buildFolder
 
 exit $LASTEXITCODE
