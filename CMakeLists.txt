@@ -55,6 +55,8 @@ add_library(
 
 target_include_directories(${COMPILE_ID} PRIVATE .)
 
+target_include_directories(${COMPILE_ID} PRIVATE third_party/cpython/include)
+
 # add src dir as include dir
 target_include_directories(${COMPILE_ID} PRIVATE ${SOURCE_DIR})
 # add include dir as include dir
@@ -62,7 +64,9 @@ target_include_directories(${COMPILE_ID} PRIVATE ${INCLUDE_DIR})
 # add shared dir as include dir
 target_include_directories(${COMPILE_ID} PUBLIC ${SHARED_DIR})
 
-target_link_libraries(${COMPILE_ID} PRIVATE -llog)
+target_link_directories(${COMPILE_ID} PRIVATE third_party/cpython/lib)
+
+target_link_libraries(${COMPILE_ID} PRIVATE -llog -lpython3.13)
 # add extern stuff like libs and other includes
 include(extern.cmake)
 
