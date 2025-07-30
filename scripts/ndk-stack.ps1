@@ -26,4 +26,4 @@ if (-not ($PSVersionTable.PSEdition -eq "Core")) {
     $stackScript += ".cmd"
 }
 
-Get-Content $logName | & $stackScript -sym ./build/debug/ > "$($logName)_processed.log"
+Get-Content $logName | & $stackScript -sym ./build-debug/debug/ > "$($logName)_processed.log"

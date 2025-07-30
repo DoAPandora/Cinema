@@ -48,6 +48,7 @@ extern
 Android.mk.backup
 /.vs
 build/
+build-debug/
 extern.cmake
 qpm_defines.cmake
 mod.json

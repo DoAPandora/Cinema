@@ -39,7 +39,7 @@ if ($help -eq $true) {
     exit
 }
 
-& $PSScriptRoot/build.ps1
+& qpm s debug
 
 if ($LASTEXITCODE -ne 0) {
     Write-Output "Failed to build, exiting..."
@@ -52,7 +52,7 @@ $modFiles = $modJson.modFiles
 
 foreach ($fileName in $modFiles) {
     if ($useDebug -eq $true) {
-        & adb push build/debug/$fileName /sdcard/ModData/com.beatgames.beatsaber/ModLoader/early_mods/$fileName
+        & adb push build-debug/debug/$fileName /sdcard/ModData/com.beatgames.beatsaber/ModLoader/early_mods/$fileName
     } else {
         & adb push build/$fileName /sdcard/ModData/com.beatgames.beatsaber/ModLoader/early_mods/$fileName
     }
@@ -62,7 +62,7 @@ $lateModFiles = $modJson.lateModFiles
 
 foreach ($fileName in $lateModFiles) {
     if ($useDebug -eq $true) {
-        & adb push build/debug/$fileName /sdcard/ModData/com.beatgames.beatsaber/ModLoader/mods/$fileName
+        & adb push build-debug/debug/$fileName /sdcard/ModData/com.beatgames.beatsaber/ModLoader/mods/$fileName
     } else {
         & adb push build/$fileName /sdcard/ModData/com.beatgames.beatsaber/ModLoader/mods/$fileName
     }

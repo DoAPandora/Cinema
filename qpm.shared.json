@@ -26,7 +26,7 @@
           "pwsh ./scripts/build.ps1 -clean"
         ],
         "copy": [
-          "pwsh ./scripts/copy.ps1"
+          "pwsh ./scripts/copy.ps1 --useDebug"
         ],
         "debug": [
           "pwsh ./scripts/build.ps1 --buildFolder build-debug"
@@ -51,7 +51,8 @@
       "ndk": "^27.1.12297006",
       "qmodIncludeDirs": [
         "./build",
-        "./extern/libs"
+        "./extern/libs",
+        "third_party/cpython/lib"
       ],
       "qmodIncludeFiles": [],
       "qmodOutput": "Cinema"
