@@ -11,7 +11,13 @@
   "dependencies": [],
   "modFiles": [],
   "lateModFiles": ["${binary}"],
-  "libraryFiles": [],
+  "libraryFiles": [
+    "libcrypto_python.so",
+    "libcrypto.so",
+    "libpython3.13.so",
+    "libssl_python.so",
+    "libssl.so"
+  ],
   "fileCopies": [],
   "copyExtensions": []
 }
