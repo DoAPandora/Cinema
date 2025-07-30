@@ -51,6 +51,7 @@ add_library(
         ${c_file_list}
         ${inline_hook_c}
         ${inline_hook_cpp}
+        "include/zip/src/zip.c"
 )
 
 target_include_directories(${COMPILE_ID} PRIVATE .)
@@ -111,7 +112,7 @@ COMMAND ${CMAKE_COMMAND} -E copy ${a_file} debug/${file}
 COMMENT "Copy a files for ndk stack")
 endforeach()
 
-file(MD5 assets/ytdlp.zip YTDLP_HASH)
+file(MD5 ${CMAKE_CURRENT_LIST_DIR}/assets/yt_dlp.zip YTDLP_HASH)
 message("YTDLP hash: ${YTDLP_HASH}")
 add_compile_definitions(YTDLP_FILE_HASH="${YTDLP_HASH}")
 

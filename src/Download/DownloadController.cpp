@@ -7,8 +7,10 @@
 
 #include "hollywood/shared/hollywood.hpp"
 
-#include "pythonlib/shared/Python.hpp"
-#include "pythonlib/shared/Utils/FileUtils.hpp"
+#include "Python/Python.hpp"
+#include "cpython/Python.h"
+
+#include "zip/src/zip.h"
 
 #include <filesystem>
 #include <mutex>
@@ -16,12 +18,16 @@
 #include <vector>
 #include <stop_token>
 
-using std::filesystem::path;
-
 static const std::string YTDLP_HASH(YTDLP_FILE_HASH);
 
 namespace Cinema
 {
+    DownloadController::DownloadController()
+    {
+        downloadWorkerThread = std::jthread(std::bind_front(&DownloadController::DownloadWorkerThread, this));
+        downloadWorkerThread.detach();
+    }
+
     bool DownloadController::IsReady()
     {
         return isReady;
@@ -29,108 +35,77 @@ namespace Cinema
 
     void DownloadController::Setup()
     {
-        std::jthread([](){
-            const path ytdlp = path(FileUtils::getScriptsPath()) / "yt_dlp";
-            if(getModConfig().ytdlpFileHash.GetValue() != YTDLP_HASH)
-            {
-                if(direxists(ytdlp.c_str()))
-                {
-                    DEBUG("Current ytdlp was an old version, removing old version!");
-                    std::filesystem::remove_all(ytdlp);
-                } else
-                {
-                    DEBUG("No ytdlp install was found, installing now!");
-                }
+        if(isReady)
+        {
+            return;
+        }
 
-                FileUtils::ExtractZip(IncludedAssets::ytdlp_zip, ytdlp.c_str());
-                getModConfig().ytdlpFileHash.SetValue(YTDLP_HASH);
-            } else 
+        try
+        {
+            Python::Setup();
+            std::string_view data = IncludedAssets::yt_dlp_zip;
+            const std::filesystem::path YTDLP_PATH = Python::SCRIPTS_DIRECTORY / "yt_dlp";
+            if(!std::filesystem::exists(YTDLP_PATH))
             {
-                DEBUG("Current install of ytdlp was already up to date!");
+                std::filesystem::create_directories(YTDLP_PATH);
+            }
+            int arg = 2;
+            if(int res = zip_stream_extract(data.data(), data.size(), YTDLP_PATH.c_str(), nullptr, &arg); res != 0)
+            {
+                throw std::runtime_error(std::format("Failed to extract ytdlp: {})", zip_strerror(res)));
             }
 
-            Python::PyRun_SimpleString("from yt_dlp.__init__ import _real_main");
-            DEBUG("Successfully set up ytdlp");
+            Python::QueueCommand("from yt_dlp import _real_main");
+
             isReady = true;
-        }).detach();
+            INFO("Python setup successful");
+        }
+        catch(std::exception& e)
+        {
+            ERROR("Python setup failed: {}", e.what());
+        }
+    }
+
+    void DownloadController::DownloadWorkerThread()
+    {
+        auto getNextItem = [this] -> std::optional<std::function<void()>>
+        {
+            std::lock_guard lock(downloadWorkerMutex);
+            if(!downloadWorkerQueue.empty())
+            {
+                auto val = downloadWorkerQueue.front();
+                downloadWorkerQueue.pop();
+                return val;
+            }
+            return std::nullopt;
+        };
+
+        while(true)
+        {
+            if(auto func = getNextItem(); func.has_value())
+            {
+                func.value()();
+            }
+            else
+            {
+                std::this_thread::yield();
+            }
+        }
+    }
+
+    std::filesystem::path DownloadController::GetTemporaryDownloadFolder()
+    {
+        std::string uuid(readfile("/proc/sys/kernel/random/uuid"));
+        std::filesystem::path videoTempFolder(getDataDir("Cinema"));
+        // for some reason it has a newline character at the end
+        videoTempFolder = videoTempFolder / "tmp" / uuid.substr(0, uuid.size() - 1);
+        return videoTempFolder;
     }
 
     void DownloadController::StartDownload(std::shared_ptr<VideoConfig> video, VideoQuality::Mode quality)
     {
         video->downloadState = DownloadState::Preparing;
-
-        std::string uuid(readfile("/proc/sys/kernel/random/uuid"));
-        std::filesystem::path videoTempFolder(getDataDir("Cinema"));
-        // for some reason it has a newline character at the end
-        videoTempFolder = videoTempFolder / "tmp" / uuid.substr(0, uuid.size() - 1);
-        std::lock_guard lock(currentDownloadsMutex);
-        std::stop_source stopSource;
-        currentDownloads.emplace_back(video, stopSource);
-
-        std::jthread(std::bind_front(&DownloadController::DownloadVideoThread, this),
-            std::move(videoTempFolder), std::move(video), quality, stopSource.get_token()
-        ).detach();
-    }
-
-    void DownloadController::DownloadVideoThread(std::filesystem::path tempDir, std::shared_ptr<VideoConfig> video, VideoQuality::Mode quality, std::stop_token stopToken)
-    {
-        if(!IsReady())
-        {
-            DEBUG("Python was not ready, waiting");
-            while(!isReady)
-            {
-                std::this_thread::yield();
-            }
-        }
-        INFO("Downloading video {}", video->videoID);
-
-        if(!std::filesystem::exists(tempDir))
-        {
-            std::filesystem::create_directories(tempDir);
-        }
-
-        std::function<void(int, char*)> eventHandler = [&](int type, char* data)
-        {
-            if(stopToken.stop_requested())
-            {
-                return;
-            }
-            switch(type)
-            {
-            case 0:
-                {
-                    std::string_view dataString(data);
-                    if(dataString.find("[download]") != std::string::npos)
-                    {
-                        if(dataString.ends_with(".mp4"))
-                        {
-                            video->downloadState = DownloadState::DownloadingVideo;
-                        }
-                        else if(dataString.ends_with(".m4a"))
-                        {
-                            video->downloadState = DownloadState::DownloadingAudio;
-                        }
-                        
-                        if(dataString.find('%') == std::string::npos)
-                        {
-                            break;
-                        }
-
-                        auto percentange = dataString.substr(11, 5);
-                        if(percentange.ends_with('%'))
-                            percentange = percentange.substr(0, percentange.size() -1 );
-
-                        video->downloadProgress = std::stof(percentange.data());
-                        onDownloadProgress.invoke(video);
-                    }
-                }
-                break;
-            case 1:
-                break;
-            }
-        };
-        Python::PythonWriteEvent += eventHandler;
-
+        onDownloadProgress.invoke(video);
         std::string videoUrl;
         if(video->videoUrl.has_value())
         {
@@ -142,103 +117,74 @@ namespace Cinema
         }
         else
         {
-            ERROR("Video config has no URL or ID!");
-            std::lock_guard lock(currentDownloadsMutex);
-            // remove current download from the downloads list
-            std::erase_if(currentDownloads, [&](const std::pair<std::shared_ptr<VideoConfig>, std::stop_source>& downloadInfo)
-                { return downloadInfo.first == video; });
-            video->downloadState = DownloadState::NotDownloaded;
-            onDownloadFinished.invoke(video);
+            ERROR("Video had no valid url!");
             return;
-            // set error ?
         }
         
-        std::string videoFormat = VideoQuality::ToYoutubeDLFormat(video, quality);
-        videoFormat = videoFormat.size() > 0 ? fmt::format("'-f', '{}',", videoFormat) : "";
-
-        video->downloadState = DownloadState::Downloading;
-        std::string command(fmt::format("_real_main(['-v', '--no-playlist', '--no-part', '--no-mtime', {} '-o', 'video.mp4', '-P', '{}', '{}'])", videoFormat, tempDir.c_str(), videoUrl));
-        DEBUG("Running command {}", command);
-
-        Python::PythonWriteEvent += eventHandler;
-        int status = Python::PyRun_SimpleString(command.c_str());
-        bool error = status != 0;
-        DEBUG("Python process returned result {}", status);
-        Python::PythonWriteEvent -= eventHandler;
-
-
-        if(error)
+        std::lock_guard lock(downloadWorkerMutex);
+        downloadWorkerQueue.emplace([video, quality, videoUrl, this]
         {
-            ERROR("An error occured while downloading video");
-        } else if(stopToken.stop_requested())
-        {
-            DEBUG("Stop was requested on download");
-        }
+            namespace fs = std::filesystem;
 
+            auto stdoutWriteHandler = [&](std::string_view data)
+            {
+                if(data.find("[download]") != std::string::npos)
+                {
+                    if(data.ends_with(".mp4"))
+                    {
+                        video->downloadState = DownloadState::DownloadingVideo;
+                    }
+                    else if(data.ends_with(".m4a"))
+                    {
+                        video->downloadState = DownloadState::DownloadingAudio;
+                    }
+                    
+                    if(data.find('%') == std::string::npos)
+                    {
+                        return;
+                    }
 
-        if(!error && !stopToken.stop_requested())
-        {
-            using namespace std::filesystem;
+                    auto percentange = data.substr(11, 5);
+                    if(percentange.ends_with('%'))
+                        percentange = percentange.substr(0, percentange.size() -1 );
 
+                    video->downloadProgress = std::stof(percentange.data());
+                    onDownloadProgress.invoke(video);
+                }
+            };
+
+            fs::path tempFolder = GetTemporaryDownloadFolder();
+            DEBUG("Queueing download command");
+            std::string command = std::format("_real_main(['-v', '--no-playlist', '--no-part', '--no-mtime', '--no-cache-dir', '-o', 'video.mp4', '-f', '{}', '-P', '{}', '{}'])",
+                VideoQuality::ToYoutubeDLFormat(video, quality),
+                tempFolder.c_str(),
+                videoUrl
+            );
+
+            Python::StandardOutputWriteEvent += stdoutWriteHandler;
+            std::future<int> fut = Python::QueueCommand(command);
+            fut.wait();
+            DEBUG("Python returned code {}", fut.get());
+            Python::StandardOutputWriteEvent -= stdoutWriteHandler;
+            
+            auto files = fs::directory_iterator(tempFolder);
+            auto videoFile = (files | std::views::filter([](const auto& e){return e.path().filename().string().ends_with(".mp4");})).begin()->path();
+            auto audioFile = (files | std::views::filter([](const auto& e){return e.path().filename().string().ends_with(".m4a");})).begin()->path();
+            
+            DEBUG("Muxing downloaded files");
+            DEBUG("Video: {}", videoFile.c_str());
+            DEBUG("Audio: {}", audioFile.c_str());
+            
             video->downloadState = DownloadState::Converting;
             onDownloadProgress.invoke(video);
+            fs::path muxOutput = tempFolder / "video.mp4";
+            fs::path destinationFile = fs::path(video->levelDir.value()) / video->GetVideoFileName(video->levelDir.value());
 
-            std::vector<directory_entry> files(directory_iterator(tempDir), {});
-            auto videoFile = std::find_if(files.cbegin(), files.cend(), [](auto f){return f.path().filename().string().ends_with(".mp4");});
-            auto audioFile = std::find_if(files.cbegin(), files.cend(), [](auto f){return f.path().filename().string().ends_with(".m4a");});
-            bool ok = true;
-            if(videoFile == files.cend())
-            {
-                ERROR("Could not find downloaded video file!");
-                ok = false;
-            }
-            if(audioFile == files.cend())
-            {
-                ERROR("Could not find downloaded video file!");
-                ok = false;
-            }
-
-            if(ok)
-            {
-                DEBUG("Merging {} and {}", videoFile->path().string(), audioFile->path().string());
-                Hollywood::MuxFilesSync(videoFile->path().string(), audioFile->path().string(), (tempDir / "video.mp4").string());
-                std::filesystem::copy(tempDir / "video.mp4", path(video->levelDir.value()) / video->GetVideoFileName(video->levelDir.value()));
-            }
-            else 
-            {
-                video->downloadState = DownloadState::NotDownloaded;
-                video->errorMessage = "Failed to download video or audio file(s)";
-            }
-        }
-
-        std::filesystem::remove_all(tempDir);
-        {
-            std::lock_guard lock(currentDownloadsMutex);
-            // remove current download from the downloads list
-            std::erase_if(currentDownloads, [&](const std::pair<std::shared_ptr<VideoConfig>, std::stop_source>& downloadInfo)
-                { return downloadInfo.first == video; });
-        }
-
-        video->UpdateDownloadState();
-        if(!error && !stopToken.stop_requested())
-        {
+            Hollywood::MuxFilesSync(videoFile.c_str(), audioFile.c_str(), muxOutput.c_str());
+            fs::copy(muxOutput, destinationFile);
+            video->downloadState = DownloadState::Downloaded;
             onDownloadFinished.invoke(video);
-        }
-    }
-
-    void DownloadController::CancelDownload(std::shared_ptr<VideoConfig> video)
-    {
-        std::lock_guard lock(currentDownloadsMutex);
-        auto downloadInfo = std::find_if(currentDownloads.begin(), currentDownloads.end(), [video](const std::pair<std::shared_ptr<VideoConfig>, std::stop_source>& downloadInfo)
-            { return downloadInfo.first == video; });
-        if(downloadInfo == currentDownloads.end())
-        {
-            DEBUG("Attempted to cancel download of video {}, but download did not exist!", video->videoID);
-            return;
-        }
-
-        downloadInfo->second.request_stop();
-        DEBUG("Requested stop for download {}", downloadInfo->first->videoID);
-        currentDownloads.erase(downloadInfo);
+            INFO("Finished video download");
+        });
     }
 }
