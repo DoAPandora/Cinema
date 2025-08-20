@@ -1,94 +1,72 @@
 
 Param(
-    [String] $qmodname="",
-
     [Parameter(Mandatory=$false)]
-    [Switch] $clean,
-    
-    [Parameter(Mandatory=$false)]
-    [Switch]$release,
+    [String] $qmodName="",
 
     [Parameter(Mandatory=$false)]
     [Switch] $help
 )
 
 if ($help -eq $true) {
-    Write-Output "`"BuildQmod <qmodName>`" - Copiles your mod into a `".so`" or a `".a`" library"
-    Write-Output "`n-- Parameters --`n"
-    Write-Output "qmodName `t The file name of your qmod"
-
+    Write-Output "`"createqmod`" - Creates a .qmod file with your compiled libraries and mod.json."
     Write-Output "`n-- Arguments --`n"
 
-    Write-Output "-Clean `t`t Performs a clean build on both your library and the qmod"
+    Write-Output "-QmodName `t The file name of your qmod"
 
     exit
 }
-
-if ($qmodName -eq "")
-{
-    Write-Output "Give a proper qmod name and try again"
-    exit
-}
-
-& $PSScriptRoot/build.ps1 -clean:$clean -release:$release
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Output "Failed to build, exiting..."
-    exit $LASTEXITCODE
-}
-
-Write-Output "Creating qmod from mod.json"
-
-$schemaUrl = "https://raw.githubusercontent.com/Lauriethefish/QuestPatcher.QMod/main/QuestPatcher.QMod/Resources/qmod.schema.json"
-Invoke-WebRequest $schemaUrl -OutFile ./mod.schema.json
 
 $mod = "./mod.json"
-$schema = "./mod.schema.json"
-$modJsonRaw = Get-Content $mod -Raw
-$modJson = $modJsonRaw | ConvertFrom-Json
-$modSchemaRaw = Get-Content $schema -Raw
 
-Remove-Item ./mod.schema.json
+& $PSScriptRoot/validate-modjson.ps1
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
+$modJson = Get-Content $mod -Raw | ConvertFrom-Json
 
-Write-Output "Validating mod.json..."
-if(!($modJsonRaw | Test-Json -Schema $modSchemaRaw)) {
-    exit
+if ($qmodName -eq "") {
+    $qmodName = $modJson.name
 }
 
 $filelist = @($mod)
 
 $cover = "./" + $modJson.coverImage
-if ((-not ($cover -eq "./")) -and (Test-Path $cover))
-{
+if ((-not ($cover -eq "./")) -and (Test-Path $cover)) {
     $filelist += ,$cover
 }
 
-foreach ($mod in $modJson.modFiles)
-{
+foreach ($mod in $modJson.modFiles) {
     $path = "./build/" + $mod
-    if (-not (Test-Path $path))
-    {
+    if (-not (Test-Path $path)) {
         $path = "./extern/libs/" + $mod
+    }
+    if (-not (Test-Path $path)) {
+        Write-Output "Error: could not find dependency: $path"
+        exit 1
     }
     $filelist += $path
 }
 
-foreach ($mod in $modJson.lateModFiles)
-{
+foreach ($mod in $modJson.lateModFiles) {
     $path = "./build/" + $mod
-    if (-not (Test-Path $path))
-    {
+    if (-not (Test-Path $path)) {
         $path = "./extern/libs/" + $mod
+    }
+    if (-not (Test-Path $path)) {
+        Write-Output "Error: could not find dependency: $path"
+        exit 1
     }
     $filelist += $path
 }
 
-foreach ($lib in $modJson.libraryFiles)
-{
-    $path = "./extern/libs/" + $lib
-    if (-not (Test-Path $path))
-    {
-        $path = "./build/" + $lib
+foreach ($lib in $modJson.libraryFiles) {
+    $path = "./build/" + $lib
+    if (-not (Test-Path $path)) {
+        $path = "./extern/libs/" + $lib
+    }
+    if (-not (Test-Path $path)) {
+        Write-Output "Error: could not find dependency: $path"
+        exit 1
     }
     $filelist += $path
 }
@@ -96,11 +74,6 @@ foreach ($lib in $modJson.libraryFiles)
 $zip = $qmodName + ".zip"
 $qmod = $qmodName + ".qmod"
 
-if ((-not ($clean.IsPresent)) -and (Test-Path $qmod))
-{
-    Write-Output "Making Clean Qmod"
-    Move-Item $qmod $zip -Force
-}
-
 Compress-Archive -Path $filelist -DestinationPath $zip -Update
+Start-Sleep 1
 Move-Item $zip $qmod -Force
