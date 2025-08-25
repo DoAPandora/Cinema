@@ -1,106 +1,126 @@
 
 Param(
-    [String] $qmodname="",
+    [Parameter(Mandatory=$false, HelpMessage="The name the output qmod file should have")][String] $qmodname="MultiplayerCore",
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory=$false, HelpMessage="Switch to create a clean compilation")]
+    [Alias("rebuild")]
     [Switch] $clean,
-    
-    [Parameter(Mandatory=$false)]
-    [Switch]$release,
 
-    [Parameter(Mandatory=$false)]
-    [Switch] $help
+    [Parameter(Mandatory=$false, HelpMessage="Prints the help instructions")]
+    [Switch] $help,
+
+    [Parameter(Mandatory=$false, HelpMessage="Tells the script to not compile and only package the existing files")]
+    [Alias("actions", "pack")]
+    [Switch] $package,
+
+    [Parameter(Mandatory=$false, HelpMessage="The version of the mod")][String] $version,
+
+    [Parameter(Mandatory=$false, HelpMessage="To create a release build")][Alias("publish")][Switch]$release = $false
 )
 
+# Builds a .qmod file for loading with QP or BMBF
+
+
 if ($help -eq $true) {
-    Write-Output "`"BuildQmod <qmodName>`" - Copiles your mod into a `".so`" or a `".a`" library"
-    Write-Output "`n-- Parameters --`n"
-    Write-Output "qmodName `t The file name of your qmod"
+    echo "`"BuildQmod <qmodName>`" - Copiles your mod into a `".so`" or a `".a`" library"
+    echo "`n-- Parameters --`n"
+    echo "qmodName `t The file name of your qmod"
 
-    Write-Output "`n-- Arguments --`n"
+    echo "`n-- Arguments --`n"
 
-    Write-Output "-Clean `t`t Performs a clean build on both your library and the qmod"
+    echo "-clean `t`t Performs a clean build on both your library and the qmod"
+    echo "-release `t`t Creates a release build, please use together with the `"-version`" and the `"-clean`" argument"
+    echo "-help `t`t Prints this"
+    echo "-package `t Only packages existing files, without recompiling`n"
 
     exit
 }
 
 if ($qmodName -eq "")
 {
-    Write-Output "Give a proper qmod name and try again"
+    echo "Give a proper qmod name and try again"
     exit
 }
 
-& $PSScriptRoot/build.ps1 -clean:$clean -release:$release
+if ($package -eq $true) {
+    $qmodName = "$($env:module_id)_$($env:version)"
+    echo "Actions: Packaging QMod $qmodName"
+}
+if (($args.Count -eq 0) -And $package -eq $false) {
+    echo "Creating QMod $qmodName"
 
-if ($LASTEXITCODE -ne 0) {
-    Write-Output "Failed to build, exiting..."
-    exit $LASTEXITCODE
+    $qpm = "./qpm.json"
+    $qpmJson = Get-Content $qpm -Raw | ConvertFrom-Json
+
+    if ($release -ne $true -and -not $qpmjson.info.version.Contains('+Dev')) {
+        $version = $qpmjson.info.version + "+Dev"
+    }
+
+    if ($version.Length -gt 0) {
+        $qmodName += "_$($version)"
+        qpm package edit --version $version
+    }
+    else {
+        $qmodName += "_$($qpmJson.info.version)"
+    }
+    # & $PSScriptRoot/build.ps1 -clean:$clean -version:$version -release:$release
+
+    # if ($LASTEXITCODE -ne 0) {
+    #     echo "Failed to build, exiting..."
+    #     exit $LASTEXITCODE
+    # }
+
+    # qpm qmod manifest
 }
 
-Write-Output "Creating qmod from mod.json"
-
-$schemaUrl = "https://raw.githubusercontent.com/Lauriethefish/QuestPatcher.QMod/main/QuestPatcher.QMod/Resources/qmod.schema.json"
-Invoke-WebRequest $schemaUrl -OutFile ./mod.schema.json
+echo "Creating qmod from mod.json"
 
 $mod = "./mod.json"
-$schema = "./mod.schema.json"
-$modJsonRaw = Get-Content $mod -Raw
-$modJson = $modJsonRaw | ConvertFrom-Json
-$modSchemaRaw = Get-Content $schema -Raw
+# $modJson = Get-Content $mod -Raw | ConvertFrom-Json
 
-Remove-Item ./mod.schema.json
+# $filelist = @($mod)
 
-Write-Output "Validating mod.json..."
-if(!($modJsonRaw | Test-Json -Schema $modSchemaRaw)) {
-    exit
-}
+# $cover = "./" + $modJson.coverImage
+# if ((-not ($cover -eq "./")) -and (Test-Path $cover))
+# { 
+#     $filelist += ,$cover
+# } else {
+#     echo "No cover Image found"
+# }
 
-$filelist = @($mod)
+# foreach ($mod in $modJson.modFiles)
+# {
+#     $path = "./build/" + $mod
+#     if (-not (Test-Path $path))
+#     {
+#         $path = "./extern/libs/" + $mod
+#     }
+#     $filelist += $path
+# }
 
-$cover = "./" + $modJson.coverImage
-if ((-not ($cover -eq "./")) -and (Test-Path $cover))
-{
-    $filelist += ,$cover
-}
+# foreach ($lib in $modJson.libraryFiles)
+# {
+#     $path = "./extern/libs/" + $lib
+#     if (-not (Test-Path $path))
+#     {
+#         $path = "./build/" + $lib
+#     }
+#     $filelist += $path
+# }
 
-foreach ($mod in $modJson.modFiles)
-{
-    $path = "./build/" + $mod
-    if (-not (Test-Path $path))
-    {
-        $path = "./extern/libs/" + $mod
-    }
-    $filelist += $path
-}
-
-foreach ($mod in $modJson.lateModFiles)
-{
-    $path = "./build/" + $mod
-    if (-not (Test-Path $path))
-    {
-        $path = "./extern/libs/" + $mod
-    }
-    $filelist += $path
-}
-
-foreach ($lib in $modJson.libraryFiles)
-{
-    $path = "./extern/libs/" + $lib
-    if (-not (Test-Path $path))
-    {
-        $path = "./build/" + $lib
-    }
-    $filelist += $path
-}
-
-$zip = $qmodName + ".zip"
+# $zip = $qmodName + ".zip"
 $qmod = $qmodName + ".qmod"
 
-if ((-not ($clean.IsPresent)) -and (Test-Path $qmod))
-{
-    Write-Output "Making Clean Qmod"
-    Move-Item $qmod $zip -Force
-}
+# if ((-not ($clean.IsPresent)) -and (Test-Path $qmod))
+# {
+#     echo "Making Clean Qmod"
+#     Move-Item $qmod $zip -Force
+# }
 
-Compress-Archive -Path $filelist -DestinationPath $zip -Update
-Move-Item $zip $qmod -Force
+# Compress-Archive -Path $filelist -DestinationPath $zip -Update
+# Move-Item $zip $qmod -Force
+
+& qpm qmod zip -i ./build/ -i ./extern/libs/ $qmod
+# Move-Item multiplayer-core.qmod $qmod -Force
+
+echo "Task Completed"
