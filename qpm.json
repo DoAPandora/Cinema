@@ -9,6 +9,7 @@
     "url": "https://github.com/bsq-ports/Cinema",
     "additionalData": {
       "overrideSoName": "libcinema.so",
+      "otherSoNames": "libcrypto_python.so",
       "cmake": true
     }
   },
@@ -51,7 +52,6 @@
       "./build",
       "./extern/libs",
       "third_party/cpython/lib"
-      {"libcrypto_python.so"},
     ],
     "qmodIncludeFiles": [],
     "qmodOutput": "Cinema"
