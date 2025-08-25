@@ -51,7 +51,7 @@
       "./build",
       "./extern/libs",
       "third_party/cpython/lib"
-      "libcrypto_python.so"
+      "libcrypto_python.so",
     ],
     "qmodIncludeFiles": [],
     "qmodOutput": "Cinema"
